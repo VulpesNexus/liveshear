@@ -1,0 +1,16 @@
+//  LiveShear.rc -- version resource plus the generated PIPL.
+
+#include <winres.h>
+#include "LiveShearID.h"
+
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif
+
+#define kMySDKPluginName kLiveShearPluginName
+#define PIPL_PLUGIN_NAME kMySDKPluginName
+
+#include "VersionInfo.rc"
+
+plugin pipl "plugin.pipl"

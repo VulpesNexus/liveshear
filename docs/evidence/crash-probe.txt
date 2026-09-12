@@ -1,0 +1,15 @@
+Live Shear -- crash bisect
+Run at 2026-09-13 00:56:54
+40 cycles per variant
+
+control: died on cycle 18 -- The remote procedure call failed. (Exception from HRESULT: 0x800706BE)
+control: 17 of 40 cycles completed before Illustrator stopped responding
+
+apply: died on cycle 7 -- The remote procedure call failed. (Exception from HRESULT: 0x800706BE)
+apply: 6 of 40 cycles completed before Illustrator stopped responding
+
+expand: 40 of 40 cycles completed
+
+raster: died on cycle 7 -- The remote procedure call failed. (Exception from HRESULT: 0x800706BE)
+raster: 6 of 40 cycles completed before Illustrator stopped responding
+

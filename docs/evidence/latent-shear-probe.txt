@@ -1,0 +1,64 @@
+Live Shear -- latent parameter probe on the built-in Transform effect
+Run at 2026-09-12 23:40:12
+Illustrator 30.7.0
+
+Applying Adobe Transform with an empty parameter dictionary.
+Applied "Adobe Transform" to 1 of 2 objects.
+baseline bounds: 100,500,300,380
+
+--- control: a documented key must move the art ---
+  set moveH_Pts on "Adobe Transform" (result 0)
+Changed 1 of 2 selected objects.
+bounds with moveH_Pts=40: 140,500,340,380
+CONTROL PASSED: writing a key into the built-in effect dictionary re-renders the art.
+  deleted moveH_Pts on "Adobe Transform" (result 0)
+Changed 1 of 2 selected objects.
+bounds after deleting moveH_Pts: 100,500,300,380
+
+--- candidates ---
+shear                  real    = 30                     -> no effect  [100,500,300,380]
+shear_Degrees          real    = 30                     -> no effect  [100,500,300,380]
+shear_Radians          real    = 0.5236                 -> no effect  [100,500,300,380]
+shearH_Degrees         real    = 30                     -> no effect  [100,500,300,380]
+shearV_Degrees         real    = 30                     -> no effect  [100,500,300,380]
+shearAngle             real    = 30                     -> no effect  [100,500,300,380]
+shearAxis              real    = 0                      -> no effect  [100,500,300,380]
+shearAxis_Degrees      real    = 0                      -> no effect  [100,500,300,380]
+shearX                 real    = 30                     -> no effect  [100,500,300,380]
+shearY                 real    = 30                     -> no effect  [100,500,300,380]
+skew                   real    = 30                     -> no effect  [100,500,300,380]
+skewX                  real    = 30                     -> no effect  [100,500,300,380]
+skewY                  real    = 30                     -> no effect  [100,500,300,380]
+skew_Degrees           real    = 30                     -> no effect  [100,500,300,380]
+skewAngle              real    = 30                     -> no effect  [100,500,300,380]
+slant                  real    = 30                     -> no effect  [100,500,300,380]
+slant_Degrees          real    = 30                     -> no effect  [100,500,300,380]
+axis                   real    = 45                     -> no effect  [100,500,300,380]
+axis_Degrees           real    = 45                     -> no effect  [100,500,300,380]
+tangent                real    = 0.5774                 -> no effect  [100,500,300,380]
+matrix                 matrix  = 1,0,0.5774,1,0,0       -> no effect  [100,500,300,380]
+transformMatrix        matrix  = 1,0,0.5774,1,0,0       -> no effect  [100,500,300,380]
+affine                 matrix  = 1,0,0.5774,1,0,0       -> no effect  [100,500,300,380]
+Matrix                 matrix  = 1,0,0.5774,1,0,0       -> no effect  [100,500,300,380]
+shearMatrix            matrix  = 1,0,0.5774,1,0,0       -> no effect  [100,500,300,380]
+
+RESULT: no candidate key changed the rendering. The built-in Transform effect exposes no latent shear.
+
+Final dictionary state:
+Selected objects: 2
+
+[0] Group "Layer 1"
+  visible bounds: l=98.102633 t=510.131836 r=577.981445 b=99.367544
+  <no art style>
+
+[1] Path "fixture-rect"
+  visible bounds: l=100.000000 t=500.000000 r=300.000000 b=380.000000
+  pre-effects: 0
+  paint fields: 2
+    [0] paint effect "(plain paint)" v0.0
+        nested effects: 0
+    [1] paint effect "(plain paint)" v0.0
+        nested effects: 0
+  post-effects: 1
+    [0] "Adobe Transform" v1.0
+      # 0 entries

@@ -1,0 +1,18 @@
+# Build output: the plug-in binary, its intermediates, and the generated PIPL.
+build/
+plugin/plugin.pipl
+*.aip
+*.pdb
+*.ilk
+*.obj
+*.lib
+*.exp
+
+# Visual Studio user state.
+*.user
+*.suo
+.vs/
+
+# Python bytecode.
+__pycache__/
+*.pyc

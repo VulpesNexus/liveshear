@@ -1,0 +1,14 @@
+Live Shear -- is the plug-in implicated in the crash?
+Run at 2026-09-13 01:12:33
+3 runs of 40 create/close cycles per arm
+
+without the plug-in, run 1: 9 of 40 cycles (plug-in loaded: False)
+without the plug-in, run 2: 32 of 40 cycles (plug-in loaded: False)
+without the plug-in, run 3: 40 of 40 cycles (plug-in loaded: False)
+without the plug-in: 1 of 3 runs completed all 40 cycles
+
+with the plug-in, run 1: 2 of 40 cycles (plug-in loaded: True)
+with the plug-in, run 2: 20 of 40 cycles (plug-in loaded: True)
+with the plug-in, run 3: 3 of 40 cycles (plug-in loaded: True)
+with the plug-in: 0 of 3 runs completed all 40 cycles
+

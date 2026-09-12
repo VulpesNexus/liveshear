@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{4B3A9F21-6C7E-4E55-9A2D-8B1F0C4D77A1}</ProjectGuid>
+    <RootNamespace>LiveShear</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+
+  <!-- Where the Adobe Illustrator SDK lives. Set the AI_SDK_ROOT environment
+       variable, or pass /p:AISDKRoot=... on the command line. The SDK is not
+       redistributable, so it is never vendored here and no default path is
+       baked in. -->
+  <PropertyGroup Label="SDKLocation">
+    <AISDKRoot Condition="'$(AISDKRoot)' == '' and '$(AI_SDK_ROOT)' != ''">$(AI_SDK_ROOT)</AISDKRoot>
+    <AISDKApi>$(AISDKRoot)\illustratorapi</AISDKApi>
+    <AISDKCommon>$(AISDKRoot)\samplecode\common</AISDKCommon>
+  </PropertyGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+
+  <PropertyGroup>
+    <OutDir>$(MSBuildProjectDirectory)\..\build\$(Configuration)\</OutDir>
+    <IntDir>$(MSBuildProjectDirectory)\..\build\obj\$(Configuration)\</IntDir>
+    <TargetName>LiveShear</TargetName>
+    <TargetExt>.aip</TargetExt>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\Source;$(MSBuildProjectDirectory)\Resources\Win;$(AISDKCommon)\includes;$(AISDKApi)\ate;$(AISDKApi)\illustrator;$(AISDKApi)\illustrator\actions;$(AISDKApi)\pica_sp;$(AISDKApi)\illustrator\legacy;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_WINDOWS;WIN_ENV;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary Condition="'$(Configuration)' == 'Debug'">MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)' == 'Release'">MultiThreadedDLL</RuntimeLibrary>
+      <StructMemberAlignment>8Bytes</StructMemberAlignment>
+      <TreatWChar_tAsBuiltInType>false</TreatWChar_tAsBuiltInType>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalOptions>/Zc:sizedDealloc- /utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <WarningLevel>Level3</WarningLevel>
+      <DisableSpecificWarnings>4819;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <ForcedIncludeFiles>pragma.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization Condition="'$(Configuration)' == 'Debug'">Disabled</Optimization>
+      <Optimization Condition="'$(Configuration)' == 'Release'">MaxSpeed</Optimization>
+    </ClCompile>
+    <ResourceCompile>
+      <Culture>0x0409</Culture>
+      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory);$(MSBuildProjectDirectory)\Source;$(MSBuildProjectDirectory)\Resources\Win;$(AISDKCommon)\win;$(AISDKCommon)\includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <ModuleDefinitionFile>$(AISDKCommon)\win\PluginMain.def</ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+      <TargetMachine>MachineX64</TargetMachine>
+      <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalDependencies>comctl32.lib;user32.lib;gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PreBuildEvent>
+      <Command>python "$(AISDKRoot)\tools\pipl\create_pipl.py" -input "[{\"name\":\"LiveShear\",\"entry_point\":\"PluginMain\"}]"</Command>
+      <Message>Generating plugin.pipl</Message>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+
+  <ItemGroup>
+    <ClCompile Include="Source\LiveShearPlugin.cpp" />
+    <ClCompile Include="Source\LiveShearSuites.cpp" />
+    <ClCompile Include="Source\ShearEffect.cpp" />
+    <ClCompile Include="Source\ShearDialog.cpp" />
+    <ClCompile Include="Source\Introspect.cpp" />
+    <ClCompile Include="Source\ShearLog.cpp" />
+    <ClCompile Include="$(AISDKApi)\illustrator\IAIUnicodeString.cpp" />
+    <ClCompile Include="$(AISDKCommon)\source\Main.cpp" />
+    <ClCompile Include="$(AISDKCommon)\source\Plugin.cpp" />
+    <ClCompile Include="$(AISDKCommon)\source\Suites.cpp" />
+    <ClCompile Include="$(AISDKCommon)\source\AppContext.cpp" />
+    <ClCompile Include="$(AISDKCommon)\source\SDKErrors.cpp" />
+    <ClCompile Include="$(AISDKCommon)\source\SDKAboutPluginsHelper.cpp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ClInclude Include="Source\LiveShearPlugin.h" />
+    <ClInclude Include="Source\LiveShearSuites.h" />
+    <ClInclude Include="Source\LiveShearID.h" />
+    <ClInclude Include="Source\ShearEffect.h" />
+    <ClInclude Include="Source\ShearMath.h" />
+    <ClInclude Include="Source\ShearDialog.h" />
+    <ClInclude Include="Source\Introspect.h" />
+    <ClInclude Include="Source\ShearLog.h" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ResourceCompile Include="Resources\Win\LiveShear.rc" />
+  </ItemGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>

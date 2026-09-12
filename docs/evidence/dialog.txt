@@ -1,0 +1,29 @@
+Live Shear -- dialog probe
+Run at 2026-09-13 01:57:51
+
+plain rectangle: 100, 500, 300, 380
+driver transcript:
+       dialog found
+       slider set to 10; numeric field now reads '10.0'
+       slider set to 20; numeric field now reads '20.0'
+       slider set to 30; numeric field now reads '30.0'
+       slider set to 40; numeric field now reads '40.0'
+       pressing ok
+[PASS] the dialog opened and OK committed the slider value
+       shearAngle in the appearance after OK: 40.000000
+[PASS] dragging through several values does not compound
+       width after dragging through 10, 20, 30, 40 is 300.692 pt; a single 40 degree shear gives 300.692 pt; compounding would give far more
+driver transcript:
+       dialog found
+       slider set to 35; numeric field now reads '35.0'
+       pressing cancel
+[PASS] Cancel restores the artwork and the parameter it started with
+       bounds before 94.751, 500, 305.249, 380; after cancel 94.751, 500, 305.249, 380; shearAngle after cancel 5.000000 (it was 5 before the dialog opened)
+driver transcript:
+       dialog found
+       typed '22.5' into the numeric field
+       pressing ok
+[PASS] a value typed into the numeric field is committed
+       shearAngle after typing 22.5 and pressing OK: 22.500000
+
+4 passed, 0 failed

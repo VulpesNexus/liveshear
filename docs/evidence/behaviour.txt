@@ -1,0 +1,73 @@
+Live Shear -- behaviour probe
+Run at 2026-09-13 02:04:38
+Illustrator 30.7.0
+
+[PASS] effect is registered with the application
+       8	VulpesNexus Shear	Shear	1.0	0xfdff	0x2 PostEffect
+[PASS] artwork renders sheared
+       visible bounds 65.359, 500, 334.641, 380; expected left 65.359 and right 334.641
+[PASS] source path is not modified (the effect is non-destructive)
+       anchor points identical before and after applying the effect
+[PASS] live text stays live text
+       typename/contents/size after the effect: TextFrame|Handgloves|48
+[PASS] retyping the text re-runs the effect
+       bounds before retyping 90.505, 430.132, 347.477, 377.956; after 90.505, 430.132, 550.322, 377.956
+[PASS] changing the font size re-runs the effect
+       bounds at 48pt 90.505, 430.132, 550.322, 377.956; at 24pt 95.252, 410.044, 325.161, 383.956
+[PASS] two instances are independent appearance entries
+       found 2 entries with shear angles 20, 15; expected 20 and 15
+[PASS] stack order changes the result (Shear then Rotate differs from Rotate then Shear)
+       Shear then Transform: 111.358,577.632,288.642,302.368
+       Transform then Shear: 70.533,553.137,329.467,326.863
+[PASS] effect survives save and reopen
+       bounds before save 80.966,508.82,319.034,371.18; after reopen 80.966,508.82,319.034,371.18
+[PASS] parameters survive save and reopen
+       read back shearAngle=27.500000 axisAngle=12.250000
+[PASS] text is still live text after a save/reopen round trip
+       read back: TextFrame|Live
+[PASS] the reopened effect is still editable
+       bounds after changing shearAngle to 40: 69.319,514.217,330.681,365.783
+[PASS] the sheared artwork exports to PDF
+       wrote 234 273 bytes
+[PASS] duplicating an object carries the effect
+       original 61.036,500,338.964,380; duplicate 61.036,500,338.964,380
+[PASS] pasting into another document carries the effect
+       pasted width 277.929 pt (a 200pt box sheared 33 degrees is 277.9pt wide); appearance lists the effect: True
+[PASS] undo removes the effect and redo puts it back
+       plain 100,500,300,380; applied 65.359,500,334.641,380; after undo 100,500,300,380; after redo 65.359,500,334.641,380
+[PASS] art type accepted: group
+       bounds before 100,500,300,320 -> after 105.773502691896,500,277.328220331739,320; Applied "VulpesNexus Shear" to 1 of 1 objects.
+[PASS] art type accepted: nested group
+       bounds before 100,500,300,320 -> after 105.773502691896,500,277.328220331739,320; Applied "VulpesNexus Shear" to 1 of 1 objects.
+[PASS] art type accepted: compound path
+       bounds before 100,500,260,340 -> after 87.6085324175601,500,272.39146758244,340; Applied "VulpesNexus Shear" to 1 of 1 objects.
+[PASS] art type accepted: clipping group
+       bounds before 100,500,300,340 -> after 53.8119784648297,500,346.18802153517,340; Applied "VulpesNexus Shear" to 1 of 1 objects.
+[PASS] art type accepted: symbol instance
+       bounds before 100,500,220,420 -> after 76.9059892324149,500,243.094010767585,420; Applied "VulpesNexus Shear" to 1 of 1 objects.
+[PASS] art type accepted: placed raster
+       bounds before 255,330,345,270 -> after 237.679491924311,330,362.320508075689,270; Applied "VulpesNexus Shear" to 1 of 1 objects.
+[INFO] coordinate space: untouched
+       width 200 -> 269.282, height 120 -> 120, widened by 69.282
+[INFO] coordinate space: translated
+       width 200 -> 269.282, height 120 -> 120, widened by 69.282
+[INFO] coordinate space: rotated 40 degrees
+       width 230.343 -> 251.493, height 220.483 -> 220.483, widened by 21.15
+[INFO] coordinate space: scaled 150/70 percent
+       width 300 -> 348.497, height 84 -> 84, widened by 48.497
+[INFO] coordinate space: reflected horizontally
+       width 200 -> 269.282, height 120 -> 120, widened by 69.282
+[INFO] coordinate space: inside a rotated group
+       width 231.976 -> 242.138, height 193.281 -> 193.281, widened by 10.162
+[PASS] shear is applied in the object's own space, not the page's
+       an upright 200x120 box should widen by tan(30) * 120 = 69.282 pt; untouched grew 69.282, translated 69.282, reflected 69.282
+[PASS] a rotated object shears about the page axes, as Illustrator's own Shear does
+       a box rotated 40 degrees widened by 21.15 pt rather than 69.282, which is what a shear along the page's horizontal axis does
+[INFO] dashed stroke
+       bounds before 94,506,306,374; after 54.967,506,345.033,374; stroke attributes still true|12|12/6
+[INFO] gradient fill
+       shears without error; bounds 65.359,500,334.641,380. Whether the gradient ramp itself is sheared has to be judged visually; the effect passes kTransformFillGradients to TransformArt so it should travel with the geometry.
+[INFO] performance on a 500-point path
+       baseline redraw 14 ms; ten parameter changes with a redraw each took 391 ms, so about 39 ms per re-evaluation including Illustrator's own redraw
+
+24 passed, 0 failed
