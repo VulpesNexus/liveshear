@@ -1,8 +1,8 @@
 # Release test matrix
 
-Generated from the evidence files by *tools/make-test-matrix.py*. Every row is one check that was actually run; nothing here is transcribed by hand. All but the first two sections were measured against a running Illustrator.
+Generated from the evidence files by *tools/make-test-matrix.py*. Every row is one check that was actually run; nothing here is transcribed by hand. The first three sections need no Illustrator — the built artifact, the scripts that judge, and the arithmetic. Everything after them was measured against a running one.
 
-**18 passed, 7 not discriminating — 25 checks.**
+**19 passed, 7 not discriminating — 26 checks.**
 
 Not present in this run: *release-verdicts.tsv*, *appearance.tsv*, *persistence.tsv*, *fills.tsv*, *export.tsv*, *limits.tsv*, *dialog.tsv*, *undo.tsv*, *stability.tsv*, *gpu.tsv*, *missing-plugin.tsv*, *crash-ab.tsv*, *shutdown.tsv*.
 
@@ -28,6 +28,16 @@ Both configurations rebuilt from clean, and the Release binary inspected: warnin
 | 14 | release build | no debug trace is on by default | the artifact is fit to ship | tracing is behind the LIVESHEAR_LOG environment variable | PASS |
 
 Source: [docs/evidence/build.tsv](evidence/build.tsv)
+
+## Test infrastructure
+
+The two scripts that turn measurements into verdicts, fed rows whose right answer is known by construction. A bug in either would turn a real failure into a green matrix, which is the one kind of bug running more tests cannot catch.
+
+| # | Group | Case | Expected | Observed | Status |
+| --- | --- | --- | --- | --- | --- |
+| 1 | test infrastructure | the scripts that decide pass and fail, fed rows whose right answer is known by construction | every verdict is the one the construction requires | 12 checks, 0 failed | PASS |
+
+Source: [docs/evidence/solvers.tsv](evidence/solvers.tsv)
 
 ## Arithmetic
 

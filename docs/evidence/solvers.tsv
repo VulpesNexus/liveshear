@@ -1,0 +1,2 @@
+probe	group	case	expected	observed	status
+solvers	test infrastructure	the scripts that decide pass and fail, fed rows whose right answer is known by construction	every verdict is the one the construction requires	12 checks, 0 failed	PASS

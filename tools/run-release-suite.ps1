@@ -51,6 +51,7 @@ Invoke-AiScript 'app.userInteractionLevel = UserInteractionLevel.DONTDISPLAYALER
 
 Write-Output ('Plugin: ' + ((Send-AiMessage version) -replace "`r?`n", ' | '))
 
+Run 'solvers'     { python (Join-Path $PSScriptRoot 'test-solvers.py') (Join-Path $evidence 'solvers.tsv') }
 Run 'built artifact' { & (Join-Path $PSScriptRoot 'probe-build.ps1') }
 Run 'arithmetic'  { & (Join-Path $PSScriptRoot 'run-mathtest.ps1') }
 Run 'anchor'      { & (Join-Path $PSScriptRoot 'probe-anchor.ps1') }

@@ -14,6 +14,7 @@ from pathlib import Path
 
 SOURCES = [
     ("build.tsv", "The built artifact", "Both configurations rebuilt from clean, and the Release binary inspected: warnings, identity, C runtime linkage, exported entry point, and whether it gives away anything about the machine that built it."),
+    ("solvers.tsv", "Test infrastructure", "The two scripts that turn measurements into verdicts, fed rows whose right answer is known by construction. A bug in either would turn a real failure into a green matrix, which is the one kind of bug running more tests cannot catch."),
     ("mathtest.tsv", "Arithmetic", "The affine algebra and the exact extent of a cubic Bezier, compiled against stub types and run without Illustrator. It covers the bounds fallback, which only runs when the host refuses to measure art itself and therefore cannot be reached on demand from a host test."),
     ("anchor-verdicts.tsv", "Reference point", "Which box Illustrator's own Shear command anchors on, recovered by fitting the anchor out of artwork it actually produced. A fixture whose geometric and visible centers coincide cannot tell the two apart and is marked as not discriminating rather than counted as agreement."),
     ("release-verdicts.tsv", "Artwork types", "Each fixture built twice: one copy carrying the live effect, the other sheared by *Object > Transform > Shear* with the same angles. The two must render to the same visible bounds, and the live copy's own path anchors must be unchanged."),
@@ -93,7 +94,7 @@ def main(evidence_dir, out_path):
     head = [
         "# Release test matrix",
         "",
-        "Generated from the evidence files by *tools/make-test-matrix.py*. Every row is one check that was actually run; nothing here is transcribed by hand. All but the first two sections were measured against a running Illustrator.",
+        "Generated from the evidence files by *tools/make-test-matrix.py*. Every row is one check that was actually run; nothing here is transcribed by hand. The first three sections need no Illustrator — the built artifact, the scripts that judge, and the arithmetic. Everything after them was measured against a running one.",
         "",
         f"**{', '.join(ordered)} — {total} checks.**",
         "",
