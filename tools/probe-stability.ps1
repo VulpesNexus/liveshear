@@ -15,7 +15,8 @@
 param(
     [string] $OutPath,
     [int] $DriftEdits = 100,
-    [int] $BulkObjects = 200
+    [int] $BulkObjects = 200,
+    [int] $Iterations = 100
 )
 
 $ErrorActionPreference = 'Stop'
@@ -107,24 +108,31 @@ Check 'source anchors identical to a fresh fixture' ($anchorsNow -eq $fresh) 'th
 
 # ---- performance ------------------------------------------------------
 $script:group = 'performance'
-Note '--- time for one hundred reevaluations ---'
+Note '--- how long one evaluation takes ---'
+Note 'Timed inside Illustrator rather than across the scripting bridge. A round'
+Note 'trip over COM costs around a tenth of a second, which is more than the'
+Note 'effect does and would bury it; timing the loop in one call removes it.'
+Note ''
+Note ("{0,-16} {1,14} {2,16} {3,16}" -f 'fixture', 'redraws', 'with the effect', 'per evaluation')
 foreach ($name in @('plainRect', 'bezier', 'multilineText', 'manyChildren', 'compound')) {
     Js "LS.clear(); LS.target = LS.fixtures['$name'](); LS.selectOnly(LS.target);" | Out-Null
     Js 'app.redraw();' | Out-Null
 
-    $baseline = Measure-Command {
-        for ($i = 0; $i -lt 100; $i++) { Invoke-AiScript 'app.redraw();' | Out-Null }
-    }
+    # The same loop, once with nothing to recompute and once with the effect
+    # re-evaluated every pass. Neither number is subtracted from the other;
+    # both are reported, because what a person feels when dragging the slider
+    # is the second one, not the difference.
+    $plain = [double] (Js "var t0 = new Date().getTime(); for (var i = 0; i < $Iterations; i++) { app.redraw(); } (new Date().getTime() - t0);")
 
     Js 'LS.shear(30, 0);' | Out-Null
     Js 'app.redraw();' | Out-Null
-    $withEffect = Measure-Command {
-        for ($i = 0; $i -lt 100; $i++) {
-            Invoke-AiScript ("LS.send('set param', '0|shearAngle|real|{0}'); app.redraw();" -f (20 + ($i % 20))) | Out-Null
-        }
-    }
-    Note ("{0,-16} 100 redraws {1,7:F0} ms   100 edited redraws {2,7:F0} ms   {3,6:F1} ms per evaluation" -f $name, $baseline.TotalMilliseconds, $withEffect.TotalMilliseconds, (($withEffect.TotalMilliseconds - $baseline.TotalMilliseconds) / 100))
+    $withEffect = [double] (Js "var t0 = new Date().getTime(); for (var i = 0; i < $Iterations; i++) { LS.send('set param', '0|shearAngle|real|' + (20 + (i % 20))); app.redraw(); } (new Date().getTime() - t0);")
+
+    $per = $withEffect / $Iterations
+    Note ("{0,-16} {1,11:F0} ms {2,13:F0} ms {3,13:F2} ms" -f $name, $plain, $withEffect, $per)
+    Add-ProbeResult -Group 'performance' -Case ("{0}: {1} evaluations with the effect" -f $name, $Iterations) -Expected 'fast enough that dragging the slider does not lag' -Observed ("{0:F0} ms in total, {1:F2} ms each; the same loop with nothing to recompute took {2:F0} ms" -f $withEffect, $per, $plain) -Status 'MEASURED'
 }
+Note ''
 
 # ---- a document full of them ------------------------------------------
 Note ("--- a document with {0} independent Shear effects ---" -f $BulkObjects)
