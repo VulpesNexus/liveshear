@@ -64,6 +64,7 @@ if (-not $SkipSlow) {
 }
 Run 'shutdown'    { & (Join-Path $PSScriptRoot 'probe-shutdown.ps1') }
 Run 'test matrix' { python (Join-Path $PSScriptRoot 'make-test-matrix.py') $evidence (Join-Path $repo 'docs\RELEASE_TEST_MATRIX.md') }
+Run 'support matrix' { python (Join-Path $PSScriptRoot 'make-support-matrix.py') $evidence (Join-Path $repo 'docs\SUPPORT_MATRIX.md') }
 Run 'registry'    {
     $r = Send-AiMessage registry
     [System.IO.File]::WriteAllText((Join-Path $evidence 'registry.txt'), $r)

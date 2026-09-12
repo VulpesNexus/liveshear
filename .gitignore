@@ -16,3 +16,6 @@ plugin/plugin.pipl
 # Python bytecode.
 __pycache__/
 *.pyc
+
+# Assembled release archives; they are built, not kept.
+dist/

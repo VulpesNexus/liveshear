@@ -116,8 +116,8 @@ namespace
         AIBoolean closed = false;
         sAIPath->GetPathClosed(art, &closed);
 
-        AIPathSegment previous;
-        AIPathSegment first;
+        AIPathSegment previous = {};
+        AIPathSegment first = {};
         bool havePrevious = false;
 
         for (ai::int16 i = 0; i < count; ++i)

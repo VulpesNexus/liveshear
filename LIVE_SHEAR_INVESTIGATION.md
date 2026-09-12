@@ -165,9 +165,9 @@ The rendered result was measured the same way the native command was — apply, 
 
 ### One thing the host refused
 
-`AIArtSuite::GetArtTransformBounds` with `kControlBounds` fails inside a live effect's `Go`. Illustrator will not compute control bounds for art that is not in the document tree, which is exactly the situation a live effect runs in. The effect falls back to `GetArtBounds`, so the anchor is the center of the *visible* bounds rather than the geometric bounds.
+`AIArtSuite::GetArtTransformBounds` with `kControlBounds` fails inside a live effect's `Go`. Illustrator will not compute control bounds for art that is not in the document tree, which is exactly the situation a live effect runs in.
 
-For unstroked artwork the two are identical. For stroked artwork the anchor sits at the center of the stroked extent, which means the anchor shifts if a stroke below the effect in the stack changes weight. This is a real semantic wrinkle and it is listed in section J as unresolved.
+The first version of the effect fell back to `GetArtBounds`, which made its anchor the center of the *visible* bounds. For unstroked artwork the two are identical, but on a mitered join spike that reaches 600 pt past its geometry the two centers are 295 pt apart, and the effect sheared about the wrong one. Since a refused API is not the same as an impossible one, the effect now tries the precise variant, then the ordinary one, and then — when the host refuses both — computes the same box itself by walking the art and solving each cubic segment's derivative for its true extremes. The reference point that comes out is the one Illustrator's own shear command uses. Section J has the measurement.
 
 ---
 
@@ -270,11 +270,26 @@ There is a genuine fourth option that deserves recording even though it is not r
 
 Listed honestly, worst first.
 
-1. **The anchor uses visible rather than geometric bounds.** Forced by Illustrator refusing `kControlBounds` inside a live effect (section F). The consequence is that a stroke below the effect in the stack shifts the shear's anchor. Whether Illustrator offers another route to geometric bounds in that context is unresolved.
-2. **Gradient and pattern behavior is asserted, not seen.** The effect passes the gradient and pattern flags to `TransformArt`, and shearing a gradient-filled object completes without error, but whether the gradient ramp itself shears correctly was not judged visually.
-3. **Stroke semantics are undecided.** A shear applied after a stroke transforms the stroked outline; a shear applied before it strokes the sheared path. Both are reachable by reordering in the *Appearance* panel, which is arguably the right answer, but no deliberate choice has been made about which should be the default, and variable-width and brush strokes were not tested.
-4. **Reference point is fixed at the center.** Illustrator's own Shear dialog offers an origin offset and the *Transform* effect offers a nine-point pin. This effect offers neither.
-5. **Not tested:** blends and the `Interpolate` handler (written but unexercised), *Transform Patterns* and *Transform Objects* as user-facing options, Document Scale Conversion, parallel effect execution (the effect does not declare `kParallelExecutionFilter`), legacy save behavior and `SetLiveEffectAppVersion`, CMYK documents, and any platform other than Windows.
+1. **Reference point is fixed at the center.** Illustrator's own Shear dialog offers an origin offset and the *Transform* effect offers a nine-point pin. This effect offers neither.
+2. **Not tested:** blends and the `Interpolate` handler (written but unexercised), *Transform Patterns* and *Transform Objects* as user-facing options, Document Scale Conversion, parallel effect execution (the effect does not declare `kParallelExecutionFilter`), legacy save behavior and `SetLiveEffectAppVersion`, and any platform other than Windows.
+
+The release-candidate sprint that followed this investigation settled the rest; what it found is in [docs/RELEASE_READINESS.md](docs/RELEASE_READINESS.md), and what it measured is in [docs/RELEASE_TEST_MATRIX.md](docs/RELEASE_TEST_MATRIX.md) and [docs/SUPPORT_MATRIX.md](docs/SUPPORT_MATRIX.md).
+
+### The anchor question, answered
+
+This was recorded above as the open issue most likely to be noticed, and it had a definite answer.
+
+Illustrator's own *Object > Transform > Shear* anchors on the center of the selection's **geometric** bounds — the Bézier outline, with strokes, effects, and the glyphs of area text excluded. That was measured rather than reasoned about. A shear along axis 0 displaces x in proportion to distance from the anchor's y and leaves y alone, so fitting a straight line through the artwork a native shear actually produced recovers the anchor exactly; axis 90 recovers the other coordinate. Run against fixtures whose geometric and visible centers are hundreds of points apart — an acute triangle whose mitered join spike reaches 600 pt past its geometry, and a group whose two members carry different stroke weights — every discriminating case comes back geometric, with residuals around 10⁻¹⁰ ([docs/evidence/anchor.tsv](docs/evidence/anchor.tsv)).
+
+The effect had been anchoring on visible bounds, which on that spike put its reference point 295 pt away from the native one. It now asks for geometric bounds, and when Illustrator refuses the request — which it does for art that is not in the document tree, exactly the situation a live effect's `Go` callback runs in — it computes the same box itself from the path segments, solving each cubic's derivative for the true extremes rather than settling for the control hull.
+
+Three host behaviors had to be understood before any of this could be measured at all, and each one silently produced plausible wrong numbers first:
+
+- The `adobe_shear` action resolves "about the center" from a **cached selection bounding box** that a scripted selection does not refresh. Redrawing, sleeping, reassigning the selection, and running the select-all menu command all leave it one selection behind, so every measurement comes out about the *previous* fixture's center. Playing the action once refreshes it, so a zero-angle pass — the identity, invisible in the geometry — is played first.
+- The action cannot see a selection made in the **same script call** at all: it reports success and does nothing. `AIMatchingArtSuite::GetSelectedArt`, which the effect itself uses, sees that selection immediately. The two disagree, so the test harness selects in one call and acts in the next.
+- Illustrator's scripting references are resolved by **position, not identity**. Duplicating an object inserts the copy at the top of the layer and every index below it shifts, so a reference held in a variable from an earlier call quietly starts pointing at a different object. Everything that has to survive a change in z-order is addressed by name.
+
+There is a fourth, unresolved: in one long session the shear action reported success and left the artwork untouched for a run of about fifteen attempts, then started working again with no difference in the calls being made, and it has not been reproduced since. The harness now checks that the oracle actually moved and reports a case as inconclusive rather than comparing against unsheared artwork.
 
 ### Two things that were unknown and are now settled
 
