@@ -78,5 +78,8 @@ Write-Output ''
 Write-Output ("Archive:  {0} ({1:N0} bytes)" -f $archive, (Get-Item $archive).Length)
 Get-ChildItem $stage | ForEach-Object { Write-Output ("  {0,-24} {1,10:N0} bytes" -f $_.Name, $_.Length) }
 Write-Output ("Symbols:  {0}" -f (Join-Path $dist 'symbols'))
+Write-Output '          The symbol file records the absolute paths of the machine that'
+Write-Output '          built it. That is what makes it useful for reading a crash dump,'
+Write-Output '          and it is why it is kept out of the archive.'
 Write-Output ''
 Write-Output 'Nothing has been published.'

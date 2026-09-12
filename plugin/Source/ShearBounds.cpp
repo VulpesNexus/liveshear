@@ -3,6 +3,7 @@
 #include "IllustratorSDK.h"
 #include "ShearBounds.h"
 #include "LiveShearSuites.h"
+#include "ShearCurve.h"
 
 #include <cmath>
 
@@ -23,90 +24,8 @@ namespace
         return r.left > r.right || r.bottom > r.top;
     }
 
-    struct Box
-    {
-        AIRealRect rect = { 0, 0, 0, 0 };
-        bool any = false;
-
-        void AddPoint(double h, double v)
-        {
-            const AIReal x = static_cast<AIReal>(h);
-            const AIReal y = static_cast<AIReal>(v);
-            if (!any)
-            {
-                rect.left = rect.right = x;
-                rect.top = rect.bottom = y;
-                any = true;
-                return;
-            }
-            if (x < rect.left)   rect.left   = x;
-            if (x > rect.right)  rect.right  = x;
-            if (y < rect.bottom) rect.bottom = y;
-            if (y > rect.top)    rect.top    = y;
-        }
-
-        void AddRect(const AIRealRect& r)
-        {
-            if (IsEmptyRect(r)) return;
-            AddPoint(r.left, r.bottom);
-            AddPoint(r.right, r.top);
-        }
-    };
-
-    /** Adds the exact extent of one cubic Bezier segment along one axis.
-        Sampling the four control points would overstate it: a curve stays
-        inside its control hull but rarely touches it. The extremes are at the
-        two ends and wherever the derivative -- a quadratic -- crosses zero
-        strictly inside the span. */
-    void AddCurveAxis(Box* box, bool vertical,
-                      double v0, double v1, double v2, double v3,
-                      double other)
-    {
-        const double a = -v0 + 3.0 * v1 - 3.0 * v2 + v3;
-        const double b = 2.0 * (v0 - 2.0 * v1 + v2);
-        const double c = v1 - v0;
-
-        double roots[2] = { 0.0, 0.0 };
-        int count = 0;
-        if (std::fabs(a) < 1.0e-12)
-        {
-            if (std::fabs(b) > 1.0e-12) roots[count++] = -c / b;
-        }
-        else
-        {
-            const double disc = b * b - 4.0 * a * c;
-            if (disc >= 0.0)
-            {
-                const double root = std::sqrt(disc);
-                roots[count++] = (-b + root) / (2.0 * a);
-                roots[count++] = (-b - root) / (2.0 * a);
-            }
-        }
-
-        for (int i = 0; i < count; ++i)
-        {
-            const double t = roots[i];
-            if (!(t > 0.0 && t < 1.0)) continue;
-            const double u = 1.0 - t;
-            const double value = u * u * u * v0 + 3.0 * u * u * t * v1 +
-                                 3.0 * u * t * t * v2 + t * t * t * v3;
-            // The other coordinate of this extremum lies somewhere between the
-            // segment's endpoints, which are already in the box, so passing an
-            // endpoint for it widens only the axis being measured.
-            if (vertical) box->AddPoint(other, value);
-            else          box->AddPoint(value, other);
-        }
-    }
-
-    void AddCurve(Box* box,
-                  const AIRealPoint& p0, const AIRealPoint& p1,
-                  const AIRealPoint& p2, const AIRealPoint& p3)
-    {
-        box->AddPoint(p0.h, p0.v);
-        box->AddPoint(p3.h, p3.v);
-        AddCurveAxis(box, false, p0.h, p1.h, p2.h, p3.h, p0.v);
-        AddCurveAxis(box, true,  p0.v, p1.v, p2.v, p3.v, p0.h);
-    }
+    using shear::Box;
+    using shear::AddCubic;
 
     bool AddPath(AIArtHandle art, Box* box)
     {
@@ -125,12 +44,12 @@ namespace
             AIPathSegment segment;
             if (sAIPath->GetPathSegments(art, i, 1, &segment)) return false;
             if (i == 0) first = segment;
-            if (havePrevious) AddCurve(box, previous.p, previous.out, segment.in, segment.p);
+            if (havePrevious) AddCubic(box, previous.p, previous.out, segment.in, segment.p);
             else              box->AddPoint(segment.p.h, segment.p.v);
             previous = segment;
             havePrevious = true;
         }
-        if (closed && count > 1) AddCurve(box, previous.p, previous.out, first.in, first.p);
+        if (closed && count > 1) AddCubic(box, previous.p, previous.out, first.in, first.p);
         return true;
     }
 

@@ -55,7 +55,15 @@ Tracing is off when the variable is unset, which is the normal case.
 
 ## Running the tests
 
-The test suite drives a real Illustrator over COM; there is no mock. Start Illustrator, then:
+One test needs neither Illustrator nor the Adobe SDK: the arithmetic under the effect, compiled against a handful of stub types and checked against brute-force sampling.
+
+```powershell
+.\tools\run-mathtest.ps1
+```
+
+It exists because the bounds fallback — the code that measures the artwork itself when the host refuses to — only runs in a situation that cannot be arranged on demand, and code that never runs is code nobody has checked.
+
+The rest of the suite drives a real Illustrator over COM; there is no mock. Start Illustrator, then:
 
 ```powershell
 .\tools\probe-release.ps1        # every art type against the native shear command

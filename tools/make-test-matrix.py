@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 
 SOURCES = [
+    ("mathtest.tsv", "Arithmetic", "The affine algebra and the exact extent of a cubic Bezier, compiled against stub types and run without Illustrator. It covers the bounds fallback, which only runs when the host refuses to measure art itself and therefore cannot be reached on demand from a host test."),
     ("anchor-verdicts.tsv", "Reference point", "Which box Illustrator's own Shear command anchors on, recovered by fitting the anchor out of artwork it actually produced. A fixture whose geometric and visible centers coincide cannot tell the two apart and is marked as not discriminating rather than counted as agreement."),
     ("release-verdicts.tsv", "Artwork types", "Each fixture built twice: one copy carrying the live effect, the other sheared by *Object > Transform > Shear* with the same angles. The two must render to the same visible bounds, and the live copy's own path anchors must be unchanged."),
     ("appearance.tsv", "Appearance composition", "Stack order, two instances, reordering, and deletion, with the native command as the oracle at every step."),

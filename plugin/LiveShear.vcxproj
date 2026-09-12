@@ -118,6 +118,7 @@
     <ClInclude Include="Source\ShearEffect.h" />
     <ClInclude Include="Source\ShearMath.h" />
     <ClInclude Include="Source\ShearBounds.h" />
+    <ClInclude Include="Source\ShearCurve.h" />
     <ClInclude Include="Source\ShearDialog.h" />
     <ClInclude Include="Source\Introspect.h" />
     <ClInclude Include="Source\ShearLog.h" />
