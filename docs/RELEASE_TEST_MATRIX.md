@@ -14,7 +14,7 @@ Both configurations rebuilt from clean, and the Release binary inspected: warnin
 | --- | --- | --- | --- | --- | --- |
 | 1 | release build | Release builds with no warnings and no errors | the artifact is fit to ship | 0 warnings, 0 errors | PASS |
 | 2 | release build | Debug builds with no warnings and no errors | the artifact is fit to ship | 0 warnings, 0 errors | PASS |
-| 3 | release build | the Release build produced a plugin | the artifact is fit to ship | <repo>\build\Release\LiveShear.aip | PASS |
+| 3 | release build | the Release build produced a plugin | the artifact is fit to ship | build\Release\LiveShear.aip | PASS |
 | 4 | release build | the binary does not claim Adobe as its publisher | the artifact is fit to ship | CompanyName is VulpesNexus | PASS |
 | 5 | release build | the binary names its own product | the artifact is fit to ship | ProductName is Shear for Illustrator | PASS |
 | 6 | release build | the binary carries a version | the artifact is fit to ship | FileVersion is 0.1.0-rc.1 | PASS |

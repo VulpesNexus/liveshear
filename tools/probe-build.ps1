@@ -63,7 +63,7 @@ foreach ($candidate in (& $vswhere -products * -requires Microsoft.Component.MSB
 }
 if (-not $msbuild) { throw 'No Visual Studio installation with both MSBuild and a C++ toolchain was found.' }
 Note ("Toolchain: MSVC {0}" -f $toolsVersion)
-Note ("SDK:       {0}" -f $SdkRoot)
+Note ("SDK:       Adobe Illustrator 2026 SDK")
 Note ''
 
 foreach ($configuration in @('Release', 'Debug')) {
@@ -75,7 +75,9 @@ foreach ($configuration in @('Release', 'Debug')) {
 }
 
 $binary = Join-Path $repo 'build\Release\LiveShear.aip'
-Check 'the Release build produced a plugin' (Test-Path $binary) $binary
+# Repo-relative, because this string ends up in a file that gets committed and
+# the absolute one names the machine it was built on.
+Check 'the Release build produced a plugin' (Test-Path $binary) 'build\Release\LiveShear.aip'
 if (-not (Test-Path $binary)) {
     Save-ProbeResults -Path ($OutPath -replace '\.txt$', '.tsv')
     [System.IO.File]::WriteAllLines($OutPath, $log)
