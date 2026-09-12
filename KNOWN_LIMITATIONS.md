@@ -22,6 +22,10 @@ Illustrator's own *Shear* dialog offers an origin offset, and the *Transform* ef
 
 The effect anchors on what it is handed, not on the original object. That is what makes it compose: an *Offset Path* or a *Transform* below the Shear grows or moves the artwork, and the shear's reference point moves with it, exactly as stacking two transforms should. It does mean the result depends on where in the *Appearance* panel the Shear sits, which is the point of having a stack. **Affected:** anyone reordering the stack and expecting the shear to stay put. **Workaround:** put the Shear at the bottom of the stack to anchor on the bare geometry.
 
+## The dialog has not been seen on a scaled display
+
+It is measured at 96 dots per inch, where it is 448 by 199 pixels with nothing clipped and every control reachable. Its scaling path reads `GetDpiForWindow` and multiplies every coordinate and the font height through it, which is the documented way to do this, but no display that would make it do anything was available to look at. **Affected:** anyone running Windows above 100% scaling. **Workaround:** none needed if it works; the dialog is a fixed layout with generous spacing, so the failure mode would be cosmetic rather than a control you cannot reach. **Planned:** testing when a scaled display is at hand.
+
 ## GPU and CPU preview were not compared
 
 The comparison could not be made on the machine the suite runs on: Illustrator reports CPU preview in its window title and neither the *Ctrl+E* shortcut nor any menu command switches it, which is what happens when the machine has no GPU that Illustrator will use. The capture that would have made the comparison was verified to work by moving the artwork and watching the picture change, so this is an absent mode rather than a broken test. The effect produces art objects and never draws anything itself, so a difference between the two paths could only come from Illustrator's own renderer — but that is an argument, not a measurement, and it is recorded as untested. **Affected:** unknown. **Workaround:** none needed; exports are measured separately and are correct.

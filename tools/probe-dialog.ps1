@@ -80,6 +80,8 @@ public static class Dlg {
     [DllImport("user32.dll")]
     public static extern bool IsWindow(IntPtr h);
     [DllImport("user32.dll")]
+    public static extern bool EnumChildWindows(IntPtr p, EnumProc cb, IntPtr l);
+    [DllImport("user32.dll")]
     public static extern bool GetWindowRect(IntPtr h, out RECT r);
     [DllImport("user32.dll")]
     public static extern bool GetClientRect(IntPtr h, out RECT r);
@@ -165,6 +167,28 @@ public static class Dlg {
         }
         catch { $lines.Add("could not capture the dialog: " + $_.Exception.Message) }
     }
+
+    # The text the window actually holds, as code points. The dialog was
+    # mixing the narrow and wide Windows entry points once, which turned its
+    # title into two Chinese characters and its degree sign into two half-width
+    # katakana on a Japanese Windows. Reading the code points back is the only
+    # way to be sure that has not come back.
+    $cap = New-Object Text.StringBuilder 256
+    [Dlg]::GetWindowTextW($dialog, $cap, 256) | Out-Null
+    $capText = $cap.ToString()
+    $capCodes = (($capText.ToCharArray() | ForEach-Object { 'U+{0:X4}' -f [int]$_ }) -join ' ')
+    $lines.Add("caption: '$capText'   $capCodes")
+
+    $childCb = [Dlg+EnumProc]{ param($h, $l)
+        $t = New-Object Text.StringBuilder 128
+        [Dlg]::GetWindowTextW($h, $t, 128) | Out-Null
+        $s = $t.ToString()
+        if ($s.Length -gt 0) {
+            $c = (($s.ToCharArray() | ForEach-Object { 'U+{0:X4}' -f [int]$_ }) -join ' ')
+            $lines.Add("  label: '$s'   $c")
+        }
+        return $true }
+    [Dlg]::EnumChildWindows($dialog, $childCb, [IntPtr]::Zero) | Out-Null
 
     $slider = [Dlg]::GetDlgItem($dialog, $SHEAR_SLIDER)
     $edit = [Dlg]::GetDlgItem($dialog, $SHEAR_EDIT)
@@ -299,6 +323,11 @@ Invoke-AiScript 'app.redraw();' | Out-Null
 $afterOk = CaseBounds
 $angle = StoredAngle
 Check 'the dialog opened and OK committed the slider value' (Near $angle 40 0.05) ("shearAngle in the appearance after OK: " + $angle)
+
+$transcriptText = ($transcript -join "`n")
+$caption = if ($transcriptText -match "caption: '([^']*)'") { $Matches[1] } else { '' }
+Check 'the window title reads Shear' ($caption -eq 'Shear') ("the title bar holds '" + $caption + "'")
+Check 'the degree sign is a degree sign' ($transcriptText -match 'U\+00B0') 'no U+00B0 among the labels; the degree sign has been mangled by a code page again'
 
 # A 200 x 120 box sheared 40 degrees widens by tan(40) * 120 = 100.692 pt.
 $expected = 200 + 120 * [Math]::Tan(40 * [Math]::PI / 180)

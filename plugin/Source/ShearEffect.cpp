@@ -11,6 +11,7 @@
 
 #include <sstream>
 #include <iomanip>
+#include <locale>
 #include <cmath>
 
 namespace
@@ -92,12 +93,20 @@ void ShearEffect::UpdateDisplayString(AILiveEffectParameters params,
                                       AIReal shearAngle, AIReal axisAngle)
 {
     if (params == nullptr) return;
+
+    // Built as UTF-8 and handed over as a Unicode string rather than through
+    // SetStringEntry, which takes a plain char pointer and leaves the encoding
+    // to be guessed. The degree sign is the whole reason: guessed wrong, it
+    // becomes two half-width katakana on a Japanese Windows.
     std::ostringstream o;
+    o.imbue(std::locale::classic());
     o << std::fixed << std::setprecision(1)
       << static_cast<double>(shearAngle) << "\xc2\xb0";
     if (std::fabs(static_cast<double>(axisAngle)) > 1.0e-6)
         o << " / axis " << static_cast<double>(axisAngle) << "\xc2\xb0";
-    sAIDictionary->SetStringEntry(params, sAIDictionary->Key(kExtraStringKey), o.str().c_str());
+
+    const ai::UnicodeString text = ai::UnicodeString::FromUTF8(o.str().c_str());
+    sAIDictionary->SetUnicodeStringEntry(params, sAIDictionary->Key(kExtraStringKey), text);
 }
 
 ASErr ShearEffect::Go(AILiveEffectGoMessage* message)

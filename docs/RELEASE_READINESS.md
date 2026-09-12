@@ -66,7 +66,13 @@ Pending re-run against this binary. PDF and SVG passed against the previous buil
 
 ## J. Dialog
 
-Pending the host run. Checks written: OK commits; Cancel, Escape, and the title bar's close button each restore both the artwork and the parameter; Enter commits; dragging through several positions does not compound; a value typed with a decimal comma, with trailing text, or past the limit; the arrow keys; and Preview off leaving the artwork alone until OK — that last one read out of the plugin's own trace, because while a modal dialog is up there is no other way to ask what the artwork did. The probe also captures the dialog to *evidence/dialog.png*.
+Pending the host run for this binary. Checks written, and all of them already exercised against the previous one: OK commits; Cancel, Escape, and the title bar's close button each restore both the artwork and the parameter; Enter commits; dragging through several positions does not compound; a value typed with a decimal comma, with trailing text, or past the limit; the arrow keys; the title and labels read back as the code points they should be; and Preview off leaving the artwork alone until OK — that last one read out of the plugin's own trace, because while a modal dialog is up there is no other way to ask what the artwork did.
+
+Nine of those passed against the previous binary and four failed, which is the right answer: the four are the decimal comma, the arrow keys, Preview off, and the text encoding, and all four are what this build changed.
+
+The probe captures the dialog to *evidence/dialog.png*, which is how the text problem was found in the first place and is worth keeping for that reason alone.
+
+**High-DPI scaling is not exercised here.** The display this runs on reports 96 dots per inch, so the dialog is measured at its unscaled size — 448 by 199 pixels, client area 432 by 160, nothing clipped, every control reachable. The scaling path reads `GetDpiForWindow` and multiplies every coordinate and the font height through it, but a display that would make it do anything is not available, so it is untested rather than verified.
 
 ## K. Parameter safety
 
@@ -101,6 +107,7 @@ Fixed during this sprint, each described where it lives:
 - The window class was registered and never unregistered. If the module were unloaded with it still registered, its window procedure would point into freed memory.
 - Six `reinterpret_cast<HMENU>(int)` conversions, which are narrowing in reverse on 64-bit. They go through `INT_PTR` now, which is what made the build clean at warning level 4.
 - The arrow keys never reached the numeric fields, because `IsDialogMessage` treats them as navigation between controls and consumed them first.
+- **The dialog's own text was mangled, and a screen capture of it is what found that.** Two separate faults, both from mixing the narrow and wide Windows entry points. The window class was registered with `RegisterClassExA` while `DefWindowProc` resolved to the wide variant, because the project builds with `UNICODE` defined — so the title "Shear" was stored as its own bytes reinterpreted as UTF-16 and came out as `U+6853 U+6165 U+0072`, which reads 桓槌r. And the degree sign, written as UTF-8 into an ANSI call, was converted through the machine's code page: on this one, page 932, it became `U+FF82 U+FF70`, two half-width katakana. Every string the dialog touches now goes through the wide entry points, so no code page is involved at all. The Appearance panel's one-line description had the same problem for the same reason and now goes through `SetUnicodeStringEntry` rather than a plain `char*`. The dialog probe reads the title and the labels back as code points, and those two checks fail against the old binary and pass against this one.
 - A preview that would change nothing still asked Illustrator to re-render, once per slider position.
 - The binary claimed Adobe as its publisher, named *Adobe Illustrator* as its product, and filed itself under *About SDK Plug-ins* as an Adobe sample. All three came from the SDK's sample defaults, whose own header says third parties should supply their own.
 - The linker stamped the absolute path of the build machine's symbol file into the shipped binary.
