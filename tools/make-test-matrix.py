@@ -9,6 +9,7 @@ Each row is probe, group, case, expected, observed, status.
 """
 
 import sys
+from collections import Counter
 from pathlib import Path
 
 SOURCES = [
@@ -50,7 +51,7 @@ def escape(text):
 def main(evidence_dir, out_path):
     evidence = Path(evidence_dir)
     sections = []
-    totals = {"PASS": 0, "FAIL": 0, "other": 0}
+    totals = Counter()
     missing = []
 
     for filename, title, blurb in SOURCES:
@@ -63,12 +64,9 @@ def main(evidence_dir, out_path):
                  "| # | Group | Case | Expected | Observed | Status |",
                  "| --- | --- | --- | --- | --- | --- |"]
         for index, row in enumerate(rows, 1):
-            status = row.get("status", "").strip()
-            if status in totals:
-                totals[status] += 1
-            else:
-                totals["other"] += 1
-            mark = {"PASS": "PASS", "FAIL": "**FAIL**"}.get(status, status)
+            status = row.get("status", "").strip() or "UNLABELED"
+            totals[status] += 1
+            mark = "**FAIL**" if status == "FAIL" else status
             lines.append("| {} | {} | {} | {} | {} | {} |".format(
                 index,
                 escape(row.get("group", "")),
@@ -81,13 +79,21 @@ def main(evidence_dir, out_path):
         lines.append("")
         sections.append("\n".join(lines))
 
-    total = totals["PASS"] + totals["FAIL"] + totals["other"]
+    total = sum(totals.values())
+    # Status labels other than PASS and FAIL are deliberate: a fixture whose
+    # geometric and visible centers coincide cannot tell an anchor apart, and a
+    # comparison the host would not let us make is not a pass.
+    ordered = ([f"{totals['PASS']} passed"] if totals["PASS"] else [])
+    ordered += ([f"{totals['FAIL']} failed"] if totals["FAIL"] else [])
+    ordered += [f"{count} {label.lower()}"
+                for label, count in sorted(totals.items())
+                if label not in ("PASS", "FAIL")]
     head = [
         "# Release test matrix",
         "",
-        "Generated from the evidence files by *tools/make-test-matrix.py*. Every row is one check a probe actually ran against Illustrator; nothing here is transcribed by hand.",
+        "Generated from the evidence files by *tools/make-test-matrix.py*. Every row is one check that was actually run; nothing here is transcribed by hand. All but the first two sections were measured against a running Illustrator.",
         "",
-        f"**{totals['PASS']} passed, {totals['FAIL']} failed, {totals['other']} inconclusive, {total} checks.**",
+        f"**{', '.join(ordered)} — {total} checks.**",
         "",
     ]
     if missing:
@@ -96,7 +102,7 @@ def main(evidence_dir, out_path):
 
     Path(out_path).write_text("\n".join(head) + "\n" + "\n".join(sections), encoding="utf-8")
     print(f"{total} checks written to {out_path}")
-    print(f"  {totals['PASS']} passed, {totals['FAIL']} failed, {totals['other']} inconclusive")
+    print("  " + ", ".join(ordered))
     if missing:
         print("  missing: " + ", ".join(missing))
     return 1 if totals["FAIL"] else 0
