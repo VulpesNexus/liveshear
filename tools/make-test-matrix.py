@@ -26,6 +26,7 @@ SOURCES = [
     ("undo.tsv", "Undo and redo", "Every edit undone and redone, counting how many steps one deliberate action costs."),
     ("stability.tsv", "Stability and performance", "Identity, cumulative drift, source invariance, evaluation cost, and a document full of independent instances."),
     ("gpu.tsv", "Preview mode", "The document window captured as a bitmap under each preview path and compared pixel by pixel."),
+    ("missing-plugin.tsv", "Opened without the plugin", "The document authored with the effect, then opened on a machine where the plugin is not installed: what still draws, what stops, and whether saving from that state loses anything."),
     ("crash-ab.tsv", "Document churn", "Illustrator dies under long runs of scripted document create/close with no third-party plugin installed at all. These rows are the three-arm comparison that says whether having this one loaded, or using it, changes that. They are labeled MEASURED rather than passed or failed, because the question is a comparison between arms and not a threshold."),
     ("shutdown.tsv", "Application shutdown", "Illustrator quit the ordinary way from each state this plugin can leave it in, checking that it went, that it went promptly, and that the Windows event log has nothing new to say."),
 ]

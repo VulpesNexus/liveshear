@@ -4,7 +4,7 @@ Generated from the evidence files by *tools/make-test-matrix.py*. Every row is o
 
 **18 passed, 7 not discriminating — 25 checks.**
 
-Not present in this run: *release-verdicts.tsv*, *appearance.tsv*, *persistence.tsv*, *fills.tsv*, *export.tsv*, *limits.tsv*, *dialog.tsv*, *undo.tsv*, *stability.tsv*, *gpu.tsv*, *shutdown.tsv*.
+Not present in this run: *release-verdicts.tsv*, *appearance.tsv*, *persistence.tsv*, *fills.tsv*, *export.tsv*, *limits.tsv*, *dialog.tsv*, *undo.tsv*, *stability.tsv*, *gpu.tsv*, *missing-plugin.tsv*, *crash-ab.tsv*, *shutdown.tsv*.
 
 ## The built artifact
 
