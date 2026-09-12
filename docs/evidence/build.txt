@@ -1,0 +1,46 @@
+Live Shear -- the built artifact
+Run at 2026-09-13 04:45:56
+Windows 10.0.26200.0
+
+Toolchain: MSVC 14.44.35207
+SDK:       Adobe Illustrator 2026 SDK
+
+[PASS] Release builds with no warnings and no errors
+       0 warnings, 0 errors
+[PASS] Debug builds with no warnings and no errors
+       0 warnings, 0 errors
+[PASS] the Release build produced a plugin
+       <repo>\build\Release\LiveShear.aip
+
+File version:   0.1.0-rc.1
+Company:        VulpesNexus
+Product:        Shear for Illustrator
+Description:    Non-destructive Shear effect for Adobe Illustrator
+Copyright:      Copyright (C) 2026 VulpesNexus. Licensed under the GNU GPL version 3 or later.
+Size:           154 112 bytes
+SHA-256:        91C3E102F0262F7E68416ACB182E24D9710D8DDDB66820B596A4C2F372E7B5D7
+
+[PASS] the binary does not claim Adobe as its publisher
+       CompanyName is VulpesNexus
+[PASS] the binary names its own product
+       ProductName is Shear for Illustrator
+[PASS] the binary carries a version
+       FileVersion is 0.1.0-rc.1
+[PASS] Release links the retail C runtime, not the debug one
+       links MSVCP140.dll, VCRUNTIME140.dll
+[PASS] no path from the build machine is embedded
+       none found
+[PASS] the symbol reference is a bare file name
+       symbol references: LiveShear.pdb
+[PASS] the entry point Illustrator looks for is exported
+       PluginMain is in the export table
+[PASS] the plugin metadata resource is present
+       the PIPL resource is in the binary
+[PASS] the effect name that documents store is unchanged
+       VulpesNexus Shear
+[PASS] the menu entry reads as a plain Adobe command
+       Effect > Distort & Transform > Shear...
+[PASS] no debug trace is on by default
+       tracing is behind the LIVESHEAR_LOG environment variable
+
+14 passed, 0 failed

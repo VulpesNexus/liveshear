@@ -122,11 +122,19 @@ Add-ProbeResult -Group 'preview mode' -Case 'the window capture sees the canvas'
 # tried too in case the shortcut has been reassigned.
 $titleBefore = Get-Title
 $switched = $null
-$shell.AppActivate($proc.Id) | Out-Null
-Start-Sleep -Milliseconds 500
-$shell.SendKeys('^e')
-Start-Sleep -Milliseconds 2000
-if ((Get-Title) -ne $titleBefore) { $switched = 'the Ctrl+E shortcut' }
+# Keystrokes go to whatever has focus, so they are only sent once Illustrator
+# has confirmed it has it. Sending Ctrl+E at whatever happened to be in front
+# would be a rude way to find that out.
+$focused = $shell.AppActivate($proc.Id)
+Start-Sleep -Milliseconds 800
+if ($focused) {
+    $shell.SendKeys('^e')
+    Start-Sleep -Milliseconds 2000
+    if ((Get-Title) -ne $titleBefore) { $switched = 'the Ctrl+E shortcut' }
+}
+else {
+    Note 'Illustrator would not come to the front, so the keyboard shortcut was not tried.'
+}
 if (-not $switched) {
     foreach ($command in @('GPU Preview', 'CPU Preview', 'gpuPreview', 'cpuPreview', 'Preview on CPU', 'Preview on GPU')) {
         try { Js ("app.executeMenuCommand('{0}');" -f $command) | Out-Null } catch { }
@@ -148,10 +156,11 @@ if ($switched) {
     # expected; a large one would mean the geometry itself came out different.
     $ok = $diff -ge 0 -and $diff -lt 0.02
     Add-ProbeResult -Group 'preview mode' -Case 'GPU and CPU preview draw the same sheared artwork' -Expected 'no more than a couple of percent of pixels differ, from antialiasing' -Observed ("{0:P3} differ; switched with {1}" -f [Math]::Max($diff, 0), $switched) -Status $(if ($ok) { 'PASS' } else { 'FAIL' })
-    $shell.AppActivate($proc.Id) | Out-Null
-    Start-Sleep -Milliseconds 400
-    $shell.SendKeys('^e')
-    Start-Sleep -Milliseconds 1200
+    if ($shell.AppActivate($proc.Id)) {
+        Start-Sleep -Milliseconds 600
+        $shell.SendKeys('^e')
+        Start-Sleep -Milliseconds 1200
+    }
     Note ("restored; title is {0}" -f (Get-Title))
 }
 else {

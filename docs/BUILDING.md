@@ -55,10 +55,11 @@ Tracing is off when the variable is unset, which is the normal case.
 
 ## Running the tests
 
-One test needs neither Illustrator nor the Adobe SDK: the arithmetic under the effect, compiled against a handful of stub types and checked against brute-force sampling.
+Two of them need no Illustrator at all. One rebuilds both configurations from clean and inspects the binary; the other compiles the arithmetic under the effect against a handful of stub types and checks it against brute-force sampling.
 
 ```powershell
-.\tools\run-mathtest.ps1
+.\tools\probe-build.ps1          # warnings, identity, linkage, embedded paths
+.\tools\run-mathtest.ps1         # the affine algebra and the Bezier extremes
 ```
 
 It exists because the bounds fallback — the code that measures the artwork itself when the host refuses to — only runs in a situation that cannot be arranged on demand, and code that never runs is code nobody has checked.
@@ -71,6 +72,7 @@ python .\tools\solve-release.py  # turns the raw numbers into verdicts
 .\tools\probe-appearance.ps1     # stack order, two instances, reorder, delete
 .\tools\probe-persistence.ps1    # save, close, reopen, edit, save, reopen
 .\tools\probe-export.ps1         # PDF and SVG
+.\tools\probe-fills.ps1          # gradients and patterns, compared in pixels
 .\tools\probe-stability.ps1      # identity, drift, performance, bulk documents
 .\tools\probe-limits.ps1         # hostile parameter values
 .\tools\probe-dialog.ps1         # the dialog, driven through the window manager

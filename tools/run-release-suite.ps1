@@ -15,6 +15,9 @@
 [CmdletBinding()]
 param(
     [string] $TracePath = $env:LIVESHEAR_LOG,
+    # Leaves out the two probes that take minutes rather than seconds: the
+    # stability suite and the shutdown suite. Useful while iterating; never
+    # for a release run.
     [switch] $SkipSlow
 )
 
@@ -48,6 +51,7 @@ Invoke-AiScript 'app.userInteractionLevel = UserInteractionLevel.DONTDISPLAYALER
 
 Write-Output ('Plugin: ' + ((Send-AiMessage version) -replace "`r?`n", ' | '))
 
+Run 'built artifact' { & (Join-Path $PSScriptRoot 'probe-build.ps1') }
 Run 'arithmetic'  { & (Join-Path $PSScriptRoot 'run-mathtest.ps1') }
 Run 'anchor'      { & (Join-Path $PSScriptRoot 'probe-anchor.ps1') }
 Run 'anchor verdicts' { python (Join-Path $PSScriptRoot 'solve-anchor.py') (Join-Path $evidence 'anchor.tsv') }
@@ -56,14 +60,17 @@ Run 'matrix verdicts' { python (Join-Path $PSScriptRoot 'solve-release.py') (Joi
 Run 'appearance'  { & (Join-Path $PSScriptRoot 'probe-appearance.ps1') }
 Run 'persistence' { & (Join-Path $PSScriptRoot 'probe-persistence.ps1') }
 Run 'export'      { & (Join-Path $PSScriptRoot 'probe-export.ps1') }
+Run 'fills'       { & (Join-Path $PSScriptRoot 'probe-fills.ps1') }
 Run 'limits'      { & (Join-Path $PSScriptRoot 'probe-limits.ps1') }
 Run 'dialog'      { & (Join-Path $PSScriptRoot 'probe-dialog.ps1') -TracePath $TracePath }
 Run 'undo'        { & (Join-Path $PSScriptRoot 'probe-undo.ps1') }
 Run 'preview mode' { & (Join-Path $PSScriptRoot 'probe-gpu.ps1') }
 if (-not $SkipSlow) {
     Run 'stability' { & (Join-Path $PSScriptRoot 'probe-stability.ps1') }
+    # Shutdown restarts Illustrator four times, which is the other thing a
+    # quick pass has no patience for.
+    Run 'shutdown' { & (Join-Path $PSScriptRoot 'probe-shutdown.ps1') }
 }
-Run 'shutdown'    { & (Join-Path $PSScriptRoot 'probe-shutdown.ps1') }
 Run 'test matrix' { python (Join-Path $PSScriptRoot 'make-test-matrix.py') $evidence (Join-Path $repo 'docs\RELEASE_TEST_MATRIX.md') }
 Run 'support matrix' { python (Join-Path $PSScriptRoot 'make-support-matrix.py') $evidence (Join-Path $repo 'docs\SUPPORT_MATRIX.md') }
 Run 'registry'    {

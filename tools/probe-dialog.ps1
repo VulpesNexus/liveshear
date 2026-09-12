@@ -48,7 +48,7 @@ function Near([double] $a, [double] $b, [double] $tol = 0.01) { [Math]::Abs($a -
 # scripting call that opened the dialog is still blocked.
 $driver = {
     param([double[]] $Angles, [string] $Button, [string] $ResultFile, [string] $TypeInto,
-          [int] $PreviewClicks, [int] $ArrowUps, [string] $TracePath)
+          [int] $PreviewClicks, [int] $ArrowUps, [string] $TracePath, [string] $ShotPath)
 
     Add-Type @"
 using System;
@@ -81,6 +81,10 @@ public static class Dlg {
     public static extern bool IsWindow(IntPtr h);
     [DllImport("user32.dll")]
     public static extern bool GetWindowRect(IntPtr h, out RECT r);
+    [DllImport("user32.dll")]
+    public static extern bool GetClientRect(IntPtr h, out RECT r);
+    [DllImport("user32.dll")]
+    public static extern bool PrintWindow(IntPtr h, IntPtr dc, uint flags);
     [StructLayout(LayoutKind.Sequential)]
     public struct RECT { public int Left, Top, Right, Bottom; }
 
@@ -137,6 +141,30 @@ public static class Dlg {
     $rect = New-Object Dlg+RECT
     [Dlg]::GetWindowRect($dialog, [ref] $rect) | Out-Null
     $lines.Add(("dialog found, {0} by {1} pixels" -f ($rect.Right - $rect.Left), ($rect.Bottom - $rect.Top)))
+
+    # A picture of the dialog, so "the labels are not clipped and the fields are
+    # usable" is something a reader can check rather than take on trust.
+    if ($ShotPath) {
+        try {
+            Add-Type -AssemblyName System.Drawing
+            $client = New-Object Dlg+RECT
+            [Dlg]::GetClientRect($dialog, [ref] $client) | Out-Null
+            $w = $client.Right - $client.Left
+            $h = $client.Bottom - $client.Top
+            if ($w -gt 0 -and $h -gt 0) {
+                $bmp = New-Object System.Drawing.Bitmap $w, $h
+                $g = [System.Drawing.Graphics]::FromImage($bmp)
+                $dc = $g.GetHdc()
+                [Dlg]::PrintWindow($dialog, $dc, 2) | Out-Null
+                $g.ReleaseHdc($dc)
+                $g.Dispose()
+                $bmp.Save($ShotPath)
+                $bmp.Dispose()
+                $lines.Add(("captured the dialog to {0}, client area {1} by {2}" -f $ShotPath, $w, $h))
+            }
+        }
+        catch { $lines.Add("could not capture the dialog: " + $_.Exception.Message) }
+    }
 
     $slider = [Dlg]::GetDlgItem($dialog, $SHEAR_SLIDER)
     $edit = [Dlg]::GetDlgItem($dialog, $SHEAR_EDIT)
@@ -219,10 +247,11 @@ function Invoke-Dialog {
         [string] $Button = 'ok',
         [string] $TypeInto = '',
         [int] $PreviewClicks = 0,
-        [int] $ArrowUps = 0
+        [int] $ArrowUps = 0,
+        [string] $ShotPath = ''
     )
     $resultFile = Join-Path $env:TEMP ("liveshear-dialog-{0}.txt" -f [Guid]::NewGuid().ToString('N'))
-    $job = Start-Job -ScriptBlock $driver -ArgumentList $Angles, $Button, $resultFile, $TypeInto, $PreviewClicks, $ArrowUps, $TracePath
+    $job = Start-Job -ScriptBlock $driver -ArgumentList $Angles, $Button, $resultFile, $TypeInto, $PreviewClicks, $ArrowUps, $TracePath, $ShotPath
     try {
         # Blocks until the dialog closes. This is the same call the Appearance
         # panel makes when an effect entry is double-clicked.
@@ -262,7 +291,8 @@ Note ''
 
 # --------------------------------------------------------- OK commits the value
 New-Case 5
-$transcript = Invoke-Dialog -Angles @(10, 20, 30, 40) -Button 'ok'
+$shot = Join-Path $repo 'docs\evidence\dialog.png'
+$transcript = Invoke-Dialog -Angles @(10, 20, 30, 40) -Button 'ok' -ShotPath $shot
 Note 'driver transcript:'
 foreach ($t in $transcript) { Note ("       " + $t) }
 Invoke-AiScript 'app.redraw();' | Out-Null
