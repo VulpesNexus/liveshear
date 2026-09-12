@@ -88,6 +88,27 @@ Pending the host run. The measurement is the cost of one hundred re-evaluations,
 
 Pending the host run for the differential measurement. By inspection: the effect acquires no suites of its own beyond the import table the SDK manages, creates no temporary art, and holds no handle past the callback that gave it. The dialog registers one window class lazily and unregisters it at shutdown, creates one font and deletes it after its modal loop rather than during `WM_DESTROY`, when the controls still hold it, and hands the application's own quit message back instead of swallowing it.
 
+### What the code review found
+
+One dedicated read of every source file, looking for the things that go wrong in SDK plugins: unchecked suite calls, stale handles, resource paths that only free on the happy path, degrees confused with radians, sign flips with no explanation, and assumptions about the host that nothing tests.
+
+Fixed during this sprint, each described where it lives:
+
+- The reference point came from the wrong box, and the code said "geometric bounds" while asking for and then falling back to something else. It now asks for what it means and says which route answered, in the trace and through the `bounds` script selector.
+- The parameter clamp lived in the dialog, so it did not apply to a value arriving from a saved document. It moved into `ShearMath.h`, and every read and every write passes through it.
+- `DeleteObject` on the dialog's font ran during `WM_DESTROY`, while the child controls still held it. `DestroyWindow` sends that message to the parent before it destroys the children.
+- The modal loop consumed `WM_QUIT`, so an application quit arriving while the dialog was open would have been swallowed. It is re-posted for Illustrator's own loop now.
+- The window class was registered and never unregistered. If the module were unloaded with it still registered, its window procedure would point into freed memory.
+- Six `reinterpret_cast<HMENU>(int)` conversions, which are narrowing in reverse on 64-bit. They go through `INT_PTR` now, which is what made the build clean at warning level 4.
+- The arrow keys never reached the numeric fields, because `IsDialogMessage` treats them as navigation between controls and consumed them first.
+- A preview that would change nothing still asked Illustrator to re-render, once per slider position.
+- The binary claimed Adobe as its publisher, named *Adobe Illustrator* as its product, and filed itself under *About SDK Plug-ins* as an Adobe sample. All three came from the SDK's sample defaults, whose own header says third parties should supply their own.
+- The linker stamped the absolute path of the build machine's symbol file into the shipped binary.
+
+Left alone deliberately: the scripting bridge, which is in the shipped binary so that the binary the tests pass against is the binary that ships, and which grants no privilege a script does not already have through Illustrator's own scripting and action interfaces.
+
+No further substantive issue was found on the last read.
+
 ## O. Host crash
 
 Illustrator 30.7.0 dies with an access violation inside *Illustrator.exe* during long runs of scripted document create/close, and it does so with this plugin uninstalled: three runs of forty cycles that never touch the effect completed 9, 32, and 40 ([evidence/crash-control.txt](evidence/crash-control.txt)). With the plugin installed the same runs completed 2, 20, and 3 — three runs per arm with that spread cannot distinguish a real effect from noise, and it has never been claimed that they can.
