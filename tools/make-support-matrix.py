@@ -38,7 +38,7 @@ FIXTURES = {
     "symbolInstance": ("Symbol instances", "an instance of a symbol made from a stroked rectangle"),
     "gradientFill": ("Linear gradients", "a linear gradient fill"),
     "radialFill": ("Radial gradients", "a radial gradient fill"),
-    "patternFill": ("Pattern fills", "a pattern swatch fill"),
+    "patternFill": ("Pattern-filled objects", "an object carrying a pattern swatch fill"),
     "calligraphicBrush": ("Calligraphic brushes", "a calligraphic brush on an open path"),
     "artBrush": ("Art brushes", "an art brush on an open path"),
     "patternBrush": ("Pattern brushes", "a pattern brush on an open path"),
@@ -59,6 +59,7 @@ FIXTURES = {
 # Things the artwork model contains that the suite does not exercise. Listed
 # so the matrix cannot be read as a claim about them.
 UNTESTED = [
+    ("Pattern fills", "a pattern swatch fill", "The object is exercised and its bounds match the native command, but whether the pattern inside it leans with the shape could not be seen: a pattern built through Illustrator's scripting interface does not render at all, so there is nothing to compare. Gradients are verified in pixels."),
     ("Variable-width strokes", "a stroke whose width profile varies along the path", "No case builds one: the width profile is not reachable from Illustrator's scripting interface, so a fixture would have to be drawn by hand."),
     ("Scatter brushes", "a brush that scatters copies of art along a path", "No scatter brush ships in the default document profile used by the fixtures."),
     ("Meshes", "a gradient mesh object", "Not exercised."),

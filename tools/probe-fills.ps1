@@ -85,7 +85,18 @@ Note ''
 
 $pass = 0
 $fail = 0
+$untested = 0
 foreach ($name in $Fixture) {
+    # --- unsheared, as the control ---
+    # Comparing two renders is only meaningful if the shear changed the
+    # picture. A fixture that renders nothing at all would otherwise match
+    # anything it was held against and report a pass, which is how a pattern
+    # fill that Illustrator declines to draw slipped through once.
+    Js "LS.clear(); LS.target = LS.fixtures['$name'](); LS.selectOnly(LS.target);" | Out-Null
+    Js 'app.activeDocument.selection = null; app.redraw();' | Out-Null
+    $plain = Join-Path $ImageFolder "$name-unsheared.png"
+    Export-Png $plain
+
     # --- the live effect ---
     Js "LS.clear(); LS.target = LS.fixtures['$name'](); LS.selectOnly(LS.target);" | Out-Null
     Js 'app.redraw();' | Out-Null
@@ -93,6 +104,15 @@ foreach ($name in $Fixture) {
     Js 'app.activeDocument.selection = null; app.redraw();' | Out-Null
     $live = Join-Path $ImageFolder "$name-effect.png"
     Export-Png $live
+
+    $discriminates = Compare-Images $plain $live
+    if ($discriminates -lt 0 -or $discriminates -lt 0.002) {
+        $untested++
+        Note ("{0,-14} the shear changed {1} of the picture, so nothing here can be told apart. UNTESTED" -f `
+            $name, $(if ($discriminates -lt 0) { 'nothing comparable' } else { "{0:P3}" -f $discriminates }))
+        Add-ProbeResult -Group 'fills' -Case ("{0} renders as the native command does" -f $name) -Expected 'the rendered pixels agree, so the fill sheared with the object' -Observed ("the fixture renders the same sheared as unsheared, so the comparison proves nothing; Illustrator draws nothing for this fill at all, sheared or not") -Status 'UNTESTED'
+        continue
+    }
 
     $results = @{}
     foreach ($patterns in @(1, 0)) {
@@ -132,7 +152,7 @@ foreach ($name in $Fixture) {
 
 Note ''
 Note ("images in {0}" -f $ImageFolder)
-Note ("{0} passed, {1} failed" -f $pass, $fail)
+Note ("{0} passed, {1} failed, {2} untested" -f $pass, $fail, $untested)
 Js 'LS.clear();' | Out-Null
 Save-ProbeResults -Path ($OutPath -replace '\.txt$', '.tsv')
 [System.IO.File]::WriteAllLines($OutPath, $log)

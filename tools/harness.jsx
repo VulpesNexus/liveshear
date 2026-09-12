@@ -37,6 +37,11 @@ var LS = (function () {
             d.pageItems[0].remove();
         }
         while (d.symbols.length > 0) { d.symbols[0].remove(); }
+        // Patterns accumulate otherwise: every run of a fixture that makes one
+        // leaves another swatch behind in the same document.
+        while (d.patterns.length > 0) {
+            try { d.patterns[0].remove(); } catch (e) { break; }
+        }
         return d;
     };
 

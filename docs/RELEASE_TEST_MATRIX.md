@@ -2,9 +2,9 @@
 
 Generated from the evidence files by *tools/make-test-matrix.py*. Every row is one check that was actually run; nothing here is transcribed by hand. The first three sections need no Illustrator — the built artifact, the scripts that judge, and the arithmetic. Everything after them was measured against a running one.
 
-**19 passed, 7 not discriminating — 26 checks.**
+**21 passed, 7 not discriminating, 1 untested — 29 checks.**
 
-Not present in this run: *release-verdicts.tsv*, *appearance.tsv*, *persistence.tsv*, *fills.tsv*, *export.tsv*, *limits.tsv*, *dialog.tsv*, *undo.tsv*, *stability.tsv*, *gpu.tsv*, *missing-plugin.tsv*, *crash-ab.tsv*, *shutdown.tsv*.
+Not present in this run: *release-verdicts.tsv*, *appearance.tsv*, *persistence.tsv*, *export.tsv*, *limits.tsv*, *dialog.tsv*, *undo.tsv*, *stability.tsv*, *gpu.tsv*, *missing-plugin.tsv*, *crash-ab.tsv*, *shutdown.tsv*.
 
 ## The built artifact
 
@@ -67,3 +67,15 @@ Which box Illustrator's own Shear command anchors on, recovered by fitting the a
 | 10 | native semantics | bezier, axis 90 | anchor is the geometric bounds center | anchor 220.000000; geometric center 220.000000, visible center 220.000000; residual 3.00e-10 | NOT DISCRIMINATING |
 
 Source: [docs/evidence/anchor-verdicts.tsv](evidence/anchor-verdicts.tsv)
+
+## Gradients and patterns
+
+Rendered to PNG and compared pixel by pixel against the native command, because bounds cannot see whether a fill inside the shape sheared with it.
+
+| # | Group | Case | Expected | Observed | Status |
+| --- | --- | --- | --- | --- | --- |
+| 1 | fills | gradientFill renders as the native command does | the rendered pixels agree, so the fill sheared with the object | patterns on 0, patterns off 0, closest patterns on | PASS |
+| 2 | fills | radialFill renders as the native command does | the rendered pixels agree, so the fill sheared with the object | patterns on 0, patterns off 0, closest patterns on | PASS |
+| 3 | fills | patternFill renders as the native command does | the rendered pixels agree, so the fill sheared with the object | the fixture renders the same sheared as unsheared, so the comparison proves nothing; Illustrator draws nothing for this fill at all, sheared or not | UNTESTED |
+
+Source: [docs/evidence/fills.tsv](evidence/fills.tsv)

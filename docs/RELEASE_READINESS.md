@@ -52,6 +52,10 @@ The reference point is taken from the artwork the appearance pipeline hands the 
 
 See [SUPPORT_MATRIX.md](SUPPORT_MATRIX.md), which is generated from the release matrix rather than written by hand, and which lists what the suite does not cover as untested rather than omitting it. Pending the host run.
 
+One result is already in, and it is worth stating because bounds cannot reach it. **Gradients shear with the artwork**: a linear and a radial gradient fill, rendered by the effect and by the native command, exported at the same size and compared pixel by pixel, differ in not one sampled pixel.
+
+**Pattern fills could not be tested at all**, and the probe says so rather than reporting agreement. A pattern swatch built through Illustrator's scripting interface does not render — not sheared, not unsheared, not at all. The object is there and reports a `PatternColor` fill; the page comes out blank. Three ways of building the tile were tried, including the grouped bounding-box form Adobe's own documentation describes. The probe now renders each fixture unsheared first and refuses to compare anything whose picture the shear did not change, which is what turned a meaningless pass into an honest UNTESTED.
+
 ## G. Appearance composition
 
 Pending the host run. The checks written and debugged: a *Transform* above a live Shear against a *Transform* above a native shear; a live Shear above a *Transform* against a native shear of that *Transform* expanded into real geometry; that the two stack orders differ; two Shear effects against two successive native shears; that editing one instance leaves the other alone; forty reorders; and deleting one of two.

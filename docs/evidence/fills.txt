@@ -1,0 +1,10 @@
+Live Shear -- do gradients and patterns shear with the artwork?
+Run at 2026-09-13 06:31:11
+Shear 30 degrees, axis 0; images at 200 percent, antialiasing off
+
+gradientFill   against native with patterns on: 0,000 %   with patterns off: 0,000 %   closest: patterns on   PASS
+radialFill     against native with patterns on: 0,000 %   with patterns off: 0,000 %   closest: patterns on   PASS
+patternFill    the shear changed 0,000 % of the picture, so nothing here can be told apart. UNTESTED
+
+images in <temp>\liveshear-fills
+2 passed, 0 failed, 1 untested

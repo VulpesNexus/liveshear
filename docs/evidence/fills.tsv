@@ -1,0 +1,4 @@
+probe	group	case	expected	observed	status
+fills	fills	gradientFill renders as the native command does	the rendered pixels agree, so the fill sheared with the object	patterns on 0, patterns off 0, closest patterns on	PASS
+fills	fills	radialFill renders as the native command does	the rendered pixels agree, so the fill sheared with the object	patterns on 0, patterns off 0, closest patterns on	PASS
+fills	fills	patternFill renders as the native command does	the rendered pixels agree, so the fill sheared with the object	the fixture renders the same sheared as unsheared, so the comparison proves nothing; Illustrator draws nothing for this fill at all, sheared or not	UNTESTED
