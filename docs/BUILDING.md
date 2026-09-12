@@ -62,7 +62,7 @@ Two of them need no Illustrator at all. One rebuilds both configurations from cl
 .\tools\run-mathtest.ps1         # the affine algebra and the Bezier extremes
 ```
 
-It exists because the bounds fallback — the code that measures the artwork itself when the host refuses to — only runs in a situation that cannot be arranged on demand, and code that never runs is code nobody has checked.
+The arithmetic test exists because the bounds fallback — the code that measures the artwork itself when the host refuses to — only runs in a situation that cannot be arranged on demand, and code that never runs is code nobody has checked.
 
 The rest of the suite drives a real Illustrator over COM; there is no mock. Start Illustrator, then:
 
@@ -81,7 +81,16 @@ python .\tools\solve-release.py  # turns the raw numbers into verdicts
 python .\tools\solve-anchor.py
 ```
 
-Or all of them in order, which also regenerates the matrix:
+Two more are run separately, because each needs the plugin uninstalled and so needs administrator rights:
+
+```powershell
+.\tools\probe-missing-plugin.ps1 -CrashTrials 6   # what a machine without it sees, and crash arm A
+.\tools\probe-crash-ab.ps1 -SkipArmA              # crash arms B and C, interleaved
+```
+
+Arm A of the crash experiment runs inside the missing-plugin probe on purpose: that probe already arranges for the plugin to be absent, and arranging it twice would mean two more prompts to answer.
+
+Or all the rest in order, which also regenerates the matrix:
 
 ```powershell
 .\tools\run-release-suite.ps1

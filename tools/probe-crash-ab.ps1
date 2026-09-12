@@ -48,10 +48,26 @@ $null = New-Item -ItemType Directory -Force -Path (Split-Path -Parent $LogPath)
 $log = New-Object Collections.Generic.List[string]
 function Note([string] $line) { $log.Add($line); Write-Output $line }
 
+Start-ProbeResults -Probe 'crash'
+
 function Get-PeakMemoryMB {
-    $p = Get-Process Illustrator -ErrorAction SilentlyContinue
-    if (-not $p) { return 0 }
-    return [int]($p.PeakWorkingSet64 / 1MB)
+    # More than one process can answer to the name for a moment while one is
+    # starting and another is on its way out, so take the largest rather than
+    # dividing an array.
+    $all = @(Get-Process Illustrator -ErrorAction SilentlyContinue)
+    if ($all.Count -eq 0) { return 0 }
+    return [int](($all | Measure-Object -Property PeakWorkingSet64 -Maximum).Maximum / 1MB)
+}
+
+function Wait-ForExit([int] $Seconds = 30) {
+    $deadline = (Get-Date).AddSeconds($Seconds)
+    while (@(Get-Process Illustrator -ErrorAction SilentlyContinue).Count -gt 0 -and (Get-Date) -lt $deadline) {
+        Start-Sleep -Milliseconds 500
+    }
+    foreach ($p in @(Get-Process Illustrator -ErrorAction SilentlyContinue)) {
+        try { Stop-Process -Id $p.Id -Force } catch { }
+    }
+    Start-Sleep -Seconds 2
 }
 
 function Get-LastCrashRecord([datetime] $since) {
@@ -70,10 +86,8 @@ $buildOnly = 'var d = app.documents.add(DocumentColorSpace.RGB, 600, 600); d.rul
 $buildShear = $buildOnly.Replace('"built";', 'app.sendScriptMessage("LiveShear", "apply effect", "VulpesNexus Shear|shearAngle=r:30"); app.redraw(); "sheared";')
 
 function Invoke-Trial([string] $arm, [string] $build) {
-    Stop-Ai | Out-Null
-    if (Get-Process Illustrator -ErrorAction SilentlyContinue) {
-        Stop-Process -Name Illustrator -Force; Start-Sleep -Seconds 2
-    }
+    try { Stop-Ai | Out-Null } catch { }
+    Wait-ForExit
     $started = Get-Date
     Start-Ai | Out-Null
 
@@ -152,17 +166,22 @@ for ($t = 1; $t -le $Trials; $t++) {
 
 Note ''
 Note 'Summary'
-Note ("{0,-14} {1,>7} {2,>9} {3,>11} {4,>9}" -f 'arm', 'trials', 'complete', 'mean cycles', 'peak MB')
+Note ("{0,-14} {1,7} {2,9} {3,12} {4,9}" -f 'arm', 'trials', 'complete', 'mean cycles', 'peak MB')
+$invariant = [Globalization.CultureInfo]::InvariantCulture
 foreach ($arm in @('A absent', 'B unused', 'C exercised')) {
-    $rows = $results | Where-Object { $_.Arm -eq $arm }
-    if (-not $rows) { continue }
+    $rows = @($results | Where-Object { $_.Arm -eq $arm })
+    if ($rows.Count -eq 0) { continue }
     $mean = ($rows | Measure-Object -Property Cycles -Average).Average
     $peak = ($rows | Measure-Object -Property PeakMB -Maximum).Maximum
-    $complete = ($rows | Where-Object { $_.Completed }).Count
-    Note ("{0,-14} {1,7} {2,9} {3,11:F1} {4,9}" -f $arm, $rows.Count, $complete, $mean, $peak)
+    # @() around the filter, because a single match arrives as a scalar whose
+    # Count is not what a reader of this table expects.
+    $complete = @($rows | Where-Object { $_.Completed }).Count
+    Note ("{0,-14} {1,7} {2,9} {3,12} {4,9}" -f $arm, $rows.Count, $complete, $mean.ToString('0.0', $invariant), $peak)
+    Add-ProbeResult -Group 'document churn' -Case ("arm {0}" -f $arm) -Expected 'no worse than the arm without the plugin' -Observed ("{0} trials, {1} completed all {2} cycles, mean {3} cycles, peak {4} MB" -f $rows.Count, $complete, $Cycles, $mean.ToString('0.0', $invariant), $peak) -Status 'MEASURED'
 }
 
 Stop-Ai | Out-Null
 Start-Ai | Out-Null
+Save-ProbeResults -Path ($LogPath -replace '\.txt$', '.tsv')
 [System.IO.File]::WriteAllLines($LogPath, $log)
 Write-Output "`nWritten to $LogPath"
