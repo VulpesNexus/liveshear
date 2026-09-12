@@ -1,4 +1,4 @@
-# Build output: the plug-in binary, its intermediates, and the generated PIPL.
+# Build output: the plugin binary, its intermediates, and the generated PIPL.
 build/
 plugin/plugin.pipl
 *.aip

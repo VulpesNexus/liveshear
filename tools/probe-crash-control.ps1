@@ -1,11 +1,11 @@
 <#
 .SYNOPSIS
-    Repeats the plainest possible document churn, with and without the plug-in
-    installed, to find out whether the plug-in is implicated in the crash.
+    Repeats the plainest possible document churn, with and without the plugin
+    installed, to find out whether the plugin is implicated in the crash.
 
 .DESCRIPTION
     The cycle creates a document with one rectangle and closes it again. It
-    never applies the effect and never speaks to the plug-in, so the only
+    never applies the effect and never speaks to the plugin, so the only
     difference between the two arms is whether LiveShear.aip is loaded at all.
     Illustrator is restarted before every run so the arms cannot contaminate
     each other.
@@ -40,14 +40,14 @@ function Churn([int] $n) {
     return $n
 }
 
-Note 'Live Shear -- is the plug-in implicated in the crash?'
+Note 'Live Shear -- is the plugin implicated in the crash?'
 Note ("Run at {0}" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'))
 Note ("{0} runs of {1} create/close cycles per arm" -f $Runs, $Cycles)
 Note ''
 
-foreach ($arm in @('without the plug-in', 'with the plug-in')) {
+foreach ($arm in @('without the plugin', 'with the plugin')) {
     Stop-Ai | Out-Null
-    if ($arm -eq 'without the plug-in') { & $install -Uninstall | Out-Null } else { & $install | Out-Null }
+    if ($arm -eq 'without the plugin') { & $install -Uninstall | Out-Null } else { & $install | Out-Null }
 
     $results = @()
     for ($r = 0; $r -lt $Runs; $r++) {
@@ -57,14 +57,14 @@ foreach ($arm in @('without the plug-in', 'with the plug-in')) {
         try { $loaded = (Send-AiMessage version) -match 'LiveShear' } catch { }
         $done = Churn $Cycles
         $results += $done
-        Note ("{0}, run {1}: {2} of {3} cycles (plug-in loaded: {4})" -f $arm, ($r + 1), $done, $Cycles, $loaded)
+        Note ("{0}, run {1}: {2} of {3} cycles (plugin loaded: {4})" -f $arm, ($r + 1), $done, $Cycles, $loaded)
     }
     $survived = ($results | Where-Object { $_ -eq $Cycles }).Count
     Note ("{0}: {1} of {2} runs completed all {3} cycles" -f $arm, $survived, $Runs, $Cycles)
     Note ''
 }
 
-# Leave the plug-in installed.
+# Leave the plugin installed.
 Stop-Ai | Out-Null
 & $install | Out-Null
 Start-Ai | Out-Null

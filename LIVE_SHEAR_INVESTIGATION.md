@@ -199,7 +199,7 @@ Milestones, using the scale the brief asked for:
 
 ### Behavior suite
 
-From [docs/evidence/behavior.txt](docs/evidence/behaviour.txt):
+From [docs/evidence/behavior.txt](docs/evidence/behavior.txt):
 
 - artwork renders sheared, and the **source path is byte-identical before and after** — the effect is genuinely non-destructive
 - **live text stays live text**: typename, contents, and point size all survive; retyping and changing the font size both re-run the effect

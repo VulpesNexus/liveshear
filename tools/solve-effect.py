@@ -1,7 +1,7 @@
 """Recovers the affine map each live effect rendered, from expanded geometry.
 
 Reads docs/evidence/effect-matrix.tsv (written by tools/probe-effect-matrix.ps1)
-and prints the measured matrix for every case. For the plug-in's own Shear
+and prints the measured matrix for every case. For the plugin's own Shear
 effect the measured matrix is checked against the formula in ShearMath.h; for
 the built-in Transform effect the measured matrix is checked against every
 plausible composition order of its documented components, so the order
@@ -117,7 +117,7 @@ def pin_points(points):
     mid_x, mid_y = (left + right) / 2.0, (bottom + top) / 2.0
     return {
         "left-top": (left, top), "mid-top": (mid_x, top), "right-top": (right, top),
-        "left-mid": (left, mid_y), "centre": (mid_x, mid_y), "right-mid": (right, mid_y),
+        "left-mid": (left, mid_y), "center": (mid_x, mid_y), "right-mid": (right, mid_y),
         "left-bottom": (left, bottom), "mid-bottom": (mid_x, bottom), "right-bottom": (right, bottom),
     }
 

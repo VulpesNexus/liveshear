@@ -1,15 +1,20 @@
 //  ShearDialog.cpp -- a plain Win32 modal dialog, built at run time so the
-//  plug-in carries no dialog resource template.
+//  plugin carries no dialog resource template.
 //
 //  Two rows, each a slider paired with an editable numeric field, plus a
 //  Preview check box. Moving a slider writes the new values into the effect's
 //  parameter dictionary and asks Illustrator to re-run the effect, so the
 //  artwork updates under the dialog. Cancel puts the dictionary back the way it
 //  was and re-runs once more, so nothing is left behind.
+//
+//  Every preview is computed from the parameters as they stand now, against art
+//  the appearance pipeline rebuilds from the untouched source. Nothing here
+//  ever transforms the previous preview.
 
 #include "IllustratorSDK.h"
 #include "ShearDialog.h"
 #include "ShearEffect.h"
+#include "ShearMath.h"
 #include "LiveShearSuites.h"
 #include "LiveShearID.h"
 #include "ShearLog.h"
@@ -18,11 +23,12 @@
 
 #include <windows.h>
 #include <commctrl.h>
-#include <cstdio>
 #include <cstdlib>
 #include <cmath>
+#include <cstring>
 #include <string>
 #include <sstream>
+#include <locale>
 
 #pragma comment(lib, "comctl32.lib")
 
@@ -38,10 +44,17 @@ namespace
     /** Sliders are integral, so both angles are carried in tenths of a degree. */
     const int kScale = 10;
 
-    const double kShearMin = -89.0;
-    const double kShearMax =  89.0;
+    /** The shear field stops one degree short of vertical; ShearMath.h explains
+        why, and SanitizeShearAngle enforces the same limit for values that
+        never pass through this dialog at all. */
+    const double kShearMin = -shear::kShearLimitDegrees;
+    const double kShearMax =  shear::kShearLimitDegrees;
     const double kAxisMin  = -180.0;
     const double kAxisMax  =  180.0;
+
+    const char* const kClassName = "VulpesNexusShearDialog";
+    bool gClassRegistered = false;
+    HINSTANCE gClassInstance = nullptr;
 
     struct DialogData
     {
@@ -49,7 +62,15 @@ namespace
         double entryShear = 0.0;
         double entryAxis = 0.0;
         bool committed = false;
+        bool finished = false;
         bool updating = false;
+        /** What was last written into the parameter dictionary, so that a
+            preview which would change nothing does not ask Illustrator to
+            re-render the artwork anyway. */
+        double pushedShear = 0.0;
+        double pushedAxis = 0.0;
+        int dpi = 96;
+        HFONT font = nullptr;
         HWND shearSlider = nullptr;
         HWND shearEdit = nullptr;
         HWND axisSlider = nullptr;
@@ -57,16 +78,66 @@ namespace
         HWND preview = nullptr;
     };
 
+    /** Control identifiers travel to CreateWindow in the hMenu parameter.
+        Widening through INT_PTR first keeps the conversion well defined on
+        64-bit, where a bare cast from int to a pointer is a narrowing one in
+        reverse. */
+    HMENU ControlId(int id)
+    {
+        return reinterpret_cast<HMENU>(static_cast<INT_PTR>(id));
+    }
+
     double Clamp(double v, double lo, double hi)
     {
         return v < lo ? lo : (v > hi ? hi : v);
     }
 
+    /** Formats to one decimal in the C locale, whatever locale the host has
+        left the process in. */
     std::string Format(double v)
     {
-        char buf[32];
-        std::snprintf(buf, sizeof(buf), "%.1f", v);
-        return buf;
+        std::ostringstream o;
+        o.imbue(std::locale::classic());
+        o.setf(std::ios::fixed, std::ios::floatfield);
+        o.precision(1);
+        o << v;
+        return o.str();
+    }
+
+    /** Reads a number out of whatever the user typed or pasted.
+
+        A plain EDIT control carries no locale of its own, so both the full stop
+        and the comma are accepted as the decimal separator; a degree sign, in
+        either the ASCII or the UTF-8 spelling, and surrounding spaces are
+        ignored. Parsing happens in the C locale explicitly rather than in
+        whichever one the host has installed, so the same keystrokes mean the
+        same angle on every machine. */
+    bool ParseAngle(const char* text, double* value)
+    {
+        if (text == nullptr) return false;
+
+        std::string cleaned;
+        for (const char* p = text; *p != 0; ++p)
+        {
+            const unsigned char c = static_cast<unsigned char>(*p);
+            if (c == ',') { cleaned.push_back('.'); continue; }
+            if (c == ' ' || c == '\t') continue;
+            if (c == 0xB0 || c == 0xC2) continue;        // degree sign, UTF-8 or Latin-1
+            cleaned.push_back(static_cast<char>(c));
+        }
+        if (cleaned.empty()) return false;
+
+        _locale_t invariant = _create_locale(LC_NUMERIC, "C");
+        if (invariant == nullptr) return false;
+        char* end = nullptr;
+        const double parsed = _strtod_l(cleaned.c_str(), &end, invariant);
+        _free_locale(invariant);
+
+        if (end == cleaned.c_str()) return false;
+        if (!(parsed == parsed)) return false;                   // NaN
+        if (parsed > 1.0e12 || parsed < -1.0e12) return false;   // infinity, or nonsense
+        *value = parsed;
+        return true;
     }
 
     void SetEditValue(HWND edit, double v)
@@ -80,13 +151,12 @@ namespace
     {
         ShearDialogState* st = dd->state;
         if (!st->allowPreview || st->parameters == nullptr || st->context == nullptr) return;
-        sAIDictionary->SetRealEntry(st->parameters, sAIDictionary->Key(kShearAngleKey),
-                                    static_cast<AIReal>(shearAngle));
-        sAIDictionary->SetRealEntry(st->parameters, sAIDictionary->Key(kShearAxisKey),
-                                    static_cast<AIReal>(axisAngle));
-        ShearEffect::UpdateDisplayString(st->parameters,
-                                         static_cast<AIReal>(shearAngle),
-                                         static_cast<AIReal>(axisAngle));
+        if (shearAngle == dd->pushedShear && axisAngle == dd->pushedAxis) return;
+        dd->pushedShear = shearAngle;
+        dd->pushedAxis = axisAngle;
+        ShearEffect::WriteParameters(st->parameters,
+                                     static_cast<AIReal>(shearAngle),
+                                     static_cast<AIReal>(axisAngle));
         sAILiveEffect->UpdateParameters(st->context);
     }
 
@@ -118,42 +188,135 @@ namespace
         Republish(dd);
     }
 
-    void SyncFromEdit(DialogData* dd, bool isShear)
+    void ApplyValue(DialogData* dd, bool isShear, double v)
     {
-        if (dd->updating) return;
-        const HWND field = isShear ? dd->shearEdit : dd->axisEdit;
-        char buf[64] = { 0 };
-        const int got = GetWindowTextA(field, buf, sizeof(buf) - 1);
-        if (shearlog::Enabled())
-        {
-            std::ostringstream o;
-            o << "dialog: SyncFromEdit " << (isShear ? "shear" : "axis")
-              << " hwnd=" << (field ? 1 : 0) << " chars=" << got << " text='" << buf << "'";
-            shearlog::Write(o.str());
-        }
-        if (buf[0] == 0) return;
-        double v = std::atof(buf);
         dd->updating = true;
         if (isShear)
         {
             v = Clamp(v, kShearMin, kShearMax);
             dd->state->shearAngle = v;
-            SendMessage(dd->shearSlider, TBM_SETPOS, TRUE, static_cast<LPARAM>(std::lround(v * kScale)));
+            SendMessage(dd->shearSlider, TBM_SETPOS, TRUE,
+                        static_cast<LPARAM>(std::lround(v * kScale)));
+            SetEditValue(dd->shearEdit, v);
         }
         else
         {
-            v = Clamp(v, kAxisMin, kAxisMax);
+            // An axis angle outside the slider's range is still a valid angle,
+            // so it is wrapped into the range rather than clipped to its end:
+            // 200 degrees means the same shear as -160 and should show as -160,
+            // where clamping to 180 would silently change the result.
+            v = shear::SanitizeAxisAngle(v);
             dd->state->axisAngle = v;
-            SendMessage(dd->axisSlider, TBM_SETPOS, TRUE, static_cast<LPARAM>(std::lround(v * kScale)));
+            SendMessage(dd->axisSlider, TBM_SETPOS, TRUE,
+                        static_cast<LPARAM>(std::lround(v * kScale)));
+            SetEditValue(dd->axisEdit, v);
         }
         dd->updating = false;
         Republish(dd);
+    }
+
+    void SyncFromEdit(DialogData* dd, bool isShear)
+    {
+        if (dd->updating) return;
+        const HWND field = isShear ? dd->shearEdit : dd->axisEdit;
+        char buf[64] = { 0 };
+        GetWindowTextA(field, buf, sizeof(buf) - 1);
+
+        double v = 0.0;
+        if (!ParseAngle(buf, &v))
+        {
+            // Unreadable text is not an error to complain about; the field just
+            // goes back to the value that is actually in effect.
+            dd->updating = true;
+            SetEditValue(field, isShear ? dd->state->shearAngle : dd->state->axisAngle);
+            dd->updating = false;
+            return;
+        }
+        ApplyValue(dd, isShear, v);
+    }
+
+    /** Up and down arrows nudge the field, by ten with Shift held, the way
+        Adobe's own numeric fields behave. */
+    LRESULT CALLBACK EditSubclassProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp,
+                                      UINT_PTR id, DWORD_PTR ref)
+    {
+        DialogData* dd = reinterpret_cast<DialogData*>(ref);
+        if (msg == WM_KEYDOWN && dd != nullptr && (wp == VK_UP || wp == VK_DOWN))
+        {
+            const bool isShear = (id == kIdShearEdit);
+            const double step = (GetKeyState(VK_SHIFT) < 0) ? 10.0 : 1.0;
+            const double current = isShear ? dd->state->shearAngle : dd->state->axisAngle;
+            ApplyValue(dd, isShear, current + (wp == VK_UP ? step : -step));
+            SendMessage(hwnd, EM_SETSEL, 0, -1);
+            return 0;
+        }
+        if (msg == WM_NCDESTROY) RemoveWindowSubclass(hwnd, EditSubclassProc, id);
+        return DefSubclassProc(hwnd, msg, wp, lp);
     }
 
     HWND MakeLabel(HWND parent, HINSTANCE inst, const char* text, int x, int y, int w, int h)
     {
         return CreateWindowExA(0, "STATIC", text, WS_CHILD | WS_VISIBLE | SS_LEFT,
                                x, y, w, h, parent, nullptr, inst, nullptr);
+    }
+
+    /** Dots per inch of the monitor the window is on, asked for in the way that
+        works on the widest range of Windows versions: the per-monitor call when
+        the running system has it, the system-wide one otherwise. */
+    int DpiOf(HWND hwnd)
+    {
+        typedef UINT (WINAPI *GetDpiForWindowProc)(HWND);
+        typedef UINT (WINAPI *GetDpiForSystemProc)(void);
+
+        const HMODULE user32 = GetModuleHandleW(L"user32.dll");
+        if (user32 != nullptr)
+        {
+            const GetDpiForWindowProc forWindow = reinterpret_cast<GetDpiForWindowProc>(
+                reinterpret_cast<void*>(GetProcAddress(user32, "GetDpiForWindow")));
+            if (forWindow != nullptr && hwnd != nullptr)
+            {
+                const UINT dpi = forWindow(hwnd);
+                if (dpi >= 48) return static_cast<int>(dpi);
+            }
+            const GetDpiForSystemProc forSystem = reinterpret_cast<GetDpiForSystemProc>(
+                reinterpret_cast<void*>(GetProcAddress(user32, "GetDpiForSystem")));
+            if (forSystem != nullptr)
+            {
+                const UINT dpi = forSystem();
+                if (dpi >= 48) return static_cast<int>(dpi);
+            }
+        }
+
+        const HDC screen = GetDC(nullptr);
+        if (screen != nullptr)
+        {
+            const int dpi = GetDeviceCaps(screen, LOGPIXELSX);
+            ReleaseDC(nullptr, screen);
+            if (dpi >= 48) return dpi;
+        }
+        return 96;
+    }
+
+    /** The standard UI typeface at nine points for this monitor's scaling. The
+        metrics the system reports are already scaled for the system's own dots
+        per inch, so only the face name is taken from them and the size is
+        computed here. */
+    HFONT MakeUiFont(int dpi)
+    {
+        NONCLIENTMETRICSW metrics;
+        ZeroMemory(&metrics, sizeof(metrics));
+        metrics.cbSize = sizeof(metrics);
+
+        LOGFONTW font;
+        ZeroMemory(&font, sizeof(font));
+        if (SystemParametersInfoW(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0))
+            font = metrics.lfMessageFont;
+        else
+            wcscpy_s(font.lfFaceName, L"Segoe UI");
+
+        font.lfHeight = -MulDiv(9, dpi, 72);
+        font.lfWidth = 0;
+        return CreateFontIndirectW(&font);
     }
 
     LRESULT CALLBACK DialogProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
@@ -169,58 +332,81 @@ namespace
                 SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(dd));
                 const HINSTANCE inst = cs->hInstance;
 
-                MakeLabel(hwnd, inst, "Shear Angle", 16, 18, 90, 18);
+                dd->dpi = DpiOf(hwnd);
+                const int dpi = dd->dpi;
+                #define S(v) MulDiv((v), dpi, 96)
+
+                MakeLabel(hwnd, inst, "Shear Angle", S(16), S(18), S(90), S(18));
                 dd->shearSlider = CreateWindowExA(0, TRACKBAR_CLASSA, "",
                     WS_CHILD | WS_VISIBLE | WS_TABSTOP | TBS_HORZ | TBS_NOTICKS,
-                    110, 14, 220, 26, hwnd, reinterpret_cast<HMENU>(kIdShearSlider), inst, nullptr);
+                    S(110), S(14), S(220), S(26), hwnd,
+                    ControlId(kIdShearSlider), inst, nullptr);
                 SendMessage(dd->shearSlider, TBM_SETRANGE, TRUE,
-                            MAKELPARAM(static_cast<int>(kShearMin * kScale), static_cast<int>(kShearMax * kScale)));
+                            MAKELPARAM(static_cast<int>(kShearMin * kScale),
+                                       static_cast<int>(kShearMax * kScale)));
                 SendMessage(dd->shearSlider, TBM_SETPOS, TRUE,
                             static_cast<LPARAM>(std::lround(dd->state->shearAngle * kScale)));
                 dd->shearEdit = CreateWindowExA(WS_EX_CLIENTEDGE, "EDIT", "",
                     WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_RIGHT | ES_AUTOHSCROLL,
-                    340, 16, 60, 22, hwnd, reinterpret_cast<HMENU>(kIdShearEdit), inst, nullptr);
+                    S(340), S(16), S(60), S(22), hwnd,
+                    ControlId(kIdShearEdit), inst, nullptr);
                 SetEditValue(dd->shearEdit, dd->state->shearAngle);
-                MakeLabel(hwnd, inst, "\xc2\xb0", 404, 18, 14, 18);
+                MakeLabel(hwnd, inst, "\xc2\xb0", S(404), S(18), S(14), S(18));
 
-                MakeLabel(hwnd, inst, "Axis Angle", 16, 54, 90, 18);
+                MakeLabel(hwnd, inst, "Axis Angle", S(16), S(54), S(90), S(18));
                 dd->axisSlider = CreateWindowExA(0, TRACKBAR_CLASSA, "",
                     WS_CHILD | WS_VISIBLE | WS_TABSTOP | TBS_HORZ | TBS_NOTICKS,
-                    110, 50, 220, 26, hwnd, reinterpret_cast<HMENU>(kIdAxisSlider), inst, nullptr);
+                    S(110), S(50), S(220), S(26), hwnd,
+                    ControlId(kIdAxisSlider), inst, nullptr);
                 SendMessage(dd->axisSlider, TBM_SETRANGE, TRUE,
-                            MAKELPARAM(static_cast<int>(kAxisMin * kScale), static_cast<int>(kAxisMax * kScale)));
+                            MAKELPARAM(static_cast<int>(kAxisMin * kScale),
+                                       static_cast<int>(kAxisMax * kScale)));
                 SendMessage(dd->axisSlider, TBM_SETPOS, TRUE,
                             static_cast<LPARAM>(std::lround(dd->state->axisAngle * kScale)));
                 dd->axisEdit = CreateWindowExA(WS_EX_CLIENTEDGE, "EDIT", "",
                     WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_RIGHT | ES_AUTOHSCROLL,
-                    340, 52, 60, 22, hwnd, reinterpret_cast<HMENU>(kIdAxisEdit), inst, nullptr);
+                    S(340), S(52), S(60), S(22), hwnd,
+                    ControlId(kIdAxisEdit), inst, nullptr);
                 SetEditValue(dd->axisEdit, dd->state->axisAngle);
-                MakeLabel(hwnd, inst, "\xc2\xb0", 404, 54, 14, 18);
+                MakeLabel(hwnd, inst, "\xc2\xb0", S(404), S(54), S(14), S(18));
 
                 dd->preview = CreateWindowExA(0, "BUTTON", "Preview",
                     WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-                    16, 92, 90, 22, hwnd, reinterpret_cast<HMENU>(kIdPreview), inst, nullptr);
+                    S(16), S(92), S(90), S(22), hwnd,
+                    ControlId(kIdPreview), inst, nullptr);
                 SendMessage(dd->preview, BM_SETCHECK,
                             dd->state->previewEnabled ? BST_CHECKED : BST_UNCHECKED, 0);
                 EnableWindow(dd->preview, dd->state->allowPreview ? TRUE : FALSE);
 
                 CreateWindowExA(0, "BUTTON", "Reset",
                     WS_CHILD | WS_VISIBLE | WS_TABSTOP,
-                    120, 92, 70, 24, hwnd, reinterpret_cast<HMENU>(kIdReset), inst, nullptr);
+                    S(120), S(92), S(70), S(24), hwnd,
+                    ControlId(kIdReset), inst, nullptr);
                 CreateWindowExA(0, "BUTTON", "Cancel",
                     WS_CHILD | WS_VISIBLE | WS_TABSTOP,
-                    250, 92, 78, 24, hwnd, reinterpret_cast<HMENU>(IDCANCEL), inst, nullptr);
+                    S(250), S(92), S(78), S(24), hwnd,
+                    ControlId(IDCANCEL), inst, nullptr);
                 CreateWindowExA(0, "BUTTON", "OK",
                     WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_DEFPUSHBUTTON,
-                    338, 92, 78, 24, hwnd, reinterpret_cast<HMENU>(IDOK), inst, nullptr);
+                    S(338), S(92), S(78), S(24), hwnd,
+                    ControlId(IDOK), inst, nullptr);
+                #undef S
 
                 // Give every control the standard UI font instead of the
                 // 1980s system font CreateWindow hands out by default.
-                const HFONT font = reinterpret_cast<HFONT>(GetStockObject(DEFAULT_GUI_FONT));
-                EnumChildWindows(hwnd, [](HWND child, LPARAM font) -> BOOL {
-                    SendMessage(child, WM_SETFONT, static_cast<WPARAM>(font), TRUE);
-                    return TRUE;
-                }, reinterpret_cast<LPARAM>(font));
+                dd->font = MakeUiFont(dd->dpi);
+                if (dd->font != nullptr)
+                {
+                    EnumChildWindows(hwnd, [](HWND child, LPARAM font) -> BOOL {
+                        SendMessage(child, WM_SETFONT, static_cast<WPARAM>(font), TRUE);
+                        return TRUE;
+                    }, reinterpret_cast<LPARAM>(dd->font));
+                }
+
+                SetWindowSubclass(dd->shearEdit, EditSubclassProc, kIdShearEdit,
+                                  reinterpret_cast<DWORD_PTR>(dd));
+                SetWindowSubclass(dd->axisEdit, EditSubclassProc, kIdAxisEdit,
+                                  reinterpret_cast<DWORD_PTR>(dd));
 
                 Republish(dd);
                 return 0;
@@ -277,12 +463,19 @@ namespace
                 break;
 
             case WM_CLOSE:
+                // The title bar's close button means the same as Cancel.
                 if (dd) dd->committed = false;
                 DestroyWindow(hwnd);
                 return 0;
 
             case WM_DESTROY:
-                PostQuitMessage(0);
+                // The font is not deleted here: DestroyWindow sends this to the
+                // parent before it destroys the children, which are still
+                // holding it. RunShearDialog deletes it once the loop is over.
+                if (dd) dd->finished = true;
+                // Wake the modal loop below without posting WM_QUIT, which
+                // belongs to the application and not to one dialog.
+                PostMessage(nullptr, WM_NULL, 0, 0);
                 return 0;
 
             default:
@@ -310,11 +503,10 @@ bool RunShearDialog(ShearDialogState& state)
     icc.dwICC = ICC_BAR_CLASSES | ICC_STANDARD_CLASSES;
     InitCommonControlsEx(&icc);
 
-    static const char* kClassName = "VulpesNexusShearDialog";
-    static bool registered = false;
-    if (!registered)
+    if (!gClassRegistered)
     {
-        WNDCLASSEXA wc = { 0 };
+        WNDCLASSEXA wc;
+        ZeroMemory(&wc, sizeof(wc));
         wc.cbSize = sizeof(wc);
         wc.lpfnWndProc = DialogProc;
         wc.hInstance = inst;
@@ -328,7 +520,8 @@ bool RunShearDialog(ShearDialogState& state)
             shearlog::Write(o.str());
             return false;
         }
-        registered = true;
+        gClassRegistered = true;
+        gClassInstance = inst;
     }
 
     HWND parent = nullptr;
@@ -340,8 +533,12 @@ bool RunShearDialog(ShearDialogState& state)
     dd.state = &state;
     dd.entryShear = state.shearAngle;
     dd.entryAxis = state.axisAngle;
+    // The dictionary already holds these, so the first preview has nothing to
+    // do and the artwork is not re-rendered just because the dialog opened.
+    dd.pushedShear = state.shearAngle;
+    dd.pushedAxis = state.axisAngle;
 
-    RECT rc = { 0, 0, 432, 160 };
+    RECT rc = { 0, 0, MulDiv(432, DpiOf(parent), 96), MulDiv(160, DpiOf(parent), 96) };
     AdjustWindowRectEx(&rc, WS_CAPTION | WS_SYSMENU, FALSE, WS_EX_DLGMODALFRAME);
 
     const HWND hwnd = CreateWindowExA(
@@ -361,16 +558,36 @@ bool RunShearDialog(ShearDialogState& state)
     shearlog::Write("dialog: opened");
 
     if (parent) EnableWindow(parent, FALSE);
+    SetFocus(dd.shearEdit);
 
     MSG msg;
-    while (GetMessage(&msg, nullptr, 0, 0) > 0)
+    while (!dd.finished)
     {
-        if (!IsDialogMessage(hwnd, &msg))
+        if (!GetMessage(&msg, nullptr, 0, 0))
+        {
+            // The application itself is quitting. Put the message back for
+            // Illustrator's own loop rather than swallowing it here, and close
+            // the dialog as a cancel.
+            PostQuitMessage(static_cast<int>(msg.wParam));
+            dd.committed = false;
+            if (IsWindow(hwnd)) DestroyWindow(hwnd);
+            break;
+        }
+        if (dd.finished) break;
+        // IsDialogMessage treats the arrow keys as navigation between controls,
+        // which would swallow the up and down nudges before the numeric fields
+        // ever see them.
+        const bool nudge = msg.message == WM_KEYDOWN &&
+                           (msg.wParam == VK_UP || msg.wParam == VK_DOWN) &&
+                           (msg.hwnd == dd.shearEdit || msg.hwnd == dd.axisEdit);
+        if (nudge || !IsDialogMessage(hwnd, &msg))
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
     }
+
+    if (dd.font != nullptr) { DeleteObject(dd.font); dd.font = nullptr; }
 
     if (parent)
     {
@@ -380,8 +597,10 @@ bool RunShearDialog(ShearDialogState& state)
 
     {
         std::ostringstream o;
+        o.imbue(std::locale::classic());
         o << "dialog: closed, committed=" << (dd.committed ? 1 : 0)
-          << " shear=" << state.shearAngle << " axis=" << state.axisAngle;
+          << " shear=" << state.shearAngle << " axis=" << state.axisAngle
+          << " dpi=" << dd.dpi;
         shearlog::Write(o.str());
     }
 
@@ -391,17 +610,21 @@ bool RunShearDialog(ShearDialogState& state)
         state.axisAngle = dd.entryAxis;
         if (state.allowPreview && state.parameters && state.context)
         {
-            sAIDictionary->SetRealEntry(state.parameters, sAIDictionary->Key(kShearAngleKey),
-                                        static_cast<AIReal>(state.shearAngle));
-            sAIDictionary->SetRealEntry(state.parameters, sAIDictionary->Key(kShearAxisKey),
-                                        static_cast<AIReal>(state.axisAngle));
-            ShearEffect::UpdateDisplayString(state.parameters,
-                                             static_cast<AIReal>(state.shearAngle),
-                                             static_cast<AIReal>(state.axisAngle));
+            ShearEffect::WriteParameters(state.parameters,
+                                         static_cast<AIReal>(state.shearAngle),
+                                         static_cast<AIReal>(state.axisAngle));
             sAILiveEffect->UpdateParameters(state.context);
         }
     }
     return dd.committed;
+}
+
+void ShutdownShearDialog()
+{
+    if (!gClassRegistered) return;
+    UnregisterClassA(kClassName, gClassInstance);
+    gClassRegistered = false;
+    gClassInstance = nullptr;
 }
 
 #else  // !WIN_ENV
@@ -409,6 +632,10 @@ bool RunShearDialog(ShearDialogState& state)
 bool RunShearDialog(ShearDialogState&)
 {
     return false;
+}
+
+void ShutdownShearDialog()
+{
 }
 
 #endif

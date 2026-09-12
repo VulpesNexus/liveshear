@@ -21,9 +21,16 @@ public:
     ASErr Interpolate(AILiveEffectInterpParamMessage* message);
 
     /** Reads the two angles out of a parameter dictionary, filling in defaults
-        for anything absent. */
+        for anything absent and sanitizing whatever is there. Every read of the
+        parameters goes through this. */
     static void ReadParameters(ConstAILiveEffectParameters params,
                                AIReal* shearAngle, AIReal* axisAngle);
+
+    /** Writes both angles, the schema number, and the Appearance panel's
+        one-line description. Every write of the parameters goes through this,
+        so nothing unsanitized can reach a saved document. */
+    static void WriteParameters(AILiveEffectParameters params,
+                                AIReal shearAngle, AIReal axisAngle);
 
     /** Refreshes the Appearance panel's one-line description of the effect. */
     static void UpdateDisplayString(AILiveEffectParameters params,

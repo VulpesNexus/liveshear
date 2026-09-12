@@ -3,6 +3,7 @@
 #include "IllustratorSDK.h"
 #include "Introspect.h"
 #include "LiveShearSuites.h"
+#include "ShearBounds.h"
 #include "LiveShearID.h"
 
 #include "actions/AIObjectAction.h"
@@ -330,7 +331,7 @@ namespace
         //
         // So the set is filtered by hand. Every art object in a layer has that
         // layer's container group as its parent, and only the container itself
-        // has no parent, which is how it is recognised and dropped. Of what
+        // has no parent, which is how it is recognized and dropped. Of what
         // remains, an object is kept only if none of its ancestors is also in
         // the set -- which keeps a selected group and drops the children
         // Illustrator reports alongside it.
@@ -991,6 +992,159 @@ std::string ApplyEffectByName(const std::string& effectName, const std::string& 
     sAIDictionary->Release(params);
 
     out << "Applied \"" << effectName << "\" to " << applied << " of " << count << " objects.\n";
+    return out.str();
+}
+
+
+namespace
+{
+    /** Rebuilds one object's style with its post-effects in a new order, or
+        with one of them gone. Reordering an appearance is something a user does
+        by dragging in the panel; doing it from a script is how the reorder and
+        deletion cases in the release matrix get run at all. */
+    std::string RestackOne(AIArtHandle art, ai::int32 from, ai::int32 to, bool remove)
+    {
+        std::ostringstream out;
+        AIArtStyleHandle style = nullptr;
+        if (sAIArtStyle->GetArtStyle(art, &style) || style == nullptr)
+            return "  no art style\n";
+
+        AIStyleParser parser = nullptr;
+        if (sAIArtStyleParser->NewParser(&parser) || parser == nullptr)
+            return "  cannot create parser\n";
+        if (sAIArtStyleParser->ParseStyle(parser, style))
+        {
+            sAIArtStyleParser->DisposeParser(parser);
+            return "  cannot parse style\n";
+        }
+
+        const ai::int32 n = sAIArtStyleParser->CountPostEffects(parser);
+        if (from < 0 || from >= n)
+        {
+            sAIArtStyleParser->DisposeParser(parser);
+            out << "  index " << from << " out of range (" << n << " post-effects)\n";
+            return out.str();
+        }
+
+        AIParserLiveEffect effect = nullptr;
+        if (sAIArtStyleParser->GetNthPostEffect(parser, from, &effect) || effect == nullptr)
+        {
+            sAIArtStyleParser->DisposeParser(parser);
+            return "  cannot read that effect\n";
+        }
+
+        ASErr err = kNoErr;
+        if (remove)
+        {
+            err = sAIArtStyleParser->RemovePostEffect(parser, effect, true);
+        }
+        else
+        {
+            // Clone before removing: RemovePostEffect with doDelete frees the
+            // original, and without it the caller owns a structure the parser
+            // no longer tracks.
+            AIParserLiveEffect clone = nullptr;
+            err = sAIArtStyleParser->CloneLiveEffect(effect, &clone);
+            if (!err && clone != nullptr)
+            {
+                err = sAIArtStyleParser->RemovePostEffect(parser, effect, true);
+                if (!err) err = sAIArtStyleParser->InsertNthPostEffect(parser, to, clone);
+                if (err) sAIArtStyleParser->DisposeParserLiveEffect(clone);
+            }
+        }
+
+        if (!err)
+        {
+            AIArtStyleHandle newStyle = nullptr;
+            err = sAIArtStyleParser->CreateNewStyle(parser, &newStyle);
+            if (!err && newStyle) err = sAIArtStyle->SetArtStyle(art, newStyle);
+        }
+        sAIArtStyleParser->DisposeParser(parser);
+
+        out << "  " << (remove ? "removed " : "moved ") << from;
+        if (!remove) out << " to " << to;
+        out << " (result " << err << ")\n";
+        return out.str();
+    }
+}
+
+std::string DumpSelectionBounds()
+{
+    std::ostringstream out;
+    AIArtHandle** store = nullptr;
+    ai::int32 count = 0;
+    if (SelectedTopLevelArt(&store, &count) || count == 0) return "No selection.\n";
+
+    out << "index\troute\tleft\ttop\tright\tbottom\n";
+    static const shear::BoundsRoute kRoutes[] = {
+        shear::kBoundsHostPrecise, shear::kBoundsHost,
+        shear::kBoundsComputed, shear::kBoundsVisible
+    };
+    for (ai::int32 i = 0; i < count; ++i)
+    {
+        for (const shear::BoundsRoute route : kRoutes)
+        {
+            AIRealRect r = { 0, 0, 0, 0 };
+            out << i << "\t" << shear::BoundsRouteName(route) << "\t";
+            if (shear::BoundsByRoute((*store)[i], route, &r))
+                out << Real(r.left) << "\t" << Real(r.top) << "\t"
+                    << Real(r.right) << "\t" << Real(r.bottom) << "\n";
+            else
+                out << "refused\t\t\t\n";
+        }
+    }
+    sAIMdMemory->MdMemoryDisposeHandle(reinterpret_cast<AIMdMemoryHandle>(store));
+    return out.str();
+}
+
+std::string MoveEffect(ai::int32 from, ai::int32 to)
+{
+    std::ostringstream out;
+    AIArtHandle** store = nullptr;
+    ai::int32 count = 0;
+    if (SelectedTopLevelArt(&store, &count) || count == 0) return "No selection.\n";
+    for (ai::int32 i = 0; i < count; ++i) out << RestackOne((*store)[i], from, to, false);
+    sAIMdMemory->MdMemoryDisposeHandle(reinterpret_cast<AIMdMemoryHandle>(store));
+    return out.str();
+}
+
+std::string RemoveEffect(ai::int32 index)
+{
+    std::ostringstream out;
+    AIArtHandle** store = nullptr;
+    ai::int32 count = 0;
+    if (SelectedTopLevelArt(&store, &count) || count == 0) return "No selection.\n";
+    for (ai::int32 i = 0; i < count; ++i) out << RestackOne((*store)[i], index, 0, true);
+    sAIMdMemory->MdMemoryDisposeHandle(reinterpret_cast<AIMdMemoryHandle>(store));
+    return out.str();
+}
+
+std::string CountEffects()
+{
+    std::ostringstream out;
+    AIArtHandle** store = nullptr;
+    ai::int32 count = 0;
+    if (SelectedTopLevelArt(&store, &count) || count == 0) return "No selection.\n";
+    for (ai::int32 i = 0; i < count; ++i)
+    {
+        AIArtStyleHandle style = nullptr;
+        ai::int32 pre = 0, post = 0;
+        if (!sAIArtStyle->GetArtStyle((*store)[i], &style) && style != nullptr)
+        {
+            AIStyleParser parser = nullptr;
+            if (!sAIArtStyleParser->NewParser(&parser) && parser != nullptr)
+            {
+                if (!sAIArtStyleParser->ParseStyle(parser, style))
+                {
+                    pre = sAIArtStyleParser->CountPreEffects(parser);
+                    post = sAIArtStyleParser->CountPostEffects(parser);
+                }
+                sAIArtStyleParser->DisposeParser(parser);
+            }
+        }
+        out << i << "\t" << pre << "\t" << post << "\n";
+    }
+    sAIMdMemory->MdMemoryDisposeHandle(reinterpret_cast<AIMdMemoryHandle>(store));
     return out.str();
 }
 

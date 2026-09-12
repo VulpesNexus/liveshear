@@ -3,6 +3,7 @@
 #include "IllustratorSDK.h"
 #include "ShearEffect.h"
 #include "ShearMath.h"
+#include "ShearBounds.h"
 #include "ShearDialog.h"
 #include "LiveShearSuites.h"
 #include "LiveShearID.h"
@@ -25,22 +26,66 @@ namespace
         kTransformFillPatterns |
         kTransformStrokePatterns |
         kTransformLinkedMasks;
+
+    std::string RectText(const AIRealRect& r)
+    {
+        std::ostringstream o;
+        o << std::fixed << std::setprecision(6)
+          << "[" << static_cast<double>(r.left) << " " << static_cast<double>(r.top)
+          << " " << static_cast<double>(r.right) << " " << static_cast<double>(r.bottom) << "]";
+        return o.str();
+    }
 }
 
 void ShearEffect::ReadParameters(ConstAILiveEffectParameters params,
                                  AIReal* shearAngle, AIReal* axisAngle)
 {
-    *shearAngle = static_cast<AIReal>(kShearDefaultAngle);
-    *axisAngle  = static_cast<AIReal>(kShearDefaultAxis);
+    // Everything that reads parameters reads them through here, which is what
+    // makes the sanitizing in ShearMath.h unconditional: a hand-edited
+    // document, another plugin writing the dictionary, or a value from a future
+    // version all arrive along this path.
+    double shear = kShearDefaultAngle;
+    double axis  = kShearDefaultAxis;
+
+    if (params != nullptr)
+    {
+        const AIDictKey angleKey = sAIDictionary->Key(kShearAngleKey);
+        if (sAIDictionary->IsKnown(params, angleKey))
+        {
+            AIReal stored = 0;
+            if (!sAIDictionary->GetRealEntry(params, angleKey, &stored))
+                shear = static_cast<double>(stored);
+        }
+
+        const AIDictKey axisKey = sAIDictionary->Key(kShearAxisKey);
+        if (sAIDictionary->IsKnown(params, axisKey))
+        {
+            AIReal stored = 0;
+            if (!sAIDictionary->GetRealEntry(params, axisKey, &stored))
+                axis = static_cast<double>(stored);
+        }
+    }
+
+    *shearAngle = static_cast<AIReal>(shear::SanitizeShearAngle(shear));
+    *axisAngle  = static_cast<AIReal>(shear::SanitizeAxisAngle(axis));
+}
+
+void ShearEffect::WriteParameters(AILiveEffectParameters params,
+                                  AIReal shearAngle, AIReal axisAngle)
+{
     if (params == nullptr) return;
 
-    const AIDictKey angleKey = sAIDictionary->Key(kShearAngleKey);
-    if (sAIDictionary->IsKnown(params, angleKey))
-        sAIDictionary->GetRealEntry(params, angleKey, shearAngle);
+    const AIReal shear = static_cast<AIReal>(shear::SanitizeShearAngle(shearAngle));
+    const AIReal axis  = static_cast<AIReal>(shear::SanitizeAxisAngle(axisAngle));
 
-    const AIDictKey axisKey = sAIDictionary->Key(kShearAxisKey);
-    if (sAIDictionary->IsKnown(params, axisKey))
-        sAIDictionary->GetRealEntry(params, axisKey, axisAngle);
+    sAIDictionary->SetRealEntry(params, sAIDictionary->Key(kShearAngleKey), shear);
+    sAIDictionary->SetRealEntry(params, sAIDictionary->Key(kShearAxisKey), axis);
+    // A schema number, so a later release that adds a parameter can tell a
+    // document written by this one from a document written by itself. Absent
+    // means version 1: the two angles, anchored on the center of the incoming
+    // art's geometric bounds.
+    sAIDictionary->SetIntegerEntry(params, sAIDictionary->Key(kShearSchemaKey), kShearSchema);
+    UpdateDisplayString(params, shear, axis);
 }
 
 void ShearEffect::UpdateDisplayString(AILiveEffectParameters params,
@@ -77,44 +122,44 @@ ASErr ShearEffect::Go(AILiveEffectGoMessage* message)
         shearlog::Write(o.str());
     }
 
+    // A zero shear is the identity, and the identity is best expressed by not
+    // transforming at all. Reevaluating an effect set to zero must leave the
+    // art bit for bit as it arrived, however many times it happens.
     if (shear::IsIdentity(shearAngle)) return kNoErr;
 
-    // The anchor is the centre of the incoming art's geometric bounds, which is
-    // what Illustrator's own transform commands use when no other reference
-    // point is given. Taking it from the art we are handed -- rather than from
-    // the source object -- is what makes the effect compose predictably with
-    // whatever sits below it in the Appearance stack.
-    // Geometric bounds are the stable choice: they do not move when a stroke
-    // below us changes weight. Illustrator refuses kControlBounds for art that
-    // is not in the document tree, which is exactly the situation a live effect
-    // runs in, so fall back to the visible bounds when that happens.
+    // The reference point is the center of the GEOMETRIC bounds of the art the
+    // appearance pipeline handed us, which is the box Illustrator's own shear
+    // command anchors on (docs/evidence/anchor.tsv). Taking it from the
+    // incoming art rather than from the original object is what makes the
+    // effect compose predictably: an effect below us that moves or grows the
+    // artwork moves the shear's reference point with it, exactly as stacking
+    // two transforms should.
     AIRealRect bounds = { 0, 0, 0, 0 };
-    const char* boundsKind = "geometric";
-    ASErr err = sAIArt->GetArtTransformBounds(message->art, nullptr,
-                                              kControlBounds | kNoExtendedBounds, &bounds);
-    if (err)
+    const shear::BoundsRoute route = shear::GeometricBounds(message->art, &bounds);
+    if (route == shear::kBoundsFailed)
     {
-        boundsKind = "visible";
-        err = sAIArt->GetArtBounds(message->art, &bounds);
-    }
-    if (err)
-    {
-        shearlog::Write("Go: bounds failed");
-        return err;
+        // Nothing measurable to shear about. Passing the art through unchanged
+        // is the only safe answer; refusing would lose it.
+        shearlog::Write("Go: no bounds; art passed through unchanged");
+        return kNoErr;
     }
 
-    AIRealPoint anchor;
-    anchor.h = (bounds.left + bounds.right) / 2;
-    anchor.v = (bounds.top + bounds.bottom) / 2;
-
+    const AIRealPoint anchor = shear::CenterOf(bounds);
     const AIRealMatrix m = shear::MatrixAbout(shearAngle, axisAngle, anchor);
-    err = sAITransformArt->TransformArt(message->art, const_cast<AIRealMatrix*>(&m),
-                                        1.0, kShearTransformFlags);
+    if (!shear::IsFiniteMatrix(m))
+    {
+        shearlog::Write("Go: non-finite matrix refused; art passed through unchanged");
+        return kNoErr;
+    }
+
+    const ASErr err = sAITransformArt->TransformArt(message->art,
+                                                    const_cast<AIRealMatrix*>(&m),
+                                                    1.0, kShearTransformFlags);
 
     if (shearlog::Enabled())
     {
         std::ostringstream o;
-        o << "Go: bounds=" << boundsKind
+        o << "Go: bounds=" << shear::BoundsRouteName(route) << " " << RectText(bounds)
           << " anchor=(" << static_cast<double>(anchor.h) << ", " << static_cast<double>(anchor.v)
           << ") matrix=[" << static_cast<double>(m.a) << " " << static_cast<double>(m.b) << " "
           << static_cast<double>(m.c) << " " << static_cast<double>(m.d) << " "
@@ -141,13 +186,9 @@ ASErr ShearEffect::EditParameters(AILiveEffectEditParamMessage* message)
 
     if (!RunShearDialog(state)) return kCanceledErr;
 
-    sAIDictionary->SetRealEntry(message->parameters, sAIDictionary->Key(kShearAngleKey),
-                                static_cast<AIReal>(state.shearAngle));
-    sAIDictionary->SetRealEntry(message->parameters, sAIDictionary->Key(kShearAxisKey),
-                                static_cast<AIReal>(state.axisAngle));
-    UpdateDisplayString(message->parameters,
-                        static_cast<AIReal>(state.shearAngle),
-                        static_cast<AIReal>(state.axisAngle));
+    WriteParameters(message->parameters,
+                    static_cast<AIReal>(state.shearAngle),
+                    static_cast<AIReal>(state.axisAngle));
 
     return sAILiveEffect->UpdateParameters(message->context);
 }
@@ -160,12 +201,9 @@ ASErr ShearEffect::Interpolate(AILiveEffectInterpParamMessage* message)
     ReadParameters(message->startParams, &startShear, &startAxis);
     ReadParameters(message->endParams, &endShear, &endAxis);
 
-    const AIReal t = message->percent;
-    const AIReal shearAngle = startShear + (endShear - startShear) * t;
-    const AIReal axisAngle  = startAxis  + (endAxis  - startAxis)  * t;
-
-    sAIDictionary->SetRealEntry(message->outParams, sAIDictionary->Key(kShearAngleKey), shearAngle);
-    sAIDictionary->SetRealEntry(message->outParams, sAIDictionary->Key(kShearAxisKey), axisAngle);
-    UpdateDisplayString(message->outParams, shearAngle, axisAngle);
+    const double t = static_cast<double>(message->percent);
+    WriteParameters(message->outParams,
+                    static_cast<AIReal>(startShear + (endShear - startShear) * t),
+                    static_cast<AIReal>(shear::InterpolateAxisAngle(startAxis, endAxis, t)));
     return kNoErr;
 }

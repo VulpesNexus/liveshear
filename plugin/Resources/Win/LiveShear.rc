@@ -1,4 +1,9 @@
 //  LiveShear.rc -- version resource plus the generated PIPL.
+//
+//  The Illustrator SDK ships a VersionInfo.rc that stamps every sample with
+//  Adobe's company name, product name, and copyright. That is right for an
+//  Adobe sample and wrong for a third-party binary, so this file declares its
+//  own identity instead of including it.
 
 #include <winres.h>
 #include "LiveShearID.h"
@@ -8,9 +13,37 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
 #endif
 
-#define kMySDKPluginName kLiveShearPluginName
-#define PIPL_PLUGIN_NAME kMySDKPluginName
-
-#include "VersionInfo.rc"
+1 VERSIONINFO
+ FILEVERSION kShearVersionMajor, kShearVersionMinor, kShearVersionPatch, 0
+ PRODUCTVERSION kShearVersionMajor, kShearVersionMinor, kShearVersionPatch, 0
+ FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
+#ifdef _DEBUG
+ FILEFLAGS VS_FF_DEBUG
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS VOS__WINDOWS32
+ FILETYPE VFT_DLL
+ FILESUBTYPE VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904E4" // Lang = US English, CharSet = Windows Multilingual
+        BEGIN
+            VALUE "CompanyName",      kShearCompanyName, "\0"
+            VALUE "FileDescription",  kShearDescription, "\0"
+            VALUE "FileVersion",      kShearVersionString, "\0"
+            VALUE "InternalName",     kLiveShearPluginName, "\0"
+            VALUE "LegalCopyright",   kShearCopyright, "\0"
+            VALUE "OriginalFilename", kLiveShearPluginName ".aip", "\0"
+            VALUE "ProductName",      kShearProductName, "\0"
+            VALUE "ProductVersion",   kShearVersionString, "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0409, 0x04E4
+    END
+END
 
 plugin pipl "plugin.pipl"

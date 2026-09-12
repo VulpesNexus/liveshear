@@ -1,0 +1,11 @@
+probe	group	case	expected	observed	status
+anchor	native semantics	plainRect, axis 0	anchor is the geometric bounds center	anchor 540.000000; geometric center 540.000000, visible center 540.000000; residual 2.84e-14	NOT DISCRIMINATING
+anchor	native semantics	strokedRect, axis 0	anchor is the geometric bounds center	anchor 540.000000; geometric center 540.000000, visible center 540.000000; residual 2.84e-14	NOT DISCRIMINATING
+anchor	native semantics	spike, axis 0	anchor is the geometric bounds center	anchor 597.000000; geometric center 597.000000, visible center 600.764024; residual 3.59e-10	PASS
+anchor	native semantics	mixedGroup, axis 0	anchor is the geometric bounds center	anchor 550.000000; geometric center 550.000000, visible center 550.000000; residual 1.42e-14	NOT DISCRIMINATING
+anchor	native semantics	bezier, axis 0	anchor is the geometric bounds center	anchor 550.000000; geometric center 550.000000, visible center 550.000000; residual 1.89e-10	NOT DISCRIMINATING
+anchor	native semantics	plainRect, axis 90	anchor is the geometric bounds center	anchor 200.000000; geometric center 200.000000, visible center 200.000000; residual 0.00e+00	NOT DISCRIMINATING
+anchor	native semantics	strokedRect, axis 90	anchor is the geometric bounds center	anchor 200.000000; geometric center 200.000000, visible center 200.000000; residual 0.00e+00	NOT DISCRIMINATING
+anchor	native semantics	spike, axis 90	anchor is the geometric bounds center	anchor 250.000000; geometric center 250.000000, visible center 545.176577; residual 0.00e+00	PASS
+anchor	native semantics	mixedGroup, axis 90	anchor is the geometric bounds center	anchor 250.000000; geometric center 250.000000, visible center 260.000000; residual 3.00e-10	PASS
+anchor	native semantics	bezier, axis 90	anchor is the geometric bounds center	anchor 220.000000; geometric center 220.000000, visible center 220.000000; residual 3.00e-10	NOT DISCRIMINATING

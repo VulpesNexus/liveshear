@@ -9,7 +9,7 @@
     the anchor points before and after. tools/solve-shear.py turns those into a
     matrix.
 
-    Cases are given as "effectName|paramSpec" strings, using the plug-in's
+    Cases are given as "effectName|paramSpec" strings, using the plugin's
     typed parameter syntax (r: real, i: integer, b: boolean, s: string).
 #>
 [CmdletBinding()]

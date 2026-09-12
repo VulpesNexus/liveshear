@@ -1,12 +1,12 @@
 <#
 .SYNOPSIS
-    The behavioural test suite for the Shear live effect, run against a live
+    The behavioral test suite for the Shear live effect, run against a live
     Illustrator.
 
 .DESCRIPTION
     Each check states what it expects before it looks, so a pass means the host
     agreed rather than that nothing crashed. Results go to
-    docs\evidence\behaviour.txt.
+    docs\evidence\behavior.txt.
 #>
 [CmdletBinding()]
 param([string] $LogPath)
@@ -15,7 +15,7 @@ $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'ai.ps1')
 
 $repo = Split-Path -Parent $PSScriptRoot
-if (-not $LogPath) { $LogPath = Join-Path $repo 'docs\evidence\behaviour.txt' }
+if (-not $LogPath) { $LogPath = Join-Path $repo 'docs\evidence\behavior.txt' }
 $null = New-Item -ItemType Directory -Force -Path (Split-Path -Parent $LogPath)
 
 $scratch = Join-Path $env:TEMP 'liveshear-probe'
@@ -42,7 +42,7 @@ function Reset-Doc {
     # Emptying one document is used in preference to closing and reopening.
     # Repeated create/close cycles trip an access violation inside Illustrator
     # itself -- see docs\evidence\crash-control.txt, where the same churn kills
-    # it with the plug-in uninstalled -- and this probe is not the place to
+    # it with the plugin uninstalled -- and this probe is not the place to
     # reproduce that.
     if ([int] (Invoke-AiScript 'app.documents.length;') -eq 0) {
         Invoke-AiScript 'app.documents.add(DocumentColorSpace.RGB, 600, 600); app.activeDocument.rulerOrigin = [0,0];' | Out-Null
@@ -70,7 +70,7 @@ function Round3([double] $v) { Num $v }
 
 function Near([double] $a, [double] $b, [double] $tol = 0.01) { [Math]::Abs($a - $b) -le $tol }
 
-Note 'Live Shear -- behaviour probe'
+Note 'Live Shear -- behavior probe'
 Note ("Run at {0}" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'))
 Note ("Illustrator {0}" -f (Get-AiApp).Version)
 Note ''

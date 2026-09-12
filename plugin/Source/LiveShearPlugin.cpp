@@ -6,6 +6,7 @@
 #include "ShearMath.h"
 #include "Introspect.h"
 #include "ShearLog.h"
+#include "ShearDialog.h"
 #include "SDKDef.h"
 #include "SDKAboutPluginsHelper.h"
 
@@ -114,18 +115,26 @@ ASErr LiveShearPlugin::StartupPlugin(SPInterfaceMessage* message)
 
 ASErr LiveShearPlugin::ShutdownPlugin(SPInterfaceMessage* message)
 {
+    // The dialog registers a window class lazily and keeps it for the life of
+    // the session. If this module were unloaded with the class still
+    // registered, its window procedure would point into freed memory, so it
+    // goes now.
+    ShutdownShearDialog();
     message->d.globals = nullptr;
     return Plugin::ShutdownPlugin(message);
 }
 
 ASErr LiveShearPlugin::AddMenus(SPInterfaceMessage* message)
 {
+    // Our own group, not the SDK's. Its defaults file the plugin under "About
+    // SDK Plug-ins" and describe it as an Adobe sample, which would be a false
+    // claim on a third-party binary.
     SDKAboutPluginsHelper aboutPluginsHelper;
     return aboutPluginsHelper.AddAboutPluginsMenuItem(
         message,
-        kSDKDefAboutSDKCompanyPluginsGroupName,
-        ai::UnicodeString(kSDKDefAboutSDKCompanyPluginsGroupNameString),
-        "Live Shear...",
+        kShearAboutGroupName,
+        ai::UnicodeString(kShearAboutGroupTitle),
+        kShearAboutMenuTitle,
         &this->fAboutPluginMenu);
 }
 
@@ -143,7 +152,7 @@ ASErr LiveShearPlugin::AddLiveEffects(SPInterfaceMessage* message)
     effectData.majorVersion = 1;
     effectData.minorVersion = 0;
     // Shear is a pure affine transform, so it can take whatever art the
-    // appearance pipeline hands it -- except plug-in groups, which we let
+    // appearance pipeline hands it -- except plugin groups, which we let
     // Illustrator resolve to their result art first.
     effectData.prefersAsInput = kAnyInputArtButPluginArt;
     // Post-effect: it transforms the painted result, which is what makes
@@ -190,8 +199,10 @@ ASErr LiveShearPlugin::GoMenuItem(AIMenuMessage* message)
     if (message->menuItem == this->fAboutPluginMenu)
     {
         SDKAboutPluginsHelper aboutPluginsHelper;
-        aboutPluginsHelper.PopAboutBox(message, "About Live Shear",
-                                       kSDKDefAboutSDKCompanyPluginsAlertString);
+        const std::string about =
+            std::string(kShearProductName) + " " + kShearVersionString + "\n" +
+            kShearDescription + "\n" + kShearHomePage + "\n" + kShearCopyright;
+        aboutPluginsHelper.PopAboutBox(message, "About Shear", about.c_str());
     }
     return kNoErr;
 }
@@ -211,8 +222,10 @@ ASErr LiveShearPlugin::HandleScriptMessage(const char* selector, AIScriptMessage
     if (sel == "version")
     {
         std::ostringstream o;
-        o << kLiveShearPluginName << " 0.1\n"
-          << "effect name: " << kShearEffectName << "\n";
+        o << kShearProductName << " " << kShearVersionString << "\n"
+          << "plugin: " << kLiveShearPluginName << "\n"
+          << "effect name: " << kShearEffectName << "\n"
+          << "parameter schema: " << kShearSchema << "\n";
         result = o.str();
     }
     else if (sel == "log")
@@ -249,6 +262,24 @@ ASErr LiveShearPlugin::HandleScriptMessage(const char* selector, AIScriptMessage
         const std::vector<std::string> f = Split(in, '|', 2);
         result = introspect::ApplyEffectByName(f.size() > 0 ? f[0] : std::string(),
                                                f.size() > 1 ? f[1] : std::string());
+    }
+    else if (sel == "bounds")
+    {
+        result = introspect::DumpSelectionBounds();
+    }
+    else if (sel == "move effect")
+    {
+        const std::vector<std::string> f = Split(in, ',');
+        result = introspect::MoveEffect(static_cast<ai::int32>(Field(f, 0)),
+                                        static_cast<ai::int32>(Field(f, 1)));
+    }
+    else if (sel == "remove effect")
+    {
+        result = introspect::RemoveEffect(std::atoi(in.c_str()));
+    }
+    else if (sel == "count effects")
+    {
+        result = introspect::CountEffects();
     }
     else if (sel == "edit effect")
     {

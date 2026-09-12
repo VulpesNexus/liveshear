@@ -51,6 +51,22 @@ namespace introspect
                                 double aboutDX, double aboutDY,
                                 bool copy, bool objects, bool patterns);
 
+    /** Geometric bounds of every selected object by each available route,
+        so the fallback that walks the art can be held against the host's own
+        answer even on artwork where the host answers first. */
+    std::string DumpSelectionBounds();
+
+    /** Moves the nth post-effect of every selected object to another position
+        in the stack, which is what dragging an entry in the Appearance panel
+        does. */
+    std::string MoveEffect(ai::int32 from, ai::int32 to);
+
+    /** Deletes the nth post-effect of every selected object. */
+    std::string RemoveEffect(ai::int32 index);
+
+    /** Pre-effect and post-effect counts per selected object, tab separated. */
+    std::string CountEffects();
+
     /** Appends a registered live effect, by unique name, to the appearance of
         every selected object, with parameters parsed from `paramSpec`
         (`key=value` pairs separated by semicolons, values typed as `r:`, `i:`,

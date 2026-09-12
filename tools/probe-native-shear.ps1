@@ -25,7 +25,7 @@ $null = New-Item -ItemType Directory -Force -Path (Split-Path -Parent $OutPath)
 # 573 and tan(90) is unbounded, and playing adobe_shear at those values sends
 # Illustrator into a computation that has not returned after several minutes.
 # The largest angle that still completes instantly is 89, which is where the
-# plug-in's own slider stops.
+# plugin's own slider stops.
 $cases = @(
     @(30, 0, 0, 0), @(-30, 0, 0, 0), @(45, 0, 0, 0), @(10, 0, 0, 0),
     @(30, 90, 0, 0), @(30, 45, 0, 0), @(30, -45, 0, 0), @(30, 30, 0, 0),
@@ -44,7 +44,7 @@ function Format-Invariant([double] $value) {
 
 function Get-RectAnchors {
     # Anchors of fixture-rect in Illustrator's internal artwork coordinates,
-    # read through the plug-in so no ExtendScript coordinate convention is
+    # read through the plugin so no ExtendScript coordinate convention is
     # involved.
     $dump = Send-AiMessage geometry
     $points = @()

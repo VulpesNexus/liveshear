@@ -1,4 +1,4 @@
-//  LiveShearSuites.h -- suites used by the Live Shear investigation plug-in.
+//  LiveShearSuites.h -- suites used by the Live Shear investigation plugin.
 
 #ifndef __LIVESHEARSUITES_H__
 #define __LIVESHEARSUITES_H__

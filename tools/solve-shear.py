@@ -2,7 +2,7 @@
 
 Reads the TSV written by tools/probe-native-shear.ps1, recovers the matrix by
 least squares from the before/after anchor points, and compares it against the
-matrix the Live Shear plug-in would build for the same parameters.
+matrix the Live Shear plugin would build for the same parameters.
 
     python tools/solve-shear.py [docs/evidence/native-shear.tsv]
 """
@@ -44,7 +44,7 @@ def main():
 
         measured = solve_affine(before, after)
         cx, cy = bounds_center(before)
-        # detX/detY offset the origin from the centre of the selection, but in
+        # detX/detY offset the origin from the center of the selection, but in
         # the y-down convention the dialog uses, not the y-up one Illustrator's
         # artwork coordinates use. Hence the negated dy.
         anchor = (cx + float(dx), cy - float(dy))

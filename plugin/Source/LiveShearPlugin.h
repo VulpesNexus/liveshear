@@ -1,4 +1,4 @@
-//  LiveShearPlugin.h -- plug-in entry object.
+//  LiveShearPlugin.h -- plugin entry object.
 
 #ifndef __LIVESHEARPLUGIN_H__
 #define __LIVESHEARPLUGIN_H__

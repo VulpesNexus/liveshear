@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
     Looks for the intermittent Illustrator crash seen while running the
-    behaviour probe, and tries to say whether the plug-in is implicated.
+    behavior probe, and tries to say whether the plugin is implicated.
 
 .DESCRIPTION
     Runs the same create/apply/close cycle many times in four variants:

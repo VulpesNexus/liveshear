@@ -10,7 +10,7 @@
     written with a value large enough that a real shear would be obvious, and
     the resulting bounds compared against the baseline.
 
-    Run with Illustrator open and the LiveShear plug-in installed.
+    Run with Illustrator open and the LiveShear plugin installed.
 #>
 [CmdletBinding()]
 param([string] $LogPath)
