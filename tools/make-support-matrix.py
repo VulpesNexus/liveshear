@@ -35,7 +35,7 @@ FIXTURES = {
     "areaText": ("Live area text", "text flowed into a rectangular frame"),
     "multilineText": ("Multi-line text", "two lines of point text"),
     "strokedText": ("Stroked text", "point text with a 6 pt character stroke"),
-    "asymmetricText": ("Text with off-centre ink", "glyphs with descenders on one side and none on the other"),
+    "asymmetricText": ("Text with off-center ink", "glyphs with descenders on one side and none on the other"),
     "retypedText": ("Text edited after the frame was made", "point text whose contents were replaced"),
     "resizedText": ("Text resized after the frame was made", "point text whose size was changed"),
     "embeddedRaster": ("Embedded rasters", "a bitmap placed and embedded in the document"),

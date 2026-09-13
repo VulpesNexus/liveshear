@@ -1,10 +1,10 @@
 Live Shear -- the built artifact
-Run at 2026-09-13 13:27:01
+Run at 2026-09-13 14:44:15
 Windows 10.0.26200.0
 
 Toolchain: MSVC 14.44.35207
 SDK:       Adobe Illustrator 2026 SDK
-Commit:    f40c4aaea2c6c62ebc7bc35890a9b0a114488ac4 (working tree not clean)
+Commit:    d74bd69e377c76bd43e40ca13ccf9cf602e541ca (working tree not clean)
 
 [PASS] Release builds with no warnings and no errors
        0 warnings, 0 errors
@@ -13,20 +13,20 @@ Commit:    f40c4aaea2c6c62ebc7bc35890a9b0a114488ac4 (working tree not clean)
 [PASS] the Release build produced a plugin
        build\Release\LiveShear.aip
 
-File version:   0.1.0-rc.1
+File version:   0.1.0-rc.2
 Company:        VulpesNexus
 Product:        Shear for Illustrator
 Description:    Non-destructive Shear effect for Adobe Illustrator
 Copyright:      Copyright (C) 2026 VulpesNexus. Licensed under the GNU GPL version 3 or later.
-Size:           162 816 bytes
-SHA-256:        4B1DF051C78924D7CA310F557055C419EEDAF5B7993809E48611B362981426E4
+Size:           166 400 bytes
+SHA-256:        1F2E778BFAC8CA3F583F1F6E800FE4033981878AFC0E3435D4A7D0A1F912EE44
 
 [PASS] the binary does not claim Adobe as its publisher
        CompanyName is VulpesNexus
 [PASS] the binary names its own product
        ProductName is Shear for Illustrator
 [PASS] the binary carries a version
-       FileVersion is 0.1.0-rc.1
+       FileVersion is 0.1.0-rc.2
 [PASS] Release links the retail C runtime, not the debug one
        links MSVCP140.dll, VCRUNTIME140.dll
 [PASS] no path from the build machine is embedded
@@ -44,9 +44,9 @@ SHA-256:        4B1DF051C78924D7CA310F557055C419EEDAF5B7993809E48611B362981426E4
 [PASS] no debug trace is on by default
        tracing is behind the LIVESHEAR_LOG environment variable
 [PASS] the source this was built from is identified
-       commit f40c4aaea2c6c62ebc7bc35890a9b0a114488ac4
+       commit d74bd69e377c76bd43e40ca13ccf9cf602e541ca
 [FAIL] the working tree was clean when it was built
-       6 uncommitted change(s)
+       29 uncommitted change(s)
 
 Depends on: COMCTL32.dll, USER32.dll, GDI32.dll, KERNEL32.dll, MSVCP140.dll, VCRUNTIME140.dll, VCRUNTIME140_1.dll, api-ms-win-crt-runtime-l1-1-0.dll, api-ms-win-crt-string-l1-1-0.dll, api-ms-win-crt-convert-l1-1-0.dll, api-ms-win-crt-heap-l1-1-0.dll, api-ms-win-crt-math-l1-1-0.dll, api-ms-win-crt-locale-l1-1-0.dll, api-ms-win-crt-stdio-l1-1-0.dll, api-ms-win-crt-filesystem-l1-1-0.dll, api-ms-win-crt-environment-l1-1-0.dll, api-ms-win-crt-time-l1-1-0.dll
 [PASS] nothing is linked but Windows and the C runtime

@@ -1,5 +1,5 @@
 Live Shear -- GPU against CPU preview
-Run at 2026-09-13 13:31:30
+Run at 2026-09-13 14:42:08
 
 window title: Untitled-1* @ 11,33 % (CMYK/Preview) 
 captured <temp>\liveshear-gpu\preview-a.png

@@ -82,15 +82,15 @@ idx	name	title	version	inputPrefs	styleFlags
 79	Adobe Inner Glow	Inner Glow	1.0	0x2ffff	0x960002 PostEffect|ScalableParams|AutoRasterize|AdjustColors|ParallelExecution
 80	Adobe Free Distort	Free Distort	1.0	0x87	0x2 PostEffect
 81	Adobe Add Arrowheads	Add Arrowheads	1.0	0x20007	0x2 PostEffect
-82	Adobe Stroke Offset	Stroke Offset Live Effect	1.0	0x20006	0x800003 StrokeFilter|ParallelExecution
-83	Adobe Twirl	Twist	1.0	0x7	0x800001 PreEffect|ParallelExecution
-84	Adobe Scribble Fill	Scribble	1.0	0x7	0x420002 PostEffect|ScalableParams|DocScaleConvertible
-85	Adobe Rasterize	Rasterize	1.0	0x2ffff	0xc60002 PostEffect|ScalableParams|AutoRasterize|DocScaleConvertible|ParallelExecution
-86	Adobe PSL Gaussian Blur	Gaussian Blur	1.0	0x0	0x820002 PostEffect|ScalableParams|ParallelExecution
-87	PSAdapter_plugin_GblR	Legacy Gaussian Blur	1.0	0x0	0x20002 PostEffect|ScalableParams
-88	Adobe Fuzzy Mask	Feather	1.0	0x2ffff	0x60002 PostEffect|ScalableParams|AutoRasterize
-89	Adobe Deform	Warp	1.0	0xffff	0x810001 PreEffect|SpecialGroupPre|ParallelExecution
-90	Adobe SVG Filter Effect	SVG Filter	1.0	0x2fdff	0xe0002 PostEffect|ScalableParams|AutoRasterize|SVGFilter
-91	Adobe Outline Stroke	Outline Stroke	1.0	0x20007	0x800002 PostEffect|ParallelExecution
-92	Adobe Offset Path	Offset Path	1.0	0x20007	0x820001 PreEffect|ScalableParams|ParallelExecution
-93	Adobe Transform	Transform	1.0	0x1d47	0x820002 PostEffect|ScalableParams|ParallelExecution
+82	Adobe Transform	Transform	1.0	0x1d47	0x820002 PostEffect|ScalableParams|ParallelExecution
+83	Adobe Stroke Offset	Stroke Offset Live Effect	1.0	0x20006	0x800003 StrokeFilter|ParallelExecution
+84	Adobe Twirl	Twist	1.0	0x7	0x800001 PreEffect|ParallelExecution
+85	Adobe Scribble Fill	Scribble	1.0	0x7	0x420002 PostEffect|ScalableParams|DocScaleConvertible
+86	Adobe Rasterize	Rasterize	1.0	0x2ffff	0xc60002 PostEffect|ScalableParams|AutoRasterize|DocScaleConvertible|ParallelExecution
+87	Adobe PSL Gaussian Blur	Gaussian Blur	1.0	0x0	0x820002 PostEffect|ScalableParams|ParallelExecution
+88	PSAdapter_plugin_GblR	Legacy Gaussian Blur	1.0	0x0	0x20002 PostEffect|ScalableParams
+89	Adobe Fuzzy Mask	Feather	1.0	0x2ffff	0x60002 PostEffect|ScalableParams|AutoRasterize
+90	Adobe Deform	Warp	1.0	0xffff	0x810001 PreEffect|SpecialGroupPre|ParallelExecution
+91	Adobe SVG Filter Effect	SVG Filter	1.0	0x2fdff	0xe0002 PostEffect|ScalableParams|AutoRasterize|SVGFilter
+92	Adobe Outline Stroke	Outline Stroke	1.0	0x20007	0x800002 PostEffect|ParallelExecution
+93	Adobe Offset Path	Offset Path	1.0	0x20007	0x820001 PreEffect|ScalableParams|ParallelExecution

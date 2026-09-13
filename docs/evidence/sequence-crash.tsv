@@ -1,0 +1,3 @@
+probe	group	case	expected	observed	status
+sequence-crash	document churn	the composition-then-save sequence, with the Shear effect	the two arms are compared; neither count is a threshold	0 of 3 trials ended in an access violation inside Illustrator.exe; 2 ran to the end	MEASURED
+sequence-crash	document churn	the composition-then-save sequence, without the Shear effect	the two arms are compared; neither count is a threshold	0 of 3 trials ended in an access violation inside Illustrator.exe; 2 ran to the end	MEASURED

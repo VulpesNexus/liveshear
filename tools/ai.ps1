@@ -76,12 +76,38 @@ function Stop-Ai {
     'Illustrator stopped.'
 }
 
+function Wait-AiReady {
+    <#
+    .SYNOPSIS
+        Waits until Illustrator will actually run a script, not merely until it
+        answers COM.
+    .DESCRIPTION
+        The two are not the same moment. GetActiveObject succeeds while the
+        application is still starting, and a DoJavaScript call made in that
+        window fails with RPC_E_CALL_REJECTED or "the remote procedure call
+        failed" -- which reads exactly like the access violation that ends a
+        long run, and was twice mistaken for one.
+    #>
+    [CmdletBinding()]
+    param([int] $TimeoutSeconds = 180)
+
+    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+    while ((Get-Date) -lt $deadline) {
+        try {
+            (Get-AiApp -TimeoutSeconds 10).DoJavaScript('app.documents.length + "";') | Out-Null
+            return $true
+        }
+        catch { Start-Sleep -Seconds 2 }
+    }
+    return $false
+}
+
 function Start-Ai {
     [CmdletBinding()]
     param([string] $Exe = 'C:\Program Files\Adobe\Adobe Illustrator 2026\Support Files\Contents\Windows\Illustrator.exe')
 
     if (-not (Get-Process Illustrator -ErrorAction SilentlyContinue)) { Start-Process $Exe }
-    Get-AiApp | Out-Null
+    if (-not (Wait-AiReady)) { throw 'Illustrator started but never became ready to run a script.' }
     'Illustrator running.'
 }
 

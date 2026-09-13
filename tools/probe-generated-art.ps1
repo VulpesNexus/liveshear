@@ -22,7 +22,7 @@
     through Adobe's effect and through the destructive command, and reports
     what Adobe's own difference is. A plain stroked rectangle is carried
     alongside as the control that must agree, so a run where everything differs
-    is recognisable as a broken measurement rather than a finding.
+    is recognizable as a broken measurement rather than a finding.
 #>
 [CmdletBinding()]
 param(

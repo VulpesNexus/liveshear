@@ -25,7 +25,7 @@
 #define kShearVersionMajor          0
 #define kShearVersionMinor          1
 #define kShearVersionPatch          0
-#define kShearVersionString         "0.1.0-rc.1"
+#define kShearVersionString         "0.1.0-rc.2"
 
 /** PERSISTENT. Unique, non-localized name of the custom live effect, stored in
     saved documents. It must never change once anything has been saved with it;

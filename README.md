@@ -8,24 +8,41 @@ Once installed, the effect appears at *Effect > Distort & Transform > Shear…*,
 
 ## Requirements
 
-- Adobe Illustrator 2026, version 30.7.0, 64-bit
+- Adobe Illustrator 2026, 64-bit
 - Windows 10 or 11
+- No Visual C++ redistributable. The three runtime files the plugin uses are the same ones *Illustrator.exe* names itself, so a machine that can start Illustrator already has them.
 
-Other Illustrator versions are not supported yet. See [Host versions](#host-versions) for what that means in practice.
+**Verified on** Illustrator 30.7.0, 64-bit, Windows 11 build 10.0.26200 — that one configuration. Windows 10 and other Illustrator versions are expected to work and have not been run; see [Host versions](#host-versions).
 
 ## Installing
 
-1. Quit Illustrator. It reads its plugin folder only at startup.
-2. Copy *LiveShear.aip* into Illustrator's plugin folder, which by default is
+Quit Illustrator first. It reads its plugin folders only at startup.
 
-   ```
-   C:\Program Files\Adobe\Adobe Illustrator 2026\Plug-ins
-   ```
+There are two places to put *LiveShear.aip*, and **only one of them at a time** — Illustrator loads both folders, and two copies means the effect is registered twice and two *Shear…* entries appear in the *Effect* menu.
 
-   That folder is under *Program Files*, so Windows will ask for administrator rights once.
-3. Start Illustrator. *Effect > Distort & Transform > Shear…* is now there.
+### If you can install software on this machine
 
-If you built the plugin yourself, `.\tools\install.ps1` does the copy and asks for the rights it needs.
+Copy *LiveShear.aip* into Illustrator's own plugin folder, which by default is
+
+```
+C:\Program Files\Adobe\Adobe Illustrator 2026\Plug-ins
+```
+
+That folder is under *Program Files*, so Windows asks for administrator rights. `.\tools\install.ps1` does the copy and asks for the rights it needs.
+
+### If you cannot
+
+You do not need administrator rights at all. Illustrator has always had a second place to look, and it can be anywhere you can write:
+
+1. Make a folder for it, for example *%LOCALAPPDATA%\\Illustrator Plug-ins*, and put *LiveShear.aip* in it.
+2. Start Illustrator, open *Edit > Preferences > Plug-ins & Scratch Disks*, tick **Additional Plug-ins Folder**, and choose that folder.
+3. Restart Illustrator.
+
+This is worth knowing: on a machine where the signed-in account is an ordinary user rather than an administrator, Windows does not offer a button to click past — it asks for an administrator's password, which you may simply not have. The Additional Plug-ins Folder needs none.
+
+`.\tools\sideload.ps1 -Path <folder>` sets the preference from a script, for when Illustrator is not the thing you want to be clicking through.
+
+Either way: start Illustrator, and *Effect > Distort & Transform > Shear…* is there.
 
 ## Using it
 
@@ -34,15 +51,26 @@ Select some artwork and choose *Effect > Distort & Transform > Shear…*.
 - **Shear Angle** is how far the artwork leans, in degrees, from −89° to 89°. Positive values lean the leading edge forward, the same direction Illustrator's own *Shear* command leans it.
 - **Axis Angle** is the direction the shear runs along. At 0° the shear is horizontal, which is the familiar italic slant; at 90° it is vertical. An axis of φ and one of φ + 180° describe the same shear.
 - **Preview** updates the artwork as you drag. *Cancel*, *Escape*, and the window's close button all put everything back exactly as it was; *OK* and *Enter* commit.
-- The numeric fields take a decimal point or a decimal comma, ignore a degree sign, and respond to the up and down arrow keys — by ten degrees with *Shift* held.
+- The numeric fields take a decimal point or a decimal comma, ignore a degree sign, and respond to the up and down arrow keys — by ten degrees with *Shift* held. They work to a tenth of a degree, which is what the sliders carry and what the fields show.
 
-The artwork is sheared about the center of its geometric bounds, which is the same reference point *Object > Transform > Shear* uses.
+## Where it shears about, and how it stacks
 
-The effect sits in the *Appearance* panel like any other. Double-click it to edit, drag it above or below other effects to change the order, and delete it to get the original artwork back. Two Shear effects on one object compose the way two transforms should.
+The artwork is sheared about the center of its **geometric** bounds — the Bézier outline, with strokes, effects, and the glyphs of area text left out. That is the same reference point *Object > Transform > Shear* uses, and it is measured rather than assumed: for each kind of artwork the suite can build, the effect and the native command are given the same angle and the difference between the two results is solved back into the distance between their reference points. That distance is zero for paths, compound paths, plain, nested, clipped and transformed groups, point and area text, symbol instances, and embedded rasters.
+
+Two of those are worth saying out loud, because Illustrator is not consistent about them:
+
+- A **clipping group** anchors on its clip path, not on everything inside it — even though the geometric bounds Illustrator *reports* for such a group are the union of its children.
+- **Area text** anchors on its frame, not on its glyphs, so a line whose ascenders overshoot the frame does not move the center.
+
+The effect anchors on what the appearance pipeline hands it, not on the original object, and that is what makes it compose. An *Offset Path* or a *Transform* below the Shear grows or moves the artwork, and the shear's reference point moves with it — exactly as stacking two transforms should. So the result depends on where in the *Appearance* panel the Shear sits, which is the point of having a stack. Put the Shear at the bottom to anchor on the bare geometry.
+
+That composition is checked in both directions rather than asserted: a *Transform* above a Shear renders what the same *Transform* renders above Illustrator's own shear, and a Shear above a *Transform* renders what Illustrator's own shear renders on that *Transform* expanded into real geometry. Two Shear effects on one object render as two successive native shears, and reordering, swapping, or deleting them behaves the way two transforms should.
 
 ## Uninstalling
 
-Quit Illustrator and delete *LiveShear.aip* from the plugin folder, or run `.\tools\install.ps1 -Uninstall`. Nothing else is installed: no services, no registry entries, no startup items, no temporary files. The plugin writes a trace file only when the `LIVESHEAR_LOG` environment variable names one, which it does not by default.
+Quit Illustrator and delete *LiveShear.aip* from wherever you put it, or run `.\tools\install.ps1 -Uninstall`. If you used the Additional Plug-ins Folder, `.\tools\sideload.ps1 -Restore` puts that preference back as it was.
+
+Nothing else is installed: no services, no registry entries, no startup items, no temporary files. The plugin writes a trace file only when the `LIVESHEAR_LOG` environment variable names one, which it does not by default.
 
 ### Documents made with the effect, opened without it
 
@@ -52,7 +80,9 @@ This is Illustrator's standard behavior for any missing effect, not something pa
 
 ## Known limitations
 
-The full list, with what each one does and whether there is a way around it, is in [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md). [docs/SUPPORT_MATRIX.md](docs/SUPPORT_MATRIX.md) says which kinds of artwork are verified, which are untested, and which are not supported.
+The full list, with what each one is and whether there is a way around it, is in [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md). [docs/SUPPORT_MATRIX.md](docs/SUPPORT_MATRIX.md) says which kinds of artwork are verified, which are untested, and which are not supported.
+
+The short version: Windows only; the shear angle stops at ±89°; the reference point is always the center; brushed artwork cannot match the destructive command and no live effect can; display scaling above 100% and GPU preview are untested because no machine here could run them.
 
 ## Host versions
 
@@ -60,7 +90,7 @@ Everything claimed here was measured against Illustrator 30.7.0 on Windows 11. T
 
 ## For developers
 
-- [docs/BUILDING.md](docs/BUILDING.md) — toolchain, SDK, project settings, and how to run the tests
+- [docs/BUILDING.md](docs/BUILDING.md) — toolchain, SDK, project settings, how to run the tests, and the scripting bridge
 - [docs/RELEASE_TEST_MATRIX.md](docs/RELEASE_TEST_MATRIX.md) — every check the test suite ran, and its result
 - [docs/RELEASE_READINESS.md](docs/RELEASE_READINESS.md) — the release assessment, with evidence
 - [LIVE_SHEAR_INVESTIGATION.md](LIVE_SHEAR_INVESTIGATION.md) — why this is a standalone effect rather than an extension of Adobe's *Transform*, and what was ruled out on the way

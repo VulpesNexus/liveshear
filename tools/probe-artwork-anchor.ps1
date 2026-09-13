@@ -25,7 +25,7 @@
 
     An offset of zero is agreement. A non-zero offset is reported in points,
     with the fixture's own geometric and visible bounds beside it, so that an
-    art type whose native semantics differ from a path's can be recognised
+    art type whose native semantics differ from a path's can be recognized
     rather than merely counted as a failure.
 #>
 [CmdletBinding()]

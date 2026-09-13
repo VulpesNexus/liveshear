@@ -1,0 +1,16 @@
+Live Shear -- the crash that happens at the same point twice
+Run at 2026-09-13 14:36:22
+3 trials per arm, alternated, each in a fresh Illustrator
+
+trial    arm    reached                      crashed  fault offset
+1        with   composition plainRect 1      no       
+1        without finished                     no       
+2        with   finished                     no       
+2        without finished                     no       
+3        with   finished                     no       
+3        without composition plainRect 1      no       
+
+with     0 of 3 trials crashed; 2 ran to the end
+without  0 of 3 trials crashed; 2 ran to the end
+
+Neither arm crashed in this run, so the sequence alone does not account for it either.

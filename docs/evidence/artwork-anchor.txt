@@ -1,5 +1,5 @@
 Live Shear -- the reference point, one kind of artwork at a time
-Run at 2026-09-13 13:48:08
+Run at 2026-09-13 14:31:50
 Shearing 30 degrees; an offset is how far the native reference point sits from the effect's, in points
 
 fixture              axis     offset pt   edge drift  cross drift   verdict
@@ -25,20 +25,20 @@ clipGroup            0                0            0            0   SAME REFEREN
 clipGroup            90               0            0            0   SAME REFERENCE POINT
 transformedGroup     0                0            0            0   SAME REFERENCE POINT
 transformedGroup     90               0            0            0   SAME REFERENCE POINT
-pointText            0                0     0.000977     0.000977   NOT A REFERENCE-POINT DIFFERENCE
+pointText            0                0     0.000977     0.000977   SAME REFERENCE POINT
 pointText            90        0.000423     0.000488     0.000488   SAME REFERENCE POINT
 areaText             0                0            0     0.000488   SAME REFERENCE POINT
 areaText             90        0.000423     0.000488     0.000488   SAME REFERENCE POINT
-multilineText        0         0.001269     0.000488     0.000977   NOT A REFERENCE-POINT DIFFERENCE
+multilineText        0         0.001269     0.000488     0.000977   SAME REFERENCE POINT
 multilineText        90               0            0     0.000488   SAME REFERENCE POINT
 strokedText          0        -0.000423     0.465332     0.402832   NOT A REFERENCE-POINT DIFFERENCE
 strokedText          90        0.000423     0.464355     0.402344   NOT A REFERENCE-POINT DIFFERENCE
-asymmetricText       0         0.001269     0.000488     0.000488   OFFSET 0.001269 pt
-asymmetricText       90        0.000423     0.000488     0.000977   NOT A REFERENCE-POINT DIFFERENCE
-retypedText          0         0.000423     0.000488     0.000977   NOT A REFERENCE-POINT DIFFERENCE
-retypedText          90               0            0     0.000977   NOT A REFERENCE-POINT DIFFERENCE
-resizedText          0         0.001691            0     0.000977   NOT A REFERENCE-POINT DIFFERENCE
-resizedText          90        0.000423     0.000488     0.000977   NOT A REFERENCE-POINT DIFFERENCE
+asymmetricText       0         0.001269     0.000488     0.000488   SAME REFERENCE POINT
+asymmetricText       90        0.000423     0.000488     0.000977   SAME REFERENCE POINT
+retypedText          0         0.000423     0.000488     0.000977   SAME REFERENCE POINT
+retypedText          90               0            0     0.000977   SAME REFERENCE POINT
+resizedText          0         0.001691            0     0.000977   SAME REFERENCE POINT
+resizedText          90        0.000423     0.000488     0.000977   SAME REFERENCE POINT
 symbolInstance       0                0            0            0   SAME REFERENCE POINT
 symbolInstance       90               0            0            0   SAME REFERENCE POINT
 calligraphicBrush    0         0.033769     0.756859     0.024626   NOT A REFERENCE-POINT DIFFERENCE
@@ -56,6 +56,5 @@ scaledRect           90               0            0            0   SAME REFEREN
 reflectedRect        0                0            0            0   SAME REFERENCE POINT
 reflectedRect        90               0            0            0   SAME REFERENCE POINT
 
-NOT A REFERENCE-POINT DIFFERENCE         15
-OFFSET                                   1
-SAME REFERENCE POINT                     36
+NOT A REFERENCE-POINT DIFFERENCE         8
+SAME REFERENCE POINT                     44

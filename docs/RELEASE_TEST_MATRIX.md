@@ -2,9 +2,9 @@
 
 Generated from the evidence files by *tools/make-test-matrix.py*. Every row is one check that was actually run; nothing here is transcribed by hand. The first three sections need no Illustrator — the built artifact, the scripts that judge, and the arithmetic. Everything after them was measured against a running one.
 
-**147 passed, 27 failed, 2 inconclusive, 5 measured, 7 not discriminating, 1 untested — 189 checks.**
+**185 passed, 18 failed, 13 measured, 7 not discriminating, 1 untested — 224 checks.**
 
-Not present in this run: *artwork-anchor.tsv*, *missing-plugin.tsv*, *crash-ab.tsv*.
+Not present in this run: *everyday.tsv*, *missing-plugin.tsv*, *crash-ab.tsv*.
 
 ## The built artifact
 
@@ -17,7 +17,7 @@ Both configurations rebuilt from clean, and the Release binary inspected: warnin
 | 3 | release build | the Release build produced a plugin | the artifact is fit to ship | build\Release\LiveShear.aip | PASS |
 | 4 | release build | the binary does not claim Adobe as its publisher | the artifact is fit to ship | CompanyName is VulpesNexus | PASS |
 | 5 | release build | the binary names its own product | the artifact is fit to ship | ProductName is Shear for Illustrator | PASS |
-| 6 | release build | the binary carries a version | the artifact is fit to ship | FileVersion is 0.1.0-rc.1 | PASS |
+| 6 | release build | the binary carries a version | the artifact is fit to ship | FileVersion is 0.1.0-rc.2 | PASS |
 | 7 | release build | Release links the retail C runtime, not the debug one | the artifact is fit to ship | links MSVCP140.dll, VCRUNTIME140.dll | PASS |
 | 8 | release build | no path from the build machine is embedded | the artifact is fit to ship | none found | PASS |
 | 9 | release build | the symbol reference is a bare file name | the artifact is fit to ship | symbol references: LiveShear.pdb | PASS |
@@ -26,8 +26,8 @@ Both configurations rebuilt from clean, and the Release binary inspected: warnin
 | 12 | release build | the effect name that documents store is unchanged | the artifact is fit to ship | VulpesNexus Shear | PASS |
 | 13 | release build | the menu entry reads as a plain Adobe command | the artifact is fit to ship | Effect > Distort & Transform > Shear... | PASS |
 | 14 | release build | no debug trace is on by default | the artifact is fit to ship | tracing is behind the LIVESHEAR_LOG environment variable | PASS |
-| 15 | release build | the source this was built from is identified | the artifact is fit to ship | commit f40c4aaea2c6c62ebc7bc35890a9b0a114488ac4 | PASS |
-| 16 | release build | the working tree was clean when it was built | the artifact is fit to ship | 6 uncommitted change(s) | **FAIL** |
+| 15 | release build | the source this was built from is identified | the artifact is fit to ship | commit d74bd69e377c76bd43e40ca13ccf9cf602e541ca | PASS |
+| 16 | release build | the working tree was clean when it was built | the artifact is fit to ship | 14 uncommitted change(s) | **FAIL** |
 | 17 | release build | nothing is linked but Windows and the C runtime | the artifact is fit to ship | no SDK, developer, or test-harness DLL is named | PASS |
 | 18 | release build | the C runtime it needs is one Illustrator already needs | the artifact is fit to ship | Illustrator.exe names the same MSVCP140.dll, VCRUNTIME140.dll, VCRUNTIME140_1.dll, so no redistributable has to be installed for the plugin | PASS |
 
@@ -39,7 +39,7 @@ The two scripts that turn measurements into verdicts, fed rows whose right answe
 
 | # | Group | Case | Expected | Observed | Status |
 | --- | --- | --- | --- | --- | --- |
-| 1 | test infrastructure | the scripts that decide pass and fail, fed rows whose right answer is known by construction | every verdict is the one the construction requires | 12 checks, 0 failed | PASS |
+| 1 | test infrastructure | the scripts that decide pass and fail, fed rows whose right answer is known by construction | every verdict is the one the construction requires | 15 checks, 0 failed | PASS |
 
 Source: [docs/evidence/solvers.tsv](evidence/solvers.tsv)
 
@@ -49,7 +49,7 @@ The affine algebra and the exact extent of a cubic Bezier, compiled against stub
 
 | # | Group | Case | Expected | Observed | Status |
 | --- | --- | --- | --- | --- | --- |
-| 1 | arithmetic | the affine algebra and the exact extent of a cubic Bezier, compiled against stub types and checked against brute-force sampling | every check passes | 2541 checks, 0 failed | PASS |
+| 1 | arithmetic | the affine algebra and the exact extent of a cubic Bezier, compiled against stub types and checked against brute-force sampling | every check passes | 3092 checks, 0 failed | PASS |
 
 Source: [docs/evidence/mathtest.tsv](evidence/mathtest.tsv)
 
@@ -72,69 +72,82 @@ Which box Illustrator's own Shear command anchors on, recovered by fitting the a
 
 Source: [docs/evidence/anchor-verdicts.tsv](evidence/anchor-verdicts.tsv)
 
+## Reference point, by kind of artwork
+
+The same question as the row above, asked of artwork that has no path anchors to fit a line through. Two shears of one angle about different reference points differ by a translation and nothing else, so subtracting the two bounding boxes recovers how far apart the reference points were -- and says so in points, rather than reporting that two numbers were not equal.
+
+| # | Group | Case | Expected | Observed | Status |
+| --- | --- | --- | --- | --- | --- |
+| 1 | reference point by artwork | plainRect, axis 0 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 2 | reference point by artwork | plainRect, axis 90 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 3 | reference point by artwork | strokedRect, axis 0 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 4 | reference point by artwork | strokedRect, axis 90 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 5 | reference point by artwork | spike, axis 0 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 6 | reference point by artwork | spike, axis 90 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 7 | reference point by artwork | bezier, axis 0 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 8 | reference point by artwork | bezier, axis 90 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 9 | reference point by artwork | openPath, axis 0 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 10 | reference point by artwork | openPath, axis 90 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 11 | reference point by artwork | compound, axis 0 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 12 | reference point by artwork | compound, axis 90 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 13 | reference point by artwork | selfIntersecting, axis 0 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 14 | reference point by artwork | selfIntersecting, axis 90 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 15 | reference point by artwork | mixedGroup, axis 0 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 16 | reference point by artwork | mixedGroup, axis 90 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 17 | reference point by artwork | nestedGroup, axis 0 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 18 | reference point by artwork | nestedGroup, axis 90 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 19 | reference point by artwork | clipGroup, axis 0 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 20 | reference point by artwork | clipGroup, axis 90 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 21 | reference point by artwork | transformedGroup, axis 0 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 22 | reference point by artwork | transformedGroup, axis 90 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 23 | reference point by artwork | pointText, axis 0 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 24 | reference point by artwork | pointText, axis 90 | the effect and the native command anchor in the same place | the two agree to 0.000244 pt | PASS |
+| 25 | reference point by artwork | areaText, axis 0 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 26 | reference point by artwork | areaText, axis 90 | the effect and the native command anchor in the same place | the two agree to 0.000244 pt | PASS |
+| 27 | reference point by artwork | multilineText, axis 0 | the effect and the native command anchor in the same place | the two agree to 0.000732 pt | PASS |
+| 28 | reference point by artwork | multilineText, axis 90 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 29 | reference point by artwork | strokedText, axis 0 | the effect and the native command anchor in the same place | the two results differ by more than a translation: the two horizontal edges disagree by 0.465332 pt and the vertical edges moved by 0.402832 pt, so the difference is in what was transformed rather than in where it was anchored | **FAIL** |
+| 30 | reference point by artwork | strokedText, axis 90 | the effect and the native command anchor in the same place | the two results differ by more than a translation: the two vertical edges disagree by 0.464355 pt and the horizontal edges moved by 0.402344 pt, so the difference is in what was transformed rather than in where it was anchored | **FAIL** |
+| 31 | reference point by artwork | asymmetricText, axis 0 | the effect and the native command anchor in the same place | the two agree to 0.000732 pt | PASS |
+| 32 | reference point by artwork | asymmetricText, axis 90 | the effect and the native command anchor in the same place | the two agree to 0.000244 pt | PASS |
+| 33 | reference point by artwork | retypedText, axis 0 | the effect and the native command anchor in the same place | the two agree to 0.000244 pt | PASS |
+| 34 | reference point by artwork | retypedText, axis 90 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 35 | reference point by artwork | resizedText, axis 0 | the effect and the native command anchor in the same place | the two agree to 0.000977 pt | PASS |
+| 36 | reference point by artwork | resizedText, axis 90 | the effect and the native command anchor in the same place | the two agree to 0.000244 pt | PASS |
+| 37 | reference point by artwork | symbolInstance, axis 0 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 38 | reference point by artwork | symbolInstance, axis 90 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 39 | reference point by artwork | calligraphicBrush, axis 0 | the effect and the native command anchor in the same place | the two results differ by more than a translation: the two horizontal edges disagree by 0.756859 pt and the vertical edges moved by 0.024626 pt, so the difference is in what was transformed rather than in where it was anchored | **FAIL** |
+| 40 | reference point by artwork | calligraphicBrush, axis 90 | the effect and the native command anchor in the same place | the two results differ by more than a translation: the two vertical edges disagree by 0.782174 pt and the horizontal edges moved by 0.036363 pt, so the difference is in what was transformed rather than in where it was anchored | **FAIL** |
+| 41 | reference point by artwork | artBrush, axis 0 | the effect and the native command anchor in the same place | the two results differ by more than a translation: the two horizontal edges disagree by 0.490803 pt and the vertical edges moved by 1.045654 pt, so the difference is in what was transformed rather than in where it was anchored | **FAIL** |
+| 42 | reference point by artwork | artBrush, axis 90 | the effect and the native command anchor in the same place | the two results differ by more than a translation: the two vertical edges disagree by 0.921778 pt and the horizontal edges moved by 0.605835 pt, so the difference is in what was transformed rather than in where it was anchored | **FAIL** |
+| 43 | reference point by artwork | patternBrush, axis 0 | the effect and the native command anchor in the same place | the two results differ by more than a translation: the two horizontal edges disagree by 1.213142 pt and the vertical edges moved by 2.19538 pt, so the difference is in what was transformed rather than in where it was anchored | **FAIL** |
+| 44 | reference point by artwork | patternBrush, axis 90 | the effect and the native command anchor in the same place | the two results differ by more than a translation: the two vertical edges disagree by 3.014916 pt and the horizontal edges moved by 2.914069 pt, so the difference is in what was transformed rather than in where it was anchored | **FAIL** |
+| 45 | reference point by artwork | embeddedRaster, axis 0 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 46 | reference point by artwork | embeddedRaster, axis 90 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 47 | reference point by artwork | rotatedRect, axis 0 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 48 | reference point by artwork | rotatedRect, axis 90 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 49 | reference point by artwork | scaledRect, axis 0 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 50 | reference point by artwork | scaledRect, axis 90 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 51 | reference point by artwork | reflectedRect, axis 0 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+| 52 | reference point by artwork | reflectedRect, axis 90 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
+
+Source: [docs/evidence/artwork-anchor.tsv](evidence/artwork-anchor.tsv)
+
 ## Artwork types
 
 Each fixture built twice: one copy carrying the live effect, the other sheared by *Object > Transform > Shear* with the same angles. The two must render to the same visible bounds, and the live copy's own path anchors must be unchanged.
 
 | # | Group | Case | Expected | Observed | Status |
 | --- | --- | --- | --- | --- | --- |
-| 1 | art types | plainRect at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 2 | art types | strokedRect at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 3 | art types | spike at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 4 | art types | roundJoin at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 5 | art types | bevelJoin at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 6 | art types | dashedStroke at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 7 | art types | bezier at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 8 | art types | openPath at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 9 | art types | compound at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 10 | art types | selfIntersecting at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 11 | art types | mixedGroup at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 12 | art types | nestedGroup at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 13 | art types | clipGroup at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 5.77e+00 pt; source geometry unchanged | **FAIL** |
-| 14 | art types | transformedGroup at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 15 | art types | pointText at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 9.77e-04 pt; source geometry unchanged | **FAIL** |
-| 16 | art types | areaText at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 8.80e-01 pt; source geometry unchanged | **FAIL** |
-| 17 | art types | multilineText at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 9.77e-04 pt; source geometry unchanged | **FAIL** |
-| 18 | art types | strokedText at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 4.03e-01 pt; source geometry unchanged | **FAIL** |
-| 19 | art types | symbolInstance at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 20 | art types | gradientFill at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 21 | art types | radialFill at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 22 | art types | patternFill at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 23 | art types | calligraphicBrush at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 3.98e-01 pt; source geometry unchanged | **FAIL** |
-| 24 | art types | artBrush at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 1.05e+00 pt; source geometry unchanged | **FAIL** |
-| 25 | art types | patternBrush at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 2.68e+00 pt; source geometry unchanged | **FAIL** |
-| 26 | art types | rotatedRect at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 27 | art types | scaledRect at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 28 | art types | reflectedRect at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 29 | art types | preShearedRect at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 30 | art types | tinyPath at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 31 | art types | hugePath at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 32 | art types | farFromOrigin at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 33 | art types | negativeCoords at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 34 | art types | zeroHeight at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | Illustrator's own shear reported success but left the oracle untouched after three attempts; nothing to compare against | INCONCLUSIVE |
-| 35 | art types | zeroWidth at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 36 | art types | singleAnchor at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | Illustrator's own shear reported success but left the oracle untouched after three attempts; nothing to compare against | INCONCLUSIVE |
-| 37 | art types | manyChildren at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 38 | art types | plainRect at -20 deg, axis 90 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 39 | art types | plainRect at 45 deg, axis 37.5 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 40 | art types | spike at -20 deg, axis 90 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 41 | art types | spike at 45 deg, axis 37.5 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 42 | art types | mixedGroup at -20 deg, axis 90 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 43 | art types | mixedGroup at 45 deg, axis 37.5 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 44 | art types | pointText at -20 deg, axis 90 | matches Illustrator's own shear, source untouched | largest difference from the native result 4.88e-04 pt; source geometry unchanged | **FAIL** |
-| 45 | art types | pointText at 45 deg, axis 37.5 | matches Illustrator's own shear, source untouched | largest difference from the native result 9.77e-04 pt; source geometry unchanged | **FAIL** |
-| 46 | art types | compound at -20 deg, axis 90 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 47 | art types | compound at 45 deg, axis 37.5 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 48 | art types | clipGroup at -20 deg, axis 90 | matches Illustrator's own shear, source untouched | largest difference from the native result 7.28e+00 pt; source geometry unchanged | **FAIL** |
-| 49 | art types | clipGroup at 45 deg, axis 37.5 | matches Illustrator's own shear, source untouched | largest difference from the native result 1.60e+01 pt; source geometry unchanged | **FAIL** |
-| 50 | art types | plainRect at 0 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 51 | art types | plainRect at 0.000001 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 1.05e-06 pt; source geometry unchanged | **FAIL** |
-| 52 | art types | plainRect at 0.001 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 1.05e-03 pt; source geometry unchanged | **FAIL** |
-| 53 | art types | plainRect at 88 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 54 | art types | plainRect at 88.9 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 55 | art types | plainRect at 89 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 56 | art types | plainRect at -89 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
-| 57 | art types | plainRect at -0.001 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 1.05e-03 pt; source geometry unchanged | **FAIL** |
+| 1 | art types | plainRect at 0.000001 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 1.05e-06 pt; source geometry unchanged | **FAIL** |
+| 2 | art types | plainRect at 0.001 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 1.05e-03 pt; source geometry unchanged | **FAIL** |
+| 3 | art types | plainRect at -0.001 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 1.05e-03 pt; source geometry unchanged | **FAIL** |
+| 4 | art types | plainRect at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
+| 5 | art types | pointText at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 9.77e-04 pt; source geometry unchanged | **FAIL** |
+| 6 | art types | clipGroup at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 0.00e+00 pt; source geometry unchanged | PASS |
+| 7 | art types | areaText at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 4.88e-04 pt; source geometry unchanged | **FAIL** |
+| 8 | art types | patternBrush at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 2.20e+00 pt; source geometry unchanged | **FAIL** |
+| 9 | art types | strokedText at 30 deg, axis 0 | matches Illustrator's own shear, source untouched | largest difference from the native result 4.03e-01 pt; source geometry unchanged | **FAIL** |
 
 Source: [docs/evidence/release-verdicts.tsv](evidence/release-verdicts.tsv)
 
@@ -144,18 +157,18 @@ Stack order, two instances, reordering, and deletion, with the native command as
 
 | # | Group | Case | Expected | Observed | Status |
 | --- | --- | --- | --- | --- | --- |
-| 1 | plainRect | plainRect : Transform over Shear matches Transform over native | matches the native oracle | -15.425625842,582.000000000,415.425625842,498.000000000 vs 100.000000000,600.000000000,300.000000000,480.000000000 | **FAIL** |
-| 2 | plainRect | plainRect : Shear over Transform matches native over expanded | matches the native oracle | 15.751288694,582.000000000,384.248711306,498.000000000 vs 40.000000000,582.000000000,360.000000000,498.000000000 | **FAIL** |
+| 1 | plainRect | plainRect : Transform over Shear matches Transform over native | matches the native oracle | -15.425625842,582.000000000,415.425625842,498.000000000 vs -15.425625842,582.000000000,415.425625842,498.000000000 | PASS |
+| 2 | plainRect | plainRect : Shear over Transform matches native over expanded | matches the native oracle | 15.751288694,582.000000000,384.248711306,498.000000000 vs 15.751288694,582.000000000,384.248711306,498.000000000 | PASS |
 | 3 | plainRect | plainRect : the two stack orders differ | matches the native oracle | both -15.425625842,582.000000000,415.425625842,498.000000000 | PASS |
-| 4 | plainRect | plainRect : two Shear effects match two native shears | matches the native oracle | 65.358983849,628.618831453,334.641016151,451.381168547 vs 100.000000000,600.000000000,300.000000000,480.000000000 | **FAIL** |
-| 5 | selfIntersecting | selfIntersecting : Transform over Shear matches Transform over native | matches the native oracle | 64.332650721,598.389800070,378.877465706,484.421729424 vs 134.404913533,622.811529494,305.595086467,460.000000000 | **FAIL** |
-| 6 | selfIntersecting | selfIntersecting : Shear over Transform matches native over expanded | matches the native oracle | 75.281284651,598.389800070,349.185561344,484.421729424 vs 83.047861653,598.389800070,356.952138347,484.421729424 | **FAIL** |
+| 4 | plainRect | plainRect : two Shear effects match two native shears | matches the native oracle | 65.358983849,628.618831453,334.641016151,451.381168547 vs 65.358983849,628.618831453,334.641016151,451.381168547 | PASS |
+| 5 | selfIntersecting | selfIntersecting : Transform over Shear matches Transform over native | matches the native oracle | 64.332650721,598.389800070,378.877465706,484.421729424 vs 64.332650721,598.389800070,378.877465706,484.421729424 | PASS |
+| 6 | selfIntersecting | selfIntersecting : Shear over Transform matches native over expanded | matches the native oracle | 75.281284651,598.389800070,349.185561344,484.421729424 vs 75.281284651,598.389800070,349.185561344,484.421729424 | PASS |
 | 7 | selfIntersecting | selfIntersecting : the two stack orders differ | matches the native oracle | both 64.332650721,598.389800070,378.877465706,484.421729424 | PASS |
-| 8 | selfIntersecting | selfIntersecting : two Shear effects match two native shears | matches the native oracle | 123.309803531,643.704830858,319.900312897,449.668752426 vs 134.404913533,622.811529494,305.595086467,460.000000000 | **FAIL** |
-| 9 | bezier | bezier : Transform over Shear matches Transform over native | matches the native oracle | -19.183315729,603.255518297,459.183315729,496.744481703 vs 97.503849117,625.702957558,342.496150883,474.297042442 | **FAIL** |
-| 10 | bezier | bezier : Shear over Transform matches native over expanded | matches the native oracle | 6.503520270,602.778572493,433.496479730,497.221427507 vs 26.354030676,602.676003408,413.645969324,497.323996592 | **FAIL** |
+| 8 | selfIntersecting | selfIntersecting : two Shear effects match two native shears | matches the native oracle | 123.309803531,643.704830858,319.900312897,449.668752426 vs 123.309803531,643.704830858,319.900312897,449.668752426 | PASS |
+| 9 | bezier | bezier : Transform over Shear matches Transform over native | matches the native oracle | -19.183315729,603.255518297,459.183315729,496.744481703 vs -19.183315729,603.255518297,459.183315729,496.744481703 | PASS |
+| 10 | bezier | bezier : Shear over Transform matches native over expanded | matches the native oracle | 6.503520270,602.778572493,433.496479730,497.221427507 vs 6.503520270,602.778572493,433.496479730,497.221427507 | PASS |
 | 11 | bezier | bezier : the two stack orders differ | matches the native oracle | both -19.183315729,603.255518297,459.183315729,496.744481703 | PASS |
-| 12 | bezier | bezier : two Shear effects match two native shears | matches the native oracle | 68.993979295,633.746759857,371.006020705,466.253240143 vs 97.503849117,625.702957558,342.496150883,474.297042442 | **FAIL** |
+| 12 | bezier | bezier : two Shear effects match two native shears | matches the native oracle | 68.993979295,633.746759857,371.006020705,466.253240143 vs 68.993979295,633.746759857,371.006020705,466.253240143 | PASS |
 | 13 | two instances | two separate entries in the appearance | matches the native oracle | found 2 | PASS |
 | 14 | two instances | editing one instance leaves the other alone | matches the native oracle | the second instance changed too | PASS |
 | 15 | two instances | 40 reorders leave the result unchanged | matches the native oracle | 0 errors, 65.358983849,628.618831453,334.641016151,451.381168547 vs 65.358983849,628.618831453,334.641016151,451.381168547 | PASS |
@@ -237,6 +250,73 @@ Values written straight into the parameter dictionary, past anything the dialog 
 | 17 | stored parameter | a document storing 90 degrees opens and renders the same | opens promptly, clamped, unchanged bounds | opened in 0,70 s, dictionary holds 90.000000, bounds -3337.397697846,600.000000000,3737.397697846,480.000000000 | PASS |
 
 Source: [docs/evidence/limits.tsv](evidence/limits.tsv)
+
+## Serialization and schema
+
+Parameter blocks this version did not write: keys missing, keys of the wrong type, an empty block, and a schema number from a version that does not exist yet. Each one redrawn behind a watchdog, so a dictionary that made the effect fail to return would be reported rather than hang the run.
+
+| # | Group | Case | Expected | Observed | Status |
+| --- | --- | --- | --- | --- | --- |
+| 1 | serialization | no schema key at all means schema 1 | a dictionary this version did not write is read safely and written back without loss | the first version wrote no schema key, and its documents must keep rendering; rendered 269.282 pt wide in 3,44 s, expected 269.282 pt | PASS |
+| 2 | serialization | a schema number from a later version still renders | a dictionary this version did not write is read safely and written back without loss | an unknown schema is not a reason to refuse to draw; the two angles mean what they have always meant; rendered 269.282 pt wide in 3,31 s, expected 269.282 pt | PASS |
+| 3 | serialization | a nonsense schema number still renders | a dictionary this version did not write is read safely and written back without loss | nothing about the number changes what the angles mean here; rendered 269.282 pt wide in 3,32 s, expected 269.282 pt | PASS |
+| 4 | serialization | no shear angle means no shear | a dictionary this version did not write is read safely and written back without loss | the default is zero, and zero is the identity; rendered 200 pt wide in 3,33 s, expected 200 pt | PASS |
+| 5 | serialization | no axis angle means the horizontal axis | a dictionary this version did not write is read safely and written back without loss | the default axis is zero, which is the shear the fixture already has; rendered 269.282 pt wide in 3,25 s, expected 269.282 pt | PASS |
+| 6 | serialization | a shear angle stored as text is refused | a dictionary this version did not write is read safely and written back without loss | reading a real out of a string entry fails, and a failed read leaves the default; rendered 200 pt wide in 3,38 s, expected 200 pt | PASS |
+| 7 | serialization | an axis angle stored as text is refused | a dictionary this version did not write is read safely and written back without loss | same, and the default axis is zero; rendered 269.282 pt wide in 3,23 s, expected 269.282 pt | PASS |
+| 8 | serialization | a shear angle stored as a flag is refused | a dictionary this version did not write is read safely and written back without loss | the type is wrong, so the default stands; rendered 200 pt wide in 3,55 s, expected 200 pt | PASS |
+| 9 | serialization | an empty parameter block is the identity | a dictionary this version did not write is read safely and written back without loss | every key absent is every default, and the defaults are zero; rendered 200 pt wide in 3,29 s, expected 200 pt | PASS |
+| 10 | serialization | a later version's extra keys survive the dialog writing the block back | a dictionary this version did not write is read safely and written back without loss | referencePoint kept, somethingElse kept after the plugin itself rewrote the block through the dialog | PASS |
+| 11 | serialization | the block records which version last wrote it | a dictionary this version did not write is read safely and written back without loss | shearSchema is 1 after this version wrote it, which is this version's number: the block says what it means rather than what it used to mean | PASS |
+
+Source: [docs/evidence/schema.tsv](evidence/schema.tsv)
+
+## Blends
+
+Two objects carrying different Shear parameters, blended. Illustrator calls the effect's interpolation handler while it builds the blend, which nothing else can observe, so the handler writes to the plugin's trace and the probe reads it back. The angles are chosen so that a naive midpoint would be wrong.
+
+| # | Group | Case | Expected | Observed | Status |
+| --- | --- | --- | --- | --- | --- |
+| 1 | blend | straight down the middle: Illustrator calls the interpolation handler | the interpolation handler runs and takes the short way round modulo 180 | the handler ran 1 time(s) while the blend was built; 4 objects after expanding | PASS |
+| 2 | blend | straight down the middle: every step takes the short way round | the interpolation handler runs and takes the short way round modulo 180 | t=0.5 -> axis 20; the two ends are 40 degrees apart going the short way, and every step is inside that. A naive midpoint would have given 20. | PASS |
+| 3 | blend | straight down the middle: the shear angle is a straight line between the two | the interpolation handler runs and takes the short way round modulo 180 | all 1 steps are exactly on the line from 30 to 10 | PASS |
+| 4 | blend | 0 to 179 the short way: Illustrator calls the interpolation handler | the interpolation handler runs and takes the short way round modulo 180 | the handler ran 1 time(s) while the blend was built; 4 objects after expanding | PASS |
+| 5 | blend | 0 to 179 the short way: every step takes the short way round | the interpolation handler runs and takes the short way round modulo 180 | t=0.5 -> axis 179.5; the two ends are 1 degrees apart going the short way, and every step is inside that. A naive midpoint would have given 89.5. | PASS |
+| 6 | blend | 0 to 179 the short way: the shear angle is a straight line between the two | the interpolation handler runs and takes the short way round modulo 180 | all 1 steps are exactly on the line from 20 to 20 | PASS |
+| 7 | blend | 1 to 179 across zero: Illustrator calls the interpolation handler | the interpolation handler runs and takes the short way round modulo 180 | the handler ran 1 time(s) while the blend was built; 4 objects after expanding | PASS |
+| 8 | blend | 1 to 179 across zero: every step takes the short way round | the interpolation handler runs and takes the short way round modulo 180 | t=0.5 -> axis 180; the two ends are 2 degrees apart going the short way, and every step is inside that. A naive midpoint would have given 90. | PASS |
+| 9 | blend | 1 to 179 across zero: the shear angle is a straight line between the two | the interpolation handler runs and takes the short way round modulo 180 | all 1 steps are exactly on the line from 20 to 20 | PASS |
+| 10 | blend | 89 to -89 across ninety: Illustrator calls the interpolation handler | the interpolation handler runs and takes the short way round modulo 180 | the handler ran 1 time(s) while the blend was built; 4 objects after expanding | PASS |
+| 11 | blend | 89 to -89 across ninety: every step takes the short way round | the interpolation handler runs and takes the short way round modulo 180 | t=0.5 -> axis -90; the two ends are 2 degrees apart going the short way, and every step is inside that. A naive midpoint would have given 0. | PASS |
+| 12 | blend | 89 to -89 across ninety: the shear angle is a straight line between the two | the interpolation handler runs and takes the short way round modulo 180 | all 1 steps are exactly on the line from 20 to 20 | PASS |
+
+Source: [docs/evidence/blend.tsv](evidence/blend.tsv)
+
+## Artwork generated from a path
+
+Brushes are not artwork but a rule for making it, and a destructive transform re-applies the rule while a live effect can only transform what the rule already produced. Adobe's own Transform effect is the control: where it differs from Adobe's own command, this effect differs in the same way.
+
+| # | Group | Case | Expected | Observed | Status |
+| --- | --- | --- | --- | --- | --- |
+| 1 | generated artwork | patternBrush: does a live effect match the destructive command? | whatever Adobe's own Transform effect does on the same artwork | Adobe's Transform effect differs from the destructive command by 1,276 % of sampled pixels; Adobe's own effect does not match its own command either: this artwork is regenerated when the path is transformed | MEASURED |
+| 2 | generated artwork | artBrush: does a live effect match the destructive command? | whatever Adobe's own Transform effect does on the same artwork | Adobe's Transform effect differs from the destructive command by 0,167 % of sampled pixels; Adobe's own effect does not match its own command either: this artwork is regenerated when the path is transformed | MEASURED |
+| 3 | generated artwork | calligraphicBrush: does a live effect match the destructive command? | whatever Adobe's own Transform effect does on the same artwork | Adobe's Transform effect differs from the destructive command by 0,220 % of sampled pixels; Adobe's own effect does not match its own command either: this artwork is regenerated when the path is transformed | MEASURED |
+| 4 | generated artwork | strokedText: does a live effect match the destructive command? | whatever Adobe's own Transform effect does on the same artwork | Adobe's Transform effect differs from the destructive command by 0,000 % of sampled pixels; the two routes agree, so this artwork is not regenerated | MEASURED |
+| 5 | generated artwork | strokedRect: does a live effect match the destructive command? | whatever Adobe's own Transform effect does on the same artwork | Adobe's Transform effect differs from the destructive command by 0,000 % of sampled pixels; the two routes agree, so this artwork is not regenerated | MEASURED |
+| 6 | generated artwork | plainRect: does a live effect match the destructive command? | whatever Adobe's own Transform effect does on the same artwork | Adobe's Transform effect differs from the destructive command by 0,000 % of sampled pixels; the two routes agree, so this artwork is not regenerated | MEASURED |
+
+Source: [docs/evidence/generated-art.tsv](evidence/generated-art.tsv)
+
+## The crash, controlled
+
+Illustrator died twice at the same point in a full suite run. These rows are the two-arm comparison that followed: the same work with the effect and without it, alternated, each trial in a fresh Illustrator. MEASURED rather than passed or failed, because the question is a comparison between arms.
+
+| # | Group | Case | Expected | Observed | Status |
+| --- | --- | --- | --- | --- | --- |
+| 1 | document churn | the composition-then-save sequence, with the Shear effect | the two arms are compared; neither count is a threshold | 0 of 3 trials ended in an access violation inside Illustrator.exe; 2 ran to the end | MEASURED |
+| 2 | document churn | the composition-then-save sequence, without the Shear effect | the two arms are compared; neither count is a threshold | 0 of 3 trials ended in an access violation inside Illustrator.exe; 2 ran to the end | MEASURED |
+
+Source: [docs/evidence/sequence-crash.tsv](evidence/sequence-crash.tsv)
 
 ## Dialog
 

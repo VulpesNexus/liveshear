@@ -441,7 +441,7 @@ var LS = (function () {
         return t;
     };
 
-    /** Glyphs whose ink sits far off-centre inside the frame: descenders on one
+    /** Glyphs whose ink sits far off-center inside the frame: descenders on one
         side, capitals and no descender on the other. Point text is anchored at
         its baseline, so the visible ink and the frame's own box are a long way
         apart here, which is what makes it worth shearing. */

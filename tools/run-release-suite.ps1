@@ -29,12 +29,44 @@ $evidence = Join-Path $repo 'docs\evidence'
 $null = New-Item -ItemType Directory -Force -Path $evidence
 
 $summary = New-Object Collections.Generic.List[string]
+$script:hostRestarts = 0
+
+# Illustrator 30.7.0 dies with an access violation under long runs of scripted
+# document churn, with or without this plugin installed, and a full suite is
+# exactly that kind of load. Losing every remaining probe to it would mean no
+# matrix at all, so a probe that fails because the host went away is retried
+# once against a fresh Illustrator, and the restart is counted and reported
+# rather than hidden.
+function Restart-IfHostDied([string] $message) {
+    if ($message -notmatch 'RPC server is unavailable|0x800706BA|not reachable over COM') { return $false }
+    # Not conditional on the process having gone. A process that is still
+    # listed but no longer answering COM is the same problem from here, and
+    # waiting for it to disappear on its own loses the rest of the run.
+    $lingering = Get-Process Illustrator -ErrorAction SilentlyContinue
+    if ($lingering) {
+        Write-Output 'Illustrator is still listed but not answering; ending it.'
+        $lingering | Stop-Process -Force -ErrorAction SilentlyContinue
+        Start-Sleep -Seconds 3
+    }
+    $script:hostRestarts++
+    Write-Output 'Illustrator is gone. Restarting it and trying this probe once more.'
+    Start-Ai | Out-Null
+    Install-AiHarness | Out-Null
+    Invoke-AiScript 'while (app.documents.length > 0) { app.documents[0].close(SaveOptions.DONOTSAVECHANGES); } app.documents.add(); "ready";' | Out-Null
+    return $true
+}
+
 function Run([string] $name, [scriptblock] $body) {
     Write-Output ''
     Write-Output ('=== {0} ===' -f $name)
     $sw = [Diagnostics.Stopwatch]::StartNew()
     try {
         $out = & $body 2>&1
+        $died = @($out | Where-Object { "$_" -match 'RPC server is unavailable|0x800706BA' })
+        if ($died.Count -and (Restart-IfHostDied ($died -join ' '))) {
+            Write-Output ('--- {0}, second attempt ---' -f $name)
+            $out = & $body 2>&1
+        }
         $out | ForEach-Object { Write-Output $_ }
         # A probe's own tally, not any tally. The solver self-test prints the
         # verdicts it reached on deliberately broken rows -- "2 passed, 3
@@ -46,12 +78,29 @@ function Run([string] $name, [scriptblock] $body) {
         $summary.Add(('{0,-22} {1,7:F0} s  {2}' -f $name, $sw.Elapsed.TotalSeconds, $tail))
     }
     catch {
+        if (Restart-IfHostDied $_.Exception.Message) {
+            try {
+                Write-Output ('--- {0}, second attempt ---' -f $name)
+                $out = & $body 2>&1
+                $out | ForEach-Object { Write-Output $_ }
+                $lines = @($out | ForEach-Object { "$_" })
+                $tail = ($lines | Where-Object { $_ -match '^\s*\d+ checks, \d+ failed' } | Select-Object -Last 1)
+                if (-not $tail) { $tail = ($lines | Where-Object { $_ -match '^\s*\d+ passed, \d+ failed' } | Select-Object -Last 1) }
+                $summary.Add(('{0,-22} {1,7:F0} s  {2}  (after a host restart)' -f $name, $sw.Elapsed.TotalSeconds, $tail))
+                return
+            }
+            catch { }
+        }
         $summary.Add(('{0,-22} {1,7:F0} s  ERROR {2}' -f $name, $sw.Elapsed.TotalSeconds, $_.Exception.Message))
         Write-Output ("ERROR: " + $_.Exception.Message)
     }
 }
 
-Get-AiApp | Out-Null
+# Not Get-AiApp: that returns as soon as the application registers itself, which
+# is well before it will run a script, and the first probe then dies on an RPC
+# error that looks like a crash.
+if (-not (Get-Process Illustrator -ErrorAction SilentlyContinue)) { Start-Ai | Out-Null }
+if (-not (Wait-AiReady)) { throw 'Illustrator is not answering; start it and try again.' }
 
 # The plugin reads LIVESHEAR_LOG out of Illustrator's own environment. Setting
 # it in this shell after Illustrator has started does nothing, and the dialog
@@ -90,6 +139,7 @@ Run 'limits'      { & (Join-Path $PSScriptRoot 'probe-limits.ps1') }
 Run 'schema'      { & (Join-Path $PSScriptRoot 'probe-schema.ps1') }
 Run 'blend'       { & (Join-Path $PSScriptRoot 'probe-blend.ps1') -TracePath $TracePath }
 Run 'generated art' { & (Join-Path $PSScriptRoot 'probe-generated-art.ps1') }
+Run 'everyday use' { & (Join-Path $PSScriptRoot 'probe-everyday.ps1') }
 Run 'dialog'      { & (Join-Path $PSScriptRoot 'probe-dialog.ps1') -TracePath $TracePath }
 Run 'undo'        { & (Join-Path $PSScriptRoot 'probe-undo.ps1') }
 Run 'preview mode' { & (Join-Path $PSScriptRoot 'probe-gpu.ps1') }
@@ -110,3 +160,8 @@ Run 'registry'    {
 Write-Output ''
 Write-Output '=== summary ==='
 $summary | ForEach-Object { Write-Output $_ }
+if ($script:hostRestarts -gt 0) {
+    Write-Output ''
+    Write-Output ("Illustrator had to be restarted {0} time(s) during this run, because it stopped answering." -f $script:hostRestarts)
+    Write-Output 'Check the Windows event log for Application Error records naming Illustrator.exe, and see the crash section of docs/RELEASE_READINESS.md.'
+}

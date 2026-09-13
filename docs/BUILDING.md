@@ -41,7 +41,21 @@ A few of them are not obvious, and all of them matter.
 .\tools\install.ps1 -Uninstall   # take it out again
 ```
 
-Both ask for administrator rights once, because the plugin folder lives under *Program Files*. Illustrator reads that folder only at startup and holds the *.aip* open while it runs, so it has to be closed first; `tools\redeploy.ps1` does build, stop, install, and start in one step, and can turn the plugin's trace file on for the new session.
+Both ask for administrator rights once, because the plugin folder lives under *Program Files*.
+
+For development that is the wrong way round, and on a machine where your account is not an administrator it is not available at all — Windows asks for an administrator's password rather than offering a button. Use Illustrator's Additional Plug-ins Folder instead, which needs no rights whatsoever:
+
+```powershell
+.\tools\sideload.ps1 -Path "$env:LOCALAPPDATA\LiveShear\Plug-ins"   # point Illustrator at a folder you own
+.\tools\sideload.ps1 -Show                                          # what it is set to now
+.\tools\sideload.ps1 -Restore                                       # put the setting back
+```
+
+The preference lives in Illustrator's own preferences file rather than anywhere a script can reach, so the tool edits that file; it refuses to run while Illustrator is open, because Illustrator rewrites the file when it exits and would undo the change. After that, deploying a new build is a file copy and a restart, with no prompt of any kind.
+
+**Only one at a time.** If the same plugin is in both folders under the same file name, Illustrator says so and ignores the additional folder entirely. Under different file names it loads both and registers the effect twice.
+
+Illustrator reads its plugin folders only at startup and holds the *.aip* open while it runs, so it has to be closed first; `tools\redeploy.ps1` does build, stop, install, and start in one step, and can turn the plugin's trace file on for the new session.
 
 ## Tracing
 
@@ -81,14 +95,20 @@ python .\tools\solve-release.py  # turns the raw numbers into verdicts
 python .\tools\solve-anchor.py
 ```
 
-Two more are run separately, because each needs the plugin uninstalled and so needs administrator rights:
+Two more are run separately, because each has to take the plugin out and put it back:
 
 ```powershell
 .\tools\probe-missing-plugin.ps1 -CrashTrials 6   # what a machine without it sees, and crash arm A
 .\tools\probe-crash-ab.ps1 -SkipArmA              # crash arms B and C, interleaved
 ```
 
-Arm A of the crash experiment runs inside the missing-plugin probe on purpose: that probe already arranges for the plugin to be absent, and arranging it twice would mean two more prompts to answer.
+Arm A of the crash experiment runs inside the missing-plugin probe on purpose: that probe already arranges for the plugin to be absent, and arranging it twice would mean doing the same work again. Installed through the Additional Plug-ins Folder, taking it out is deleting a file you own, so neither of these needs administrator rights any more.
+
+And one that is only worth running when the host has just died:
+
+```powershell
+.\tools\probe-sequence-crash.ps1 -Trials 3        # the same work with and without the effect
+```
 
 Or all the rest in order, which also regenerates the matrix:
 
@@ -102,4 +122,14 @@ The measurement library the probes share is *tools/harness.jsx*. Illustrator kee
 
 ## The scripting bridge
 
-The plugin answers `app.sendScriptMessage("LiveShear", selector, arguments)` with a set of selectors used by the probes: `version`, `log`, `registry`, `appearance`, `selection`, `geometry`, `matrix`, `apply effect`, `set param`, `delete param`, `move effect`, `remove effect`, `count effects`, `bounds`, `edit effect`, and `native shear`. It is in the shipped binary on purpose, so that the binary which passes the tests is the binary that ships. It grants no privilege a script does not already have — anything it can reach is reachable through Illustrator's own scripting and action interfaces.
+The plugin answers `app.sendScriptMessage("LiveShear", selector, arguments)` with a set of selectors used by the probes: `version`, `log`, `registry`, `appearance`, `selection`, `geometry`, `matrix`, `apply effect`, `set param`, `delete param`, `move effect`, `remove effect`, `count effects`, `bounds`, `bounds flags`, `edit effect`, and `native shear`.
+
+**Status: a test interface, not a public API.** It is unsupported, undocumented beyond this paragraph, and carries no stability guarantee whatsoever: selectors may change meaning, change arguments, or disappear between any two versions without a note. Do not build anything on it.
+
+It is in the shipped binary on purpose, so that the binary which passes the tests is the binary that ships — a test suite that runs against a different build than the one users get is testing the wrong thing. Two questions follow from shipping it, and both have been answered rather than assumed:
+
+**Does it grant anything?** No. Everything it reaches is reachable through Illustrator's own scripting and action interfaces, which any script already has. `native shear` plays Illustrator's own shear action; `apply effect` applies an effect by name; the rest read state or edit this plugin's own parameters. There is no file, network, or process access in any of it.
+
+**Can a malformed message hurt the host?** Every argument is parsed defensively. Numbers go through `atof`, which yields zero rather than throwing on nonsense; missing fields take documented defaults; and every index that reaches a host API is range-checked first against the actual number of post-effects — including the destination index of `move effect`, which was not, and which would otherwise have handed `InsertNthPostEffect` whatever a caller sent. A selector that is not recognized returns a message and does nothing.
+
+If you would rather it were not there at all, `HandleScriptMessage` in *LiveShearPlugin.cpp* is the only entry point; removing the `kCallerAIScriptMessage` branch in `Message` removes the whole surface. The test suite stops working at that point, which is the trade.
