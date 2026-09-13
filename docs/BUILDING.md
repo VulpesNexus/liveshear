@@ -139,11 +139,11 @@ MSVC stamps a link timestamp into the binary, so building the same source twice 
 So:
 
 ```powershell
-git commit ...                                  # a clean tree first
-.	ools\probe-build.ps1                          # rebuild, record the commit and the hash
-.	ools\install.ps1                              # install that exact file
-.	oolsun-release-suite.ps1 -SkipBuildProbe    # test it without rebuilding it
-.	ools\make-release.ps1 -SkipBuild              # pack the file that was tested
+git commit ...                                   # a clean tree first
+.\tools\probe-build.ps1                          # rebuild, record the commit and the hash
+.\tools\install.ps1                              # install that exact file
+.\tools\run-release-suite.ps1 -SkipBuildProbe    # test it without rebuilding it
+.\tools\make-release.ps1 -SkipBuild              # pack the file that was tested
 ```
 
 What ties the artifact to the source is *tools/probe-build.ps1* recording the commit it built at and whether the working tree was clean, in [evidence/build.txt](evidence/build.txt), alongside the hash of what came out. Everything after that step uses that same file.
@@ -151,8 +151,8 @@ What ties the artifact to the source is *tools/probe-build.ps1* recording the co
 Before committing, both gates:
 
 ```powershell
-python .workspace	ools\housestyle.py --check <repo>
-python .workspace	ools\privacy.py --check --tracked <repo>
+python .workspace\tools\housestyle.py --check <repo>
+python .workspace\tools\privacy.py --check --tracked <repo>
 ```
 
 The second one matters here more than in most repositories: the probes write paths into the evidence, and the evidence is committed. Every probe transcript and result file goes through `Hide-Personal` in *tools/ai.ps1* on the way out, so a generated file comes back redacted rather than needing to be scrubbed each time.
