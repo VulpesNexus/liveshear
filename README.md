@@ -79,7 +79,7 @@ Windows 10 is expected to work and has not been run. The plugin needs no Visual 
 
 ## Verifying
 
-Every claim above comes from a probe that drives a real Illustrator over COM; there is no mock. The current run is **312 checks, none failed**, against the exact binary in the release — built, hashed, installed, tested, and packed in that order, because the compiler stamps a link timestamp and a rebuild is a different file.
+Every claim above comes from a probe that drives a real Illustrator over COM; there is no mock. The current run is **315 checks, none failed**, against the exact binary in the release — built, hashed, installed, tested, and packed in that order, because the compiler stamps a link timestamp and a rebuild is a different file.
 
 - [docs/RELEASE_TEST_MATRIX.md](docs/RELEASE_TEST_MATRIX.md) — every check and its result, generated from the raw output
 - [docs/RELEASE_READINESS.md](docs/RELEASE_READINESS.md) — the release assessment, with evidence

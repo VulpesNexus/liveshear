@@ -1,5 +1,5 @@
 Live Shear -- the reference point, one kind of artwork at a time
-Run at 2026-09-14 01:27:13
+Run at 2026-09-14 01:47:22
 Shearing 30 degrees; an offset is how far the native reference point sits from the effect's, in points
 
 fixture              axis     offset pt   edge drift  cross drift   verdict
