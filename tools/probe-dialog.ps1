@@ -545,11 +545,16 @@ if ($TracePath) {
 #
 # Centering is easy to get right in the middle of a screen and easy to get
 # wrong at its edge, and the clamp that handles the edge is the part no
-# ordinary run exercises. So Illustrator is pushed left until the middle of its
-# window is within half a dialog of the desktop edge -- centering alone would
-# then put a good part of the dialog past it -- and the dialog is opened there.
-# The window's placement is saved first and put back afterwards, maximized
-# state included.
+# ordinary run exercises. So Illustrator is put in the corner of the work area
+# and made small enough that its own middle is less than half a dialog from the
+# edge -- centering alone would then put a good part of the dialog past it --
+# and the dialog is opened from there. The window's placement is saved first
+# and put back afterwards, maximized state included.
+#
+# Illustrator will not be moved to a negative coordinate: asked to sit off the
+# left of the desktop it comes back to zero. So the overshoot this arranges is
+# the vertical one, and the check reads whichever axis actually overshot rather
+# than assuming which.
 Add-Type @"
 using System;
 using System.Runtime.InteropServices;
@@ -572,9 +577,9 @@ public static class HostWin {
 $aiProc = Get-Process Illustrator -ErrorAction SilentlyContinue |
           Where-Object { $_.MainWindowHandle -ne [IntPtr]::Zero } | Select-Object -First 1
 if (-not $aiProc) {
-    Note '[SKIP] the dialog is pushed back on screen when Illustrator sits against the edge'
+    Note '[SKIP] the dialog is pushed back on screen when Illustrator sits in the corner'
     Note '       Illustrator has no main window handle to move'
-    Add-ProbeResult -Group 'dialog' -Case 'the dialog is pushed back on screen when Illustrator sits against the edge' `
+    Add-ProbeResult -Group 'dialog' -Case 'the dialog is pushed back on screen when Illustrator sits in the corner' `
         -Expected 'the dialog behaves like an Adobe dialog' `
         -Observed 'Illustrator reported no main window, so it could not be moved to the edge' -Status 'INCONCLUSIVE'
 }
@@ -586,44 +591,46 @@ else {
     try {
         [HostWin]::ShowWindow($hwnd, 9) | Out-Null        # SW_RESTORE
         Start-Sleep -Milliseconds 600
+        # SWP_NOZORDER | SWP_NOACTIVATE. Small enough that half of it is less
+        # than half the dialog, in the corner, so the middle of the window is
+        # nearer the edge than the dialog's own half-height.
+        [HostWin]::SetWindowPos($hwnd, [IntPtr]::Zero, 0, 0, 400, 140, 0x0014) | Out-Null
+        Start-Sleep -Milliseconds 800
         $r = New-Object HostWin+RECT
         [HostWin]::GetWindowRect($hwnd, [ref] $r) | Out-Null
-        $width = $r.Right - $r.Left
-        # Left edge here puts the window's own middle 60 pixels from the
-        # desktop's, which is far less than half the dialog's width.
-        $movedTo = 60 - [int]($width / 2)
-        # SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE
-        [HostWin]::SetWindowPos($hwnd, [IntPtr]::Zero, $movedTo, 0, 0, 0, 0x0015) | Out-Null
-        Start-Sleep -Milliseconds 600
-        [HostWin]::GetWindowRect($hwnd, [ref] $r) | Out-Null
-        Note ("moved Illustrator to {0},{1}; its middle is now at x={2}" -f $r.Left, $r.Top, [int](($r.Left + $r.Right) / 2))
+        Note ("Illustrator is at {0},{1} to {2},{3}; its middle is {4},{5}" -f `
+              $r.Left, $r.Top, $r.Right, $r.Bottom, [int](($r.Left + $r.Right) / 2), [int](($r.Top + $r.Bottom) / 2))
 
         New-Case 5
         $transcript = Invoke-Dialog -Angles @(12) -Button 'cancel'
-        Note 'driver transcript (Illustrator against the left edge):'
+        Note 'driver transcript (Illustrator in the corner):'
         foreach ($t in $transcript) { Note ("       " + $t) }
         $edge = Get-Placement (($transcript -join "`n"))
+        # The distance between the two centers is the overshoot the clamp took
+        # back: with nothing to clamp they coincide, as they do in every case
+        # above.
+        $pushed = if ($null -eq $edge) { 0 } else { [Math]::Max([Math]::Abs($edge.Dx), [Math]::Abs($edge.Dy)) }
 
         if ($null -eq $edge) {
-            Check 'the dialog is pushed back on screen when Illustrator sits against the edge' $false `
+            Check 'the dialog is pushed back on screen when Illustrator sits in the corner' $false `
                 'the driver could not read the placement back'
         }
-        elseif ([Math]::Abs($edge.Dx) -le 4) {
+        elseif ($pushed -le 4) {
             # Centering and clamping agreed, which means the window never got
             # near enough to the edge for the clamp to have anything to do.
             # Reporting a pass here would be reporting an arrangement, not a
             # result.
-            Note '[----] the dialog is pushed back on screen when Illustrator sits against the edge'
+            Note '[----] the dialog is pushed back on screen when Illustrator sits in the corner'
             Note ('       ' + $edge.Line)
-            Add-ProbeResult -Group 'dialog' -Case 'the dialog is pushed back on screen when Illustrator sits against the edge' `
+            Add-ProbeResult -Group 'dialog' -Case 'the dialog is pushed back on screen when Illustrator sits in the corner' `
                 -Expected 'the dialog behaves like an Adobe dialog' `
                 -Observed ('Illustrator did not end up close enough to the edge for centering to overshoot it, so the clamp had nothing to do: ' + $edge.Line) `
                 -Status 'NOT DISCRIMINATING'
         }
         else {
-            Check 'the dialog is pushed back on screen when Illustrator sits against the edge' $edge.Inside `
+            Check 'the dialog is pushed back on screen when Illustrator sits in the corner' $edge.Inside `
                 ("centering alone would have put it {0} pixels past the edge; it opened at {1},{2}, entirely on the desktop" -f `
-                 [Math]::Abs($edge.Dx), $edge.X, $edge.Y)
+                 $pushed, $edge.X, $edge.Y)
         }
     }
     finally {
