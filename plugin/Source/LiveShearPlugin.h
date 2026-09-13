@@ -46,6 +46,12 @@ private:
     ASErr HandleScriptMessage(const char* selector, AIScriptMessage* message);
 
     AIMenuItemHandle fAboutPluginMenu;
+    /** The effect's own menu item. Kept so the `effect menu` selector can say
+        which group Illustrator filed it in, which is the only way to check the
+        placement: the menu bar is not scriptable and the host's shell does not
+        answer Alt the way a stock menu bar would, so a screen capture is not
+        available either. */
+    AIMenuItemHandle fEffectMenu;
     AILiveEffectHandle fShearEffect;
     ShearEffect fShear;
 };

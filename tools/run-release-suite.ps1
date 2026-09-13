@@ -217,6 +217,9 @@ Run 'blend'       { & (Join-Path $PSScriptRoot 'probe-blend.ps1') -TracePath $Tr
 Run 'generated art' { & (Join-Path $PSScriptRoot 'probe-generated-art.ps1') } -NeedsHost
 Run 'everyday use' { & (Join-Path $PSScriptRoot 'probe-everyday.ps1') } -NeedsHost
 Run 'dialog'      { & (Join-Path $PSScriptRoot 'probe-dialog.ps1') -TracePath $TracePath } -NeedsHost
+# Everything above applies the effect through the script bridge, which never
+# touches a menu. This is the only probe that picks the menu item.
+Run 'menu'        { & (Join-Path $PSScriptRoot 'probe-menu.ps1') } -NeedsHost
 Run 'undo'        { & (Join-Path $PSScriptRoot 'probe-undo.ps1') } -NeedsHost
 Run 'preview mode' { & (Join-Path $PSScriptRoot 'probe-gpu.ps1') } -NeedsHost
 if (-not $SkipSlow) {

@@ -1,0 +1,14 @@
+    group	Effects 3rd Party
+    item text	Shear...
+    command string	Live VulpesNexus Shear
+the item is on the Effect menu, not in a submenu         PASS
+no submenu of its own has come back                      PASS
+it is not inside one of Adobe s own submenus             PASS
+the item still reads Shear...                            PASS
+    driver reported: dialogs: 1
+the command string reaches the item                      PASS
+choosing it applies exactly one Shear                    PASS
+    Adobe Apply Last Effect returned
+Apply Last Effect reapplies it to another object         PASS
+
+7 passed, 0 failed

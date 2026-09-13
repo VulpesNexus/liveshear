@@ -1,10 +1,10 @@
 Live Shear -- the built artifact
-Run at 2026-09-13 21:26:37
+Run at 2026-09-14 00:18:17
 Windows 10.0.26200.0
 
 Toolchain: MSVC 14.44.35207
 SDK:       Adobe Illustrator 2026 SDK
-Commit:    7a331e6a2d30c8096ba692db487792521cd44ebc
+Commit:    fbae888874d58a308f8f2cb9fa3f0ad2b832443b
 
 [PASS] Release builds with no warnings and no errors
        0 warnings, 0 errors
@@ -13,20 +13,20 @@ Commit:    7a331e6a2d30c8096ba692db487792521cd44ebc
 [PASS] the Release build produced a plugin
        build\Release\LiveShear.aip
 
-File version:   0.1.0-rc.4
+File version:   0.1.0-rc.5
 Company:        VulpesNexus
 Product:        Shear for Illustrator
 Description:    Non-destructive Shear effect for Adobe Illustrator
 Copyright:      Copyright (C) 2026 Vixen420. GPL-3.0-or-later, with an Adobe Illustrator SDK linking exception.
 Size:           182 272 bytes
-SHA-256:        6C2FC7FCBAC6993C62C4D5E546142C42558017D2C035F81730F2BEE0CF45081F
+SHA-256:        3F93DE6763D7F7AE523EA80EC457A14DA619C9EDBB8EC3AEE226C6DC39AE0E90
 
 [PASS] the binary does not claim Adobe as its publisher
        CompanyName is VulpesNexus
 [PASS] the binary names its own product
        ProductName is Shear for Illustrator
 [PASS] the binary carries a version
-       FileVersion is 0.1.0-rc.4
+       FileVersion is 0.1.0-rc.5
 [PASS] Release links the retail C runtime, not the debug one
        links MSVCP140.dll, VCRUNTIME140.dll
 [PASS] no path from the build machine is embedded
@@ -40,11 +40,13 @@ SHA-256:        6C2FC7FCBAC6993C62C4D5E546142C42558017D2C035F81730F2BEE0CF45081F
 [PASS] the effect name that documents store is unchanged
        VulpesNexus Shear
 [PASS] the menu entry reads as a plain Adobe command
-       Effect > Distort & Transform > Shear...
+       Effect > Shear...
+[PASS] the effect claims no submenu of its own
+       no effect category is compiled in
 [PASS] no debug trace is on by default
        tracing is behind the LIVESHEAR_LOG environment variable
 [PASS] the source this was built from is identified
-       commit 7a331e6a2d30c8096ba692db487792521cd44ebc
+       commit fbae888874d58a308f8f2cb9fa3f0ad2b832443b
 [PASS] the working tree was clean when it was built
        0 uncommitted change(s)
 
@@ -54,4 +56,4 @@ Depends on: COMCTL32.dll, USER32.dll, GDI32.dll, KERNEL32.dll, SHELL32.dll, MSVC
 [PASS] the C runtime it needs is one Illustrator already needs
        Illustrator.exe names the same MSVCP140.dll, VCRUNTIME140.dll, VCRUNTIME140_1.dll, so no redistributable has to be installed for the plugin
 
-18 passed, 0 failed
+19 passed, 0 failed

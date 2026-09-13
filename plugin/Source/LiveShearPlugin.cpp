@@ -84,6 +84,7 @@ void FixupReload(Plugin* plugin)
 LiveShearPlugin::LiveShearPlugin(SPPluginRef pluginRef)
     : Plugin(pluginRef),
       fAboutPluginMenu(nullptr),
+      fEffectMenu(nullptr),
       fShearEffect(nullptr)
 {
     strncpy(fPluginName, kLiveShearPluginName, kMaxStringLength);
@@ -196,12 +197,11 @@ ASErr LiveShearPlugin::AddLiveEffects(SPInterfaceMessage* message)
     menuData.title = menuTitleStr;
     menuData.options = 0;
 
-    AIMenuItemHandle menuHandle = nullptr;
     error = sAILiveEffect->AddLiveEffectMenuItem(this->fShearEffect, nameStr,
-                                                 &menuData, &menuHandle, nullptr);
+                                                 &menuData, &this->fEffectMenu, nullptr);
     if (error) return error;
 
-    return sAIMenu->UpdateMenuItemAutomatically(menuHandle, kAutoEnableMenuItemAction,
+    return sAIMenu->UpdateMenuItemAutomatically(this->fEffectMenu, kAutoEnableMenuItemAction,
                                                 0, 0, kIfAnyArt, 0, 0, 0);
 }
 
@@ -335,6 +335,39 @@ ASErr LiveShearPlugin::HandleScriptMessage(const char* selector, AIScriptMessage
                 o << name << "\n";
             }
         }
+        result = o.str();
+    }
+    else if (sel == "effect menu")
+    {
+        /* Where Illustrator actually filed the effect's menu item, and what it
+           can be reached by. The placement is not observable any other way:
+           the menu bar is not scriptable, and this host's shell does not
+           answer the Alt key the way a stock menu bar would, so there is no
+           screen capture to fall back on either.
+
+           The group name matters because a category would change it. An item
+           in "Effects 3rd Party" is on the Effect menu itself; anything called
+           "Live 3rd Party ..." is in a submenu of its own; anything called
+           "Live Vector ..." is inside one of Adobe's, which is the placement
+           that silently breaks Apply Last Effect. */
+        std::ostringstream o;
+        AIMenuGroup group = nullptr;
+        const char* name = nullptr;
+        if (!sAIMenu->GetItemMenuGroup(this->fEffectMenu, &group) && group != nullptr &&
+            !sAIMenu->GetMenuGroupName(group, &name) && name != nullptr)
+            o << "group\t" << name << "\n";
+        else
+            o << "group\t(could not be read)\n";
+
+        ai::UnicodeString text;
+        if (!sAIMenu->GetItemText(this->fEffectMenu, text))
+            o << "item text\t" << text.as_UTF8() << "\n";
+
+        const char* key = nullptr;
+        if (!sAIMenu->GetMenuItemKeyboardShortcutDictionaryKey(this->fEffectMenu, &key) &&
+            key != nullptr)
+            o << "command string\t" << key << "\n";
+
         result = o.str();
     }
     else if (sel == "about")

@@ -1,0 +1,8 @@
+probe	group	case	expected	observed	status
+menu	menu placement	the item is on the Effect menu, not in a submenu	the group is Effects 3rd Party	the group is 'Effects 3rd Party'	PASS
+menu	menu placement	no submenu of its own has come back	no group named Live 3rd Party...	the group is 'Effects 3rd Party'	PASS
+menu	menu placement	it is not inside one of Adobe s own submenus	no group named Live Vector... -- that placement breaks Apply Last Effect	the group is 'Effects 3rd Party'	PASS
+menu	menu placement	the item still reads Shear...	Shear...	Shear...	PASS
+menu	choosing it	the command string reaches the item	one dialog opens	dialogs: 1	PASS
+menu	choosing it	choosing it applies exactly one Shear	one Shear effect on the object	1 Shear effect(s)	PASS
+menu	Apply Last Effect	Apply Last Effect reapplies it to another object	one Shear effect on the second object	1 Shear effect(s); the command returned	PASS
