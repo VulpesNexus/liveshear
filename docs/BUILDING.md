@@ -93,7 +93,10 @@ python .\tools\solve-release.py  # turns the raw numbers into verdicts
 .\tools\probe-undo.ps1           # undo, redo, and how many steps an edit costs
 .\tools\probe-anchor.ps1         # which bounds the native command anchors on
 python .\tools\solve-anchor.py
+.\tools\probe-theme.ps1          # the dialog against Illustrator's own brightness
 ```
+
+*probe-theme.ps1* restarts Illustrator once per brightness setting and once more to put the machine back, because Illustrator applies that preference only at startup: written through scripting it reads back as the new value while the running application goes on drawing itself, and reporting its colors, at the old one.
 
 Two more are run separately, because each has to take the plugin out and put it back:
 

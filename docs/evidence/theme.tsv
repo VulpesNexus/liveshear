@@ -1,0 +1,6 @@
+probe	group	case	expected	observed	status
+theme	theme	the dialog was captured at every brightness setting	2 captures	2 of 2 produced a picture	PASS
+theme	theme	the dialog gets lighter when Illustrator does	a palette baked into the plugin would give the same picture at every setting	the average pixel goes from 48.5 at uiBrightness 0 to 233.6 at 1, a spread of 185.1	PASS
+theme	theme	the darkest setting is dark and the lightest is light	the dialog is not merely different, but dark and light the right way round	darkest average 48.5, lightest average 233.6	PASS
+theme	theme	it tracks the setting rather than only the extremes	each step is at least as light as the one below it	0:48.5 1:233.6	PASS
+theme	theme	the colours came from the host, not from the system	the plugin logs which source it used	2 of 2 openings read the colours from Illustrator	PASS

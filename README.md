@@ -51,6 +51,7 @@ Select some artwork and choose *Effect > Distort & Transform > Shear…*.
 - **Shear Angle** is how far the artwork leans, in degrees, from −89° to 89°. Positive values lean the leading edge forward, the same direction Illustrator's own *Shear* command leans it.
 - **Axis Angle** is the direction the shear runs along. At 0° the shear is horizontal, which is the familiar italic slant; at 90° it is vertical. An axis of φ and one of φ + 180° describe the same shear.
 - **Preview** updates the artwork as you drag. *Cancel*, *Escape*, and the window's close button all put everything back exactly as it was; *OK* and *Enter* commit.
+- The window takes its colors from Illustrator, so it matches whatever you have set under *Edit > Preferences > User Interface > Brightness*, down to the title bar. Illustrator applies that setting when it starts, so a dialog opened after you change it is the one that matches.
 - The numeric fields take a decimal point or a decimal comma, ignore a degree sign, and respond to the up and down arrow keys — by ten degrees with *Shift* held. They work to a tenth of a degree, which is what the sliders carry and what the fields show.
 
 ## Where it shears about, and how it stacks

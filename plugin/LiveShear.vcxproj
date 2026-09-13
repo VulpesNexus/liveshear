@@ -100,6 +100,7 @@
     <ClCompile Include="Source\ShearEffect.cpp" />
     <ClCompile Include="Source\ShearBounds.cpp" />
     <ClCompile Include="Source\ShearDialog.cpp" />
+    <ClCompile Include="Source\ShearTheme.cpp" />
     <ClCompile Include="Source\Introspect.cpp" />
     <ClCompile Include="Source\ShearLog.cpp" />
     <ClCompile Include="$(AISDKApi)\illustrator\IAIUnicodeString.cpp" />
@@ -120,6 +121,7 @@
     <ClInclude Include="Source\ShearBounds.h" />
     <ClInclude Include="Source\ShearCurve.h" />
     <ClInclude Include="Source\ShearDialog.h" />
+    <ClInclude Include="Source\ShearTheme.h" />
     <ClInclude Include="Source\Introspect.h" />
     <ClInclude Include="Source\ShearLog.h" />
   </ItemGroup>

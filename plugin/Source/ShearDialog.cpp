@@ -22,6 +22,7 @@
 #include "ShearEffect.h"
 #include "ShearMath.h"
 #include "ShearLayout.h"
+#include "ShearTheme.h"
 #include "LiveShearSuites.h"
 #include "LiveShearID.h"
 #include "ShearLog.h"
@@ -89,6 +90,17 @@ namespace
         HWND axisSlider = nullptr;
         HWND axisEdit = nullptr;
         HWND preview = nullptr;
+
+        /** Illustrator's own dialog colours, read once when the window is
+            created. The dialog is modal, so the host's brightness cannot
+            change underneath it. */
+        sheartheme::Theme theme;
+        HBRUSH backBrush = nullptr;
+        HBRUSH editBrush = nullptr;
+        /** The mouse is over this control, so it draws lit. Tracked here
+            because an owner-drawn button is told it is pushed but never that
+            it is merely hovered. */
+        int hot = 0;
     };
 
     /** Control identifiers travel to CreateWindow in the hMenu parameter.
@@ -353,6 +365,241 @@ namespace
         return CreateFontIndirectW(&font);
     }
 
+    void FillSolid(HDC dc, const RECT& rc, COLORREF colour)
+    {
+        const HBRUSH brush = CreateSolidBrush(colour);
+        if (brush == nullptr) return;
+        FillRect(dc, &rc, brush);
+        DeleteObject(brush);
+    }
+
+    void FrameSolid(HDC dc, const RECT& rc, COLORREF colour)
+    {
+        const HBRUSH brush = CreateSolidBrush(colour);
+        if (brush == nullptr) return;
+        FrameRect(dc, &rc, brush);
+        DeleteObject(brush);
+    }
+
+    /** One pixel at this monitor's scaling, so a border drawn on a 200% display
+        is not a hairline the artwork swallows. */
+    int Hairline(int dpi)
+    {
+        const int n = MulDiv(1, dpi, 96);
+        return n < 1 ? 1 : n;
+    }
+
+    void InsetBy(RECT& rc, int n)
+    {
+        rc.left += n; rc.top += n; rc.right -= n; rc.bottom -= n;
+    }
+
+    /** Frames a rectangle with a border n pixels thick, from the outside in,
+        because FrameRect only ever draws one pixel. */
+    void FrameThick(HDC dc, RECT rc, COLORREF colour, int n)
+    {
+        for (int i = 0; i < n; ++i) { FrameSolid(dc, rc, colour); InsetBy(rc, 1); }
+    }
+
+    void DrawButtonText(HDC dc, HWND button, const RECT& rc, COLORREF colour, HFONT font)
+    {
+        wchar_t text[64];
+        text[0] = L'\0';
+        GetWindowTextW(button, text, static_cast<int>(std::size(text)));
+
+        const HGDIOBJ oldFont = font != nullptr ? SelectObject(dc, font) : nullptr;
+        SetBkMode(dc, TRANSPARENT);
+        SetTextColor(dc, colour);
+        RECT box = rc;
+        DrawTextW(dc, text, -1, &box, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+        if (oldFont != nullptr) SelectObject(dc, oldFont);
+    }
+
+    /** A push button in the host's colours: a flat face with a one-pixel
+        border, which is what Illustrator's own buttons look like at every
+        brightness. The default button is marked with the focus-ring colour
+        rather than by being a different shape. */
+    void DrawPushButton(DialogData* dd, const DRAWITEMSTRUCT* di)
+    {
+        const sheartheme::Theme& t = dd->theme;
+        const bool disabled = (di->itemState & ODS_DISABLED) != 0;
+        const bool pressed = (di->itemState & ODS_SELECTED) != 0;
+        const bool focused = (di->itemState & ODS_FOCUS) != 0;
+        const bool hot = dd->hot == static_cast<int>(di->CtlID);
+        const bool isDefault = di->CtlID == IDOK;
+
+        COLORREF face = t.control;
+        if (disabled) face = t.background;
+        else if (pressed) face = t.controlPressed;
+        else if (hot) face = t.controlHot;
+
+        RECT rc = di->rcItem;
+        FillSolid(di->hDC, rc, face);
+
+        const int line = Hairline(dd->dpi);
+        COLORREF edge = t.border;
+        if (isDefault && !disabled) edge = t.focusRing;
+        FrameThick(di->hDC, rc, edge, line);
+
+        if (focused && !disabled)
+        {
+            RECT ring = rc;
+            InsetBy(ring, line * 2);
+            FrameThick(di->hDC, ring, t.focusRing, line);
+        }
+
+        DrawButtonText(di->hDC, di->hwndItem, rc,
+                       disabled ? t.disabledText : t.text, dd->font);
+    }
+
+    /** The Preview check box. Owner-drawn like the buttons, because a stock
+        check box paints its own white square and there is no message that
+        recolours it. The tick is two strokes rather than a font glyph, so it
+        cannot come out as a missing-character box on a machine without the
+        symbol face. */
+    void DrawCheckBox(DialogData* dd, const DRAWITEMSTRUCT* di)
+    {
+        const sheartheme::Theme& t = dd->theme;
+        const bool disabled = (di->itemState & ODS_DISABLED) != 0;
+        const bool focused = (di->itemState & ODS_FOCUS) != 0;
+        const bool hot = dd->hot == static_cast<int>(di->CtlID);
+        const bool checked = dd->state != nullptr && dd->state->previewEnabled;
+
+        RECT rc = di->rcItem;
+        FillSolid(di->hDC, rc, t.background);
+
+        const int line = Hairline(dd->dpi);
+        const int side = MulDiv(13, dd->dpi, 96);
+        RECT box;
+        box.left = rc.left;
+        box.top = rc.top + (rc.bottom - rc.top - side) / 2;
+        box.right = box.left + side;
+        box.bottom = box.top + side;
+
+        FillSolid(di->hDC, box, disabled ? t.background : t.editBackground);
+        FrameThick(di->hDC, box, (hot && !disabled) ? t.focusRing : t.border, line);
+
+        if (checked)
+        {
+            const COLORREF ink = disabled ? t.disabledText : t.editText;
+            const HPEN pen = CreatePen(PS_SOLID, line * 2, ink);
+            if (pen != nullptr)
+            {
+                const HGDIOBJ oldPen = SelectObject(di->hDC, pen);
+                const int w = box.right - box.left;
+                const POINT pts[3] = {
+                    { box.left + w / 4,     box.top + w / 2 },
+                    { box.left + w / 2 - line, box.bottom - w / 3 },
+                    { box.right - w / 5,    box.top + w / 4 }
+                };
+                Polyline(di->hDC, pts, 3);
+                SelectObject(di->hDC, oldPen);
+                DeleteObject(pen);
+            }
+        }
+
+        wchar_t text[64];
+        text[0] = L'\0';
+        GetWindowTextW(di->hwndItem, text, static_cast<int>(std::size(text)));
+        RECT label = rc;
+        label.left = box.right + MulDiv(6, dd->dpi, 96);
+
+        const HGDIOBJ oldFont = dd->font != nullptr ? SelectObject(di->hDC, dd->font) : nullptr;
+        SetBkMode(di->hDC, TRANSPARENT);
+        SetTextColor(di->hDC, disabled ? t.disabledText : t.text);
+        DrawTextW(di->hDC, text, -1, &label, DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+        if (oldFont != nullptr) SelectObject(di->hDC, oldFont);
+
+        if (focused && !disabled)
+        {
+            RECT ring = rc;
+            InsetBy(ring, line);
+            FrameThick(di->hDC, ring, t.focusRing, line);
+        }
+    }
+
+    /** The trackbars. A stock trackbar paints a light channel and a chrome
+        thumb from the visual styles, neither of which can be recoloured by a
+        message, so the two parts that show are drawn here instead. */
+    LRESULT DrawTrackbar(DialogData* dd, NMCUSTOMDRAW* cd)
+    {
+        const sheartheme::Theme& t = dd->theme;
+
+        if (cd->dwDrawStage == CDDS_PREPAINT) return CDRF_NOTIFYITEMDRAW;
+        if (cd->dwDrawStage != CDDS_ITEMPREPAINT) return CDRF_DODEFAULT;
+
+        const int line = Hairline(dd->dpi);
+        const bool enabled = IsWindowEnabled(cd->hdr.hwndFrom) != FALSE;
+
+        if (cd->dwItemSpec == TBCD_CHANNEL)
+        {
+            RECT rc = cd->rc;
+            // The stock channel rectangle is taller than the groove it draws.
+            const int thickness = MulDiv(3, dd->dpi, 96);
+            const int middle = (rc.top + rc.bottom) / 2;
+            rc.top = middle - thickness / 2;
+            rc.bottom = rc.top + thickness;
+            FillSolid(cd->hdc, rc, enabled ? t.border : t.background);
+            return CDRF_SKIPDEFAULT;
+        }
+
+        if (cd->dwItemSpec == TBCD_THUMB)
+        {
+            RECT rc = cd->rc;
+            const bool hot = dd->hot == static_cast<int>(GetDlgCtrlID(cd->hdr.hwndFrom));
+            FillSolid(cd->hdc, rc, enabled ? (hot ? t.controlHot : t.control) : t.background);
+            FrameThick(cd->hdc, rc, enabled ? t.focusRing : t.border, line);
+            return CDRF_SKIPDEFAULT;
+        }
+
+        if (cd->dwItemSpec == TBCD_TICS) return CDRF_SKIPDEFAULT;
+        return CDRF_DODEFAULT;
+    }
+
+    /** Which control the pointer is over, so buttons light up under it the way
+        a stock button does through the visual styles. An owner-drawn control is
+        never told it is merely hovered, and the parent does not see mouse
+        movement over its children, so each control reports for itself. */
+    LRESULT CALLBACK HoverSubclassProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp,
+                                       UINT_PTR id, DWORD_PTR ref)
+    {
+        DialogData* dd = reinterpret_cast<DialogData*>(ref);
+
+        if (msg == WM_MOUSEMOVE && dd != nullptr)
+        {
+            if (dd->hot != static_cast<int>(id))
+            {
+                const HWND was = dd->hot != 0 ? GetDlgItem(GetParent(hwnd), dd->hot) : nullptr;
+                dd->hot = static_cast<int>(id);
+                if (was != nullptr) InvalidateRect(was, nullptr, TRUE);
+                InvalidateRect(hwnd, nullptr, TRUE);
+
+                // Asking for one leave message; without it the control stays
+                // lit after the pointer has gone somewhere else entirely.
+                TRACKMOUSEEVENT tme;
+                ZeroMemory(&tme, sizeof(tme));
+                tme.cbSize = sizeof(tme);
+                tme.dwFlags = TME_LEAVE;
+                tme.hwndTrack = hwnd;
+                TrackMouseEvent(&tme);
+            }
+        }
+        else if (msg == WM_MOUSELEAVE && dd != nullptr)
+        {
+            if (dd->hot == static_cast<int>(id))
+            {
+                dd->hot = 0;
+                InvalidateRect(hwnd, nullptr, TRUE);
+            }
+        }
+        else if (msg == WM_NCDESTROY)
+        {
+            RemoveWindowSubclass(hwnd, HoverSubclassProc, id);
+        }
+
+        return DefSubclassProc(hwnd, msg, wp, lp);
+    }
+
     LRESULT CALLBACK DialogProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
     {
         DialogData* dd = reinterpret_cast<DialogData*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
@@ -368,6 +615,14 @@ namespace
 
                 dd->dpi = DpiOf(hwnd);
                 const int dpi = dd->dpi;
+
+                // Ask the host what it looks like before building anything, so
+                // every control is created into a known set of colours rather
+                // than repainted out of the system grey afterwards.
+                dd->theme = sheartheme::Read();
+                dd->backBrush = CreateSolidBrush(dd->theme.background);
+                dd->editBrush = CreateSolidBrush(dd->theme.editBackground);
+                sheartheme::ApplyTitleBar(hwnd, dd->theme.dark);
                 // Every control's box comes from the table in ShearLayout.h,
                 // which is also what the layout test reads, so the dialog and
                 // the thing that checks it cannot disagree.
@@ -387,7 +642,7 @@ namespace
                 SendMessageW(dd->shearSlider, TBM_SETPOS, TRUE,
                              static_cast<LPARAM>(std::lround(dd->state->shearAngle * kScale)));
                 { R(kShearEdit);
-                dd->shearEdit = CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"",
+                dd->shearEdit = CreateWindowExW(0, L"EDIT", L"",
                     WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_RIGHT | ES_AUTOHSCROLL,
                     box.x, box.y, box.w, box.h, hwnd,
                     ControlId(kIdShearEdit), inst, nullptr); }
@@ -408,7 +663,7 @@ namespace
                 SendMessageW(dd->axisSlider, TBM_SETPOS, TRUE,
                              static_cast<LPARAM>(std::lround(dd->state->axisAngle * kScale)));
                 { R(kAxisEdit);
-                dd->axisEdit = CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"",
+                dd->axisEdit = CreateWindowExW(0, L"EDIT", L"",
                     WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_RIGHT | ES_AUTOHSCROLL,
                     box.x, box.y, box.w, box.h, hwnd,
                     ControlId(kIdAxisEdit), inst, nullptr); }
@@ -418,26 +673,24 @@ namespace
 
                 { R(kPreview);
                 dd->preview = CreateWindowExW(0, L"BUTTON", L"Preview",
-                    WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
+                    WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_OWNERDRAW,
                     box.x, box.y, box.w, box.h, hwnd,
                     ControlId(kIdPreview), inst, nullptr); }
-                SendMessageW(dd->preview, BM_SETCHECK,
-                             dd->state->previewEnabled ? BST_CHECKED : BST_UNCHECKED, 0);
                 EnableWindow(dd->preview, dd->state->allowPreview ? TRUE : FALSE);
 
                 { R(kReset);
                 CreateWindowExW(0, L"BUTTON", L"Reset",
-                    WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+                    WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_OWNERDRAW,
                     box.x, box.y, box.w, box.h, hwnd,
                     ControlId(kIdReset), inst, nullptr); }
                 { R(kCancel);
                 CreateWindowExW(0, L"BUTTON", L"Cancel",
-                    WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+                    WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_OWNERDRAW,
                     box.x, box.y, box.w, box.h, hwnd,
                     ControlId(IDCANCEL), inst, nullptr); }
                 { R(kOk);
                 CreateWindowExW(0, L"BUTTON", L"OK",
-                    WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_DEFPUSHBUTTON,
+                    WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_OWNERDRAW,
                     box.x, box.y, box.w, box.h, hwnd,
                     ControlId(IDOK), inst, nullptr); }
                 #undef R
@@ -458,9 +711,106 @@ namespace
                 SetWindowSubclass(dd->axisEdit, EditSubclassProc, kIdAxisEdit,
                                   reinterpret_cast<DWORD_PTR>(dd));
 
+                // Everything that lights up under the pointer.
+                {
+                    const int hoverIds[] = { kIdPreview, kIdReset, IDCANCEL, IDOK,
+                                             kIdShearSlider, kIdAxisSlider };
+                    for (size_t i = 0; i < std::size(hoverIds); ++i)
+                    {
+                        const HWND control = GetDlgItem(hwnd, hoverIds[i]);
+                        if (control != nullptr)
+                            SetWindowSubclass(control, HoverSubclassProc,
+                                              static_cast<UINT_PTR>(hoverIds[i]),
+                                              reinterpret_cast<DWORD_PTR>(dd));
+                    }
+                }
+
                 Republish(dd);
                 return 0;
             }
+
+            case WM_ERASEBKGND:
+                if (dd != nullptr && dd->backBrush != nullptr)
+                {
+                    RECT rc;
+                    GetClientRect(hwnd, &rc);
+                    FillRect(reinterpret_cast<HDC>(wp), &rc, dd->backBrush);
+                    return 1;
+                }
+                break;
+
+            case WM_PAINT:
+                // The edit fields lost their system bevel, which could not be
+                // recoloured, so their border is drawn here in the host's own
+                // line colour -- outside each field, on the dialog's face.
+                if (dd != nullptr)
+                {
+                    PAINTSTRUCT ps;
+                    const HDC dc = BeginPaint(hwnd, &ps);
+                    const int line = Hairline(dd->dpi);
+                    const HWND fields[2] = { dd->shearEdit, dd->axisEdit };
+                    for (int i = 0; i < 2; ++i)
+                    {
+                        if (fields[i] == nullptr) continue;
+                        RECT rc;
+                        GetWindowRect(fields[i], &rc);
+                        MapWindowPoints(nullptr, hwnd, reinterpret_cast<POINT*>(&rc), 2);
+                        InsetBy(rc, -line);
+                        const bool focused = GetFocus() == fields[i];
+                        FrameThick(dc, rc,
+                                   focused ? dd->theme.focusRing : dd->theme.border, line);
+                    }
+                    EndPaint(hwnd, &ps);
+                    return 0;
+                }
+                break;
+
+            case WM_CTLCOLORSTATIC:
+                // Labels and both trackbars come through here.
+                if (dd != nullptr && dd->backBrush != nullptr)
+                {
+                    SetBkMode(reinterpret_cast<HDC>(wp), TRANSPARENT);
+                    SetTextColor(reinterpret_cast<HDC>(wp),
+                                 IsWindowEnabled(reinterpret_cast<HWND>(lp))
+                                     ? dd->theme.text : dd->theme.disabledText);
+                    SetBkColor(reinterpret_cast<HDC>(wp), dd->theme.background);
+                    return reinterpret_cast<LRESULT>(dd->backBrush);
+                }
+                break;
+
+            case WM_CTLCOLOREDIT:
+                if (dd != nullptr && dd->editBrush != nullptr)
+                {
+                    SetTextColor(reinterpret_cast<HDC>(wp), dd->theme.editText);
+                    SetBkColor(reinterpret_cast<HDC>(wp), dd->theme.editBackground);
+                    return reinterpret_cast<LRESULT>(dd->editBrush);
+                }
+                break;
+
+            case WM_DRAWITEM:
+                if (dd != nullptr)
+                {
+                    const DRAWITEMSTRUCT* di = reinterpret_cast<const DRAWITEMSTRUCT*>(lp);
+                    if (di->CtlType == ODT_BUTTON)
+                    {
+                        if (di->CtlID == kIdPreview) DrawCheckBox(dd, di);
+                        else DrawPushButton(dd, di);
+                        return TRUE;
+                    }
+                }
+                break;
+
+            case WM_NOTIFY:
+                if (dd != nullptr)
+                {
+                    NMHDR* hdr = reinterpret_cast<NMHDR*>(lp);
+                    if (hdr != nullptr && hdr->code == NM_CUSTOMDRAW &&
+                        (hdr->hwndFrom == dd->shearSlider || hdr->hwndFrom == dd->axisSlider))
+                    {
+                        return DrawTrackbar(dd, reinterpret_cast<NMCUSTOMDRAW*>(lp));
+                    }
+                }
+                break;
 
             case WM_HSCROLL:
                 if (dd)
@@ -482,8 +832,8 @@ namespace
                         if (HIWORD(wp) == EN_KILLFOCUS) SyncFromEdit(dd, false);
                         return 0;
                     case kIdPreview:
-                        dd->state->previewEnabled =
-                            SendMessageW(dd->preview, BM_GETCHECK, 0, 0) == BST_CHECKED;
+                        dd->state->previewEnabled = !dd->state->previewEnabled;
+                        InvalidateRect(dd->preview, nullptr, TRUE);
                         Republish(dd);
                         return 0;
                     case kIdReset:
@@ -632,6 +982,25 @@ bool RunShearDialog(ShearDialogState& state)
         const bool nudge = msg.message == WM_KEYDOWN &&
                            (msg.wParam == VK_UP || msg.wParam == VK_DOWN) &&
                            (msg.hwnd == dd.shearEdit || msg.hwnd == dd.axisEdit);
+
+        // Enter used to be handled for free, because OK carried
+        // BS_DEFPUSHBUTTON and IsDialogMessage looks for it. That style lives
+        // in the same bits as BS_OWNERDRAW and a button cannot have both, so
+        // the key is routed here instead: to the push button that has the
+        // focus if one does, and to OK otherwise, which is what a stock dialog
+        // does with it.
+        if (msg.message == WM_KEYDOWN && msg.wParam == VK_RETURN)
+        {
+            const HWND focus = GetFocus();
+            const int focused = focus != nullptr ? GetDlgCtrlID(focus) : 0;
+            const bool onButton = focused == kIdReset || focused == IDCANCEL || focused == IDOK;
+            const int send = onButton ? focused : IDOK;
+            SendMessageW(hwnd, WM_COMMAND,
+                         MAKEWPARAM(send, BN_CLICKED),
+                         reinterpret_cast<LPARAM>(onButton ? focus : nullptr));
+            continue;
+        }
+
         if (nudge || !IsDialogMessageW(hwnd, &msg))
         {
             TranslateMessage(&msg);
@@ -639,7 +1008,11 @@ bool RunShearDialog(ShearDialogState& state)
         }
     }
 
+    // Same reason as the font: the controls were still holding these while
+    // they drew, and they are gone only once the loop is over.
     if (dd.font != nullptr) { DeleteObject(dd.font); dd.font = nullptr; }
+    if (dd.backBrush != nullptr) { DeleteObject(dd.backBrush); dd.backBrush = nullptr; }
+    if (dd.editBrush != nullptr) { DeleteObject(dd.editBrush); dd.editBrush = nullptr; }
 
     if (parent)
     {

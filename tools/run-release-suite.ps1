@@ -221,6 +221,10 @@ Run 'undo'        { & (Join-Path $PSScriptRoot 'probe-undo.ps1') } -NeedsHost
 Run 'preview mode' { & (Join-Path $PSScriptRoot 'probe-gpu.ps1') } -NeedsHost
 if (-not $SkipSlow) {
     Run 'stability' { & (Join-Path $PSScriptRoot 'probe-stability.ps1') } -NeedsHost
+    # Illustrator applies its interface brightness only at startup, so proving
+    # the dialog follows it costs a restart per setting and one more to put
+    # the machine back.
+    Run 'theme'     { & (Join-Path $PSScriptRoot 'probe-theme.ps1') } -NeedsHost
     # Shutdown restarts Illustrator four times, which is the other thing a
     # quick pass has no patience for.
     Run 'shutdown' { & (Join-Path $PSScriptRoot 'probe-shutdown.ps1') }

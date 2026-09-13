@@ -27,6 +27,7 @@ extern "C"
     AIPreferenceSuite*          sAIPreference = nullptr;
     AIStringFormatUtilsSuite*   sAIStringFormatUtils = nullptr;
     AIUndoSuite*                sAIUndo = nullptr;
+    AIUIThemeSuite*             sAIUITheme = nullptr;
 };
 
 ImportSuite gImportSuites[] =
@@ -53,7 +54,13 @@ ImportSuite gImportSuites[] =
     kAIPreferenceSuite,         kAIPreferenceVersion,           &sAIPreference,
     kAIStringFormatUtilsSuite,  kAIStringFormatUtilsVersion,    &sAIStringFormatUtils,
     kAIUndoSuite,               kAIUndoVersion,                 &sAIUndo,
-    nullptr, 0, nullptr
+
+    // Everything past this marker is optional: if the host does not
+    // have it, the pointer stays null and the plugin still loads.
+    nullptr,                    kStartOptionalSuites,           nullptr,
+    kAIUIThemeSuite,            kAIUIThemeVersion,              &sAIUITheme,
+
+    nullptr, kEndAllSuites, nullptr
 };
 
 // End LiveShearSuites.cpp

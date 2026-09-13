@@ -17,6 +17,7 @@
 #include "AIStringFormatUtils.h"
 #include "AIDocument.h"
 #include "AIArtSet.h"
+#include "AIUITheme.h"
 
 extern "C" AIMenuSuite*                 sAIMenu;
 extern "C" AIUnicodeStringSuite*        sAIUnicodeString;
@@ -40,5 +41,11 @@ extern "C" AIDocumentSuite*             sAIDocument;
 extern "C" AIPreferenceSuite*           sAIPreference;
 extern "C" AIStringFormatUtilsSuite*    sAIStringFormatUtils;
 extern "C" AIUndoSuite*                 sAIUndo;
+
+// Optional. Illustrator has reported its own interface colours for a long
+// time, but a host that did not would otherwise refuse to load the plugin over
+// a detail of how one dialog is painted. This one is allowed to be absent, and
+// the dialog falls back to the system colours when it is.
+extern "C" AIUIThemeSuite*              sAIUITheme;
 
 #endif // __LIVESHEARSUITES_H__
