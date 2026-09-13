@@ -43,7 +43,7 @@ INSTALL
 
 DID IT WORK
 
-  Effect > Distort & Transform > Shear...
+  Effect > Shear...
 
   If that entry is not there, the plugin did not load. Check that Illustrator
   was fully restarted after step 3, and that the preference points at the
@@ -52,7 +52,7 @@ DID IT WORK
 
 USING IT
 
-  Select some artwork and choose Effect > Distort & Transform > Shear...
+  Select some artwork and choose Effect > Shear...
 
   Shear Angle   how far it leans, -89 to 89 degrees
   Axis Angle    the direction the shear runs along; 0 is horizontal

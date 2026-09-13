@@ -28,6 +28,11 @@
     own sample defaults name Adobe as the publisher, which would be wrong on a
     third-party binary. */
 #define kShearProductName           "Shear for Illustrator"
+/** What the plugin calls itself in its own window. The product name says "for
+    Illustrator" because Windows file properties show it out of context, where
+    a bare "Shear" would name nothing; inside Illustrator the context is the
+    window it is sitting in, and the qualifier is just noise. */
+#define kShearDisplayName           "Shear"
 #define kShearCompanyName           "VulpesNexus"
 // Named the way the other plugin repositories name it, and saying which
 // license the binary is actually distributable under: a bare GPL would not
@@ -45,19 +50,52 @@
    whatever the compiler guessed the file's encoding was. */
 #define LS_WIDEN2(x)                L ## x
 #define LS_WIDEN(x)                 LS_WIDEN2(x)
-#define LS_WVERSION                 LS_WIDEN(kShearVersionString)
+#define LS_WDISPLAYNAME             LS_WIDEN(kShearDisplayName)
+/* Widened a number at a time. kShearDisplayVersion is three string literals
+   side by side, not one token, and the paste above only ever reaches the
+   first of them. */
+#define LS_WDISPLAYVERSION          LS_WIDEN(LS_STRINGIFY(kShearVersionMajor)) L"." \
+                                    LS_WIDEN(LS_STRINGIFY(kShearVersionMinor)) L"." \
+                                    LS_WIDEN(LS_STRINGIFY(kShearVersionPatch))
 
 #define LS_COPY                     L"\x00A9"   /* U+00A9 copyright sign */
 
 #define LS_REPO_URL                 L"https://github.com/VulpesNexus/liveshear"
 #define LS_AUTHOR_URL               L"https://github.com/VulpesNexus"
 
-/** Release version. Keep in step with the version resource, the README, and
-    the name of the distribution archive. */
+/** Release version. Keep in step with the README and the name of the
+    distribution archive; the version resource is built from these.
+
+    Two forms, deliberately. kShearVersionString is the build: it carries the
+    release-candidate suffix, and it is what the file version, the archive
+    name, and the script bridge report, so a downloaded binary can be tied back
+    to the release it came from. kShearDisplayVersion is the release: three
+    numbers, no suffix, and it is what the About window shows.
+
+    The display form is built from the numbers rather than written out, and the
+    two are checked against each other below, so they cannot drift. */
 #define kShearVersionMajor          0
 #define kShearVersionMinor          1
 #define kShearVersionPatch          0
-#define kShearVersionString         "0.1.0-rc.4"
+#define kShearVersionString         "0.1.0-rc.5"
+
+#define LS_STRINGIFY2(x)            #x
+#define LS_STRINGIFY(x)             LS_STRINGIFY2(x)
+#define kShearDisplayVersion        LS_STRINGIFY(kShearVersionMajor) "." \
+                                    LS_STRINGIFY(kShearVersionMinor) "." \
+                                    LS_STRINGIFY(kShearVersionPatch)
+
+#ifdef __cplusplus
+namespace liveshearid {
+    constexpr bool StartsWith(const char* text, const char* prefix)
+    {
+        return *prefix == '\0' ? true
+             : (*text == *prefix && StartsWith(text + 1, prefix + 1));
+    }
+}
+static_assert(liveshearid::StartsWith(kShearVersionString, kShearDisplayVersion),
+              "kShearVersionString and the major.minor.patch numbers disagree.");
+#endif
 
 /** PERSISTENT. Unique, non-localized name of the custom live effect, stored in
     saved documents. It must never change once anything has been saved with it;
@@ -71,8 +109,11 @@
 /** Menu item text. The ellipsis is the platform convention for a command that
     opens a dialog, and matches Adobe's own "Shear..." under Object > Transform. */
 #define kShearEffectMenuTitle       "Shear..."
-/** Submenu of the Effect menu the item is added to. */
-#define kShearEffectCategory        "Distort & Transform"
+/* There is no category here on purpose. Illustrator files a third-party
+   effect category under a menu group it names "Live 3rd Party " plus the
+   category, so a category never joins one of Adobe's own submenus -- it makes
+   a second submenu next to it, wearing the same name. The item goes on the
+   Effect menu itself instead. See LIVE_SHEAR_INVESTIGATION.md. */
 
 /** Our own group in the Help > About Plug-ins menu. The SDK's defaults put
     third-party plugins under "About SDK Plug-ins" and describe them as Adobe

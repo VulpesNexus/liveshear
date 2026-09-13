@@ -8,6 +8,10 @@ plugin/plugin.pipl
 *.lib
 *.exp
 
+# Harness build output (tools/AboutHarness/build.cmd).
+tools/AboutHarness/*.exe
+tools/AboutHarness/*.res
+
 # Visual Studio user state.
 *.user
 *.suo

@@ -81,17 +81,17 @@ const char* const kBodyRtf =
        headings and seven lines of prose, and check the picture after editing
        it. The template's geometry is shared with the other plugins and is not
        the thing to change. */
-    "{\\b Effect > Distort & Transform > Shear...}\\line "
+    "{\\b Effect > Shear...}\\line "
     "Shears artwork by an angle along an axis, and stays editable in the "
-    "{\\i Appearance} panel. Illustrator's own {\\i Transform} effect offers "
-    "move, scale, rotate and reflect, and stops there.\\par "
+    "{\\i Appearance} panel.\\par "
 
     "{\\b It leaves the artwork alone}\\line "
     "Text stays live text, paths stay editable paths, and deleting the effect "
-    "gives back exactly what you started with.\\par "
+    "gives back what you started with. Without the plugin installed the shear "
+    "still draws; it just cannot be edited.\\par "
 
     "{\\b It anchors where the native command does}\\line "
-    "On the center of the geometric bounds, the same point "
+    "On the center of the geometric bounds, the point "
     "{\\i Object > Transform > Shear} uses."
     "}";
 
@@ -256,8 +256,14 @@ INT_PTR CALLBACK AboutProc(HWND dlg, UINT msg, WPARAM wParam, LPARAM lParam)
         if (st->legal) SendDlgItemMessageW(dlg, IDC_ABOUT_LEGAL, WM_SETFONT,
                                            reinterpret_cast<WPARAM>(st->legal), TRUE);
 
+        /* The name and the release, and nothing else. Not the product name --
+           "Shear for Illustrator" is for Windows file properties, where there
+           is no context to say which application this belongs to; here the
+           window is already sitting in it. And not the build string either:
+           the release-candidate suffix belongs on the download, not on the
+           window a user opens to see what they have. */
         SetDlgItemTextW(dlg, IDC_ABOUT_TITLE,
-            L"<a href=\"" LS_REPO_URL L"\">Shear for Illustrator " LS_WVERSION L"</a>");
+            L"<a href=\"" LS_REPO_URL L"\">" LS_WDISPLAYNAME L" " LS_WDISPLAYVERSION L"</a>");
 
         FillBody(dlg, st->theme);
 

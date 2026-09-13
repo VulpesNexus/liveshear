@@ -1,6 +1,6 @@
 # LiveShear
 
-A non-destructive **Shear** effect for Adobe Illustrator, at *Effect > Distort & Transform > Shear…*.
+A non-destructive **Shear** effect for Adobe Illustrator, at *Effect > Shear…*.
 
 <p align="center"><img src="docs/shear-dialog.png" alt="The Shear dialog, drawn in Illustrator's dark interface colors: a Shear Angle slider reading 5.0 degrees, an Axis Angle slider reading 0.0 degrees, a ticked Preview check box, and Reset, Cancel, and OK buttons." width="460"></p>
 
@@ -16,7 +16,7 @@ This adds it. The artwork underneath is never touched — text stays live text, 
 
 Quit Illustrator first. It reads its plugin folders only at startup, and holds the *.aip* open while it runs, so a file in use cannot be replaced.
 
-Download *LiveShear-0.1.0-rc.4.zip* from the [latest release](../../releases/latest) and put *LiveShear.aip* in
+Download *LiveShear-0.1.0-rc.5.zip* from the [latest release](../../releases/latest) and put *LiveShear.aip* in
 
 ```
 %LOCALAPPDATA%\Adobe Illustrator Plug-ins\30
@@ -34,7 +34,9 @@ To uninstall, delete the *.aip*, or run `.\tools\install.ps1 -Uninstall`. Nothin
 
 ## Use
 
-Select some artwork and choose *Effect > Distort & Transform > Shear…*.
+Select some artwork and choose *Effect > Shear…*.
+
+It sits on the *Effect* menu itself, below Illustrator's own submenus, with the other third-party effects. Not inside *Distort & Transform*, where it would read as one of Adobe's — and not in a submenu of its own either, since it is one command. Illustrator will not let a third-party effect join one of its own submenus in any case; what looks like the way to do it builds a second submenu wearing the same name. There is a way around that, and it costs a working *Apply Last Effect*; [the investigation](LIVE_SHEAR_INVESTIGATION.md#where-the-menu-item-goes) has the measurements.
 
 - **Shear Angle** is how far the artwork leans, in degrees, from −89° to 89°. Positive values lean the leading edge forward, the same direction Illustrator's own *Shear* command leans it.
 - **Axis Angle** is the direction the shear runs along. At 0° the shear is horizontal, the familiar italic slant; at 90° it is vertical. An axis of φ and one of φ + 180° describe the same shear.

@@ -158,7 +158,6 @@ ASErr LiveShearPlugin::AddLiveEffects(SPInterfaceMessage* message)
     char nameStr[]      = kShearEffectName;
     char titleStr[]     = kShearEffectTitle;
     char menuTitleStr[] = kShearEffectMenuTitle;
-    char categoryStr[]  = kShearEffectCategory;
 
     AILiveEffectData effectData;
     effectData.self = message->d.self;
@@ -178,7 +177,22 @@ ASErr LiveShearPlugin::AddLiveEffects(SPInterfaceMessage* message)
     if (error) return error;
 
     AddLiveEffectMenuData menuData;
-    menuData.category = categoryStr;
+    /* No submenu: the item sits on the Effect menu itself, among the
+       third-party effects, and Illustrator puts it in its "Effects 3rd Party"
+       group.
+
+       A category here would not do what it looks like it does. Illustrator
+       files a third-party category in a menu group it names "Live 3rd Party "
+       plus the category, always -- so "Distort & Transform" did not join
+       Adobe's submenu of that name, it made a second one beside it, and since
+       the group name is also the submenu's label, the bare ampersand was eaten
+       as a Windows mnemonic and it read "Distort  Transform".
+
+       Adobe's own submenu can in fact be reached, by creating that third-party
+       group next to it before the host does. It was tried, and it costs: an
+       item there stops responding to Effect > Apply Last Effect, silently.
+       See LIVE_SHEAR_INVESTIGATION.md. */
+    menuData.category = nullptr;
     menuData.title = menuTitleStr;
     menuData.options = 0;
 

@@ -38,7 +38,7 @@ The build probe reports the working tree as it stood when it ran. The record cit
 
 ## C. Architecture
 
-One standalone live effect, registered as a post-effect accepting any input art but plugin groups, at *Effect > Distort & Transform > Shear…*. Its `Go` handler reads two angles from the parameter dictionary, takes the center of the incoming artwork's geometric bounds as the reference point, builds one matrix, and calls `AITransformArtSuite::TransformArt` once.
+One standalone live effect, registered as a post-effect accepting any input art but plugin groups, at *Effect > Shear…*. Its `Go` handler reads two angles from the parameter dictionary, takes the center of the incoming artwork's geometric bounds as the reference point, builds one matrix, and calls `AITransformArtSuite::TransformArt` once.
 
 It is not an extension of Adobe's *Transform* effect because it cannot be: that effect has no shear state to expose, and no public interface adds behavior to an effect another plugin registered. [LIVE_SHEAR_INVESTIGATION.md](../LIVE_SHEAR_INVESTIGATION.md) has the evidence for both.
 

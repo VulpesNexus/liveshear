@@ -127,7 +127,12 @@ Check 'the symbol reference is a bare file name' (($pdbNames.Count -eq 1) -and (
 Check 'the entry point Illustrator looks for is exported' ($ascii -match 'PluginMain') 'PluginMain is in the export table'
 Check 'the plugin metadata resource is present' ($ascii -match 'ADBEkind' -or $ascii -match 'PiPL') 'the PIPL resource is in the binary'
 Check 'the effect name that documents store is unchanged' ($ascii -match 'VulpesNexus Shear') 'VulpesNexus Shear'
-Check 'the menu entry reads as a plain Adobe command' (($ascii -match 'Distort & Transform') -and ($ascii -match 'Shear\.\.\.')) 'Effect > Distort & Transform > Shear...'
+Check 'the menu entry reads as a plain Adobe command' ($ascii -match 'Shear\.\.\.') 'Effect > Shear...'
+# The category is gone on purpose: Illustrator files a third-party category
+# under a group it names "Live 3rd Party " plus the category, so it never joins
+# the Adobe submenu of the same name -- it builds a second one beside it. A
+# category string reappearing in the binary would mean that came back.
+Check 'the effect claims no submenu of its own' (-not ($ascii -match 'Distort & Transform')) 'no effect category is compiled in'
 Check 'no debug trace is on by default' ($ascii -match 'LIVESHEAR_LOG') 'tracing is behind the LIVESHEAR_LOG environment variable'
 
 Check 'the source this was built from is identified' ([bool] $commit) ("commit {0}" -f $(if ($commit) { $commit.Trim() } else { 'unknown' }))

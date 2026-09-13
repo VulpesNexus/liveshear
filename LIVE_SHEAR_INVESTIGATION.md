@@ -157,11 +157,59 @@ The plugin registers one effect:
 
 - unique name `VulpesNexus Shear`, title **Shear**, version 1.0
 - registered as `kPostEffectFilter`, accepting `kAnyInputArtButPluginArt`
-- menu item at *Effect > Distort & Transform > Shear…*
+- menu item at *Effect > Shear…* — see [Where the menu item goes](#where-the-menu-item-goes)
 
 Its `Go` handler reads two reals from the parameter dictionary, takes the center of the incoming art's bounds as the anchor, builds the matrix from section B, and calls `AITransformArtSuite::TransformArt` once, with `kTransformObjects | kTransformChildren`, the gradient and pattern flags, and `kTransformLinkedMasks`. That is the entire implementation: about forty lines of arithmetic and one API call.
 
 The rendered result was measured the same way the native command was — apply, expand the appearance, solve the affine from the anchor points — over seven parameter combinations including three arbitrary axis angles. **Every one matches the formula exactly, and matches what *Object > Transform > Shear* produces for the same numbers.** A 200 × 120 pt rectangle sheared 30° renders with its left edge at 65.358984 and its right edge at 334.641016 under both routes, to six decimal places.
+
+### Where the menu item goes
+
+For three releases the effect registered itself with the category `Distort & Transform`, on the reasonable assumption that naming Illustrator's own submenu would put the item in it. It does not, and the menu read *Distort  Transform* — two spaces, no ampersand — which is what finally got this looked at.
+
+`AIMenuSuite::CountMenuGroups` and `GetNthMenuGroup` list every menu group the host holds, and that list settles it. Illustrator's own submenu is a group named `Live Vector &Distort && Transform`; ours was a second group named `Live 3rd Party Distort & Transform`. The prefix is not conditional. Four categories were registered on throwaway effects and the group each landed in was read back from `AddLiveEffectMenuItem`'s own out-parameter:
+
+| Category passed | Group the item landed in |
+| --- | --- |
+| `Distort & Transform` | `Live 3rd Party Distort & Transform` |
+| `Distort && Transform` | `Live 3rd Party Distort && Transform` |
+| `&Distort && Transform` | `Live 3rd Party &Distort && Transform` |
+| `Live Vector &Distort && Transform` | `Live 3rd Party Live Vector &Distort && Transform` |
+
+So `"Live 3rd Party "` is pasted on whatever it is given, and **a category can never name an Adobe submenu**. It names a new one beside it. And because the group name is also the submenu's label, and the label goes through Windows mnemonic handling, the bare `&` was read as a mnemonic prefix on the following space and eaten — Adobe's own group name spells it `&&`, with `&D` marking the accelerator.
+
+**Adobe's submenu can be reached, by a different route.** A menu group is looked up by exact name, and the header says adding one that exists returns the existing one — so creating `Live 3rd Party Distort & Transform` *before Illustrator does*, with Adobe's group named as the near group, puts it inside Adobe's submenu, and the host's own effect item then lands there. It works: both groups report the same `AIPlatformMenuHandle` from `GetMenuGroupRange`, Adobe's items at 0–7 and ours at 7, while a third submenu (`Live Vector &Stylize`) reports a different handle — the control that makes the shared handle mean something.
+
+Two things had to be got right for that. The group cannot be created during `StartupPlugin`: plug-in load order is indeterminate, Adobe's group does not exist yet, and naming it as the near group fails with `kBadParameterErr`. It has to happen from `kAIApplicationStartedNotifier`, which the SDK's `Plugin` framework already subscribes to and surfaces as `PostStartupPlugin()`. And the near-group name has to carry the mnemonic markup exactly: `Live Vector Distort & Transform` fails where `Live Vector &Distort && Transform` succeeds.
+
+**It was not shipped, because it costs *Apply Last Effect*.** Measured across four placements, each a fresh Illustrator, each applying the effect through its own menu item and then reapplying to a second object:
+
+| Placement | Group | Effect applies | *Apply Last Effect* |
+| --- | --- | --- | --- |
+| Registered at startup, category `Distort & Transform` | `Live 3rd Party Distort & Transform` | yes | works |
+| Registered at `PostStartupPlugin`, same category | same | yes | works |
+| Group pre-created in the usual third-party place | same | yes | works |
+| Group pre-created inside Adobe's submenu | same | yes | **does nothing** |
+
+The third row is the discriminator: creating the group ahead of the host is harmless, so it is the *position* that breaks it, not the pre-creation. In the broken case *Effect > Apply Last Effect* returns without error and leaves the artwork alone, while its sibling *Effect > Last Effect*, which reopens the dialog, still works. Illustrator's last-effect bookkeeping evidently expects the item to be in the third-party part of the menu, and nothing in the SDK exposes it — there is no call to set the last effect, only the notifier strings `kAIAdobeApplyLastEffectCommandPreNotifierStr` and friends.
+
+Given the choice between a cosmetic placement and a menu command that silently does nothing, the item went to the top level of the *Effect* menu instead: no category at all, which puts it in Illustrator's `Effects 3rd Party` group with one line and no submenu wrapped around one command. *Apply Last Effect* works there.
+
+### On identifiers, when many plugins are installed
+
+Every name a plugin registers — the effect's unique name, menu group names, the plugin's own name — lives in one flat namespace shared with every other plugin and with Adobe's. Nothing enforces uniqueness. Registering a name that is already taken was tried three times and the host's answer read back each time:
+
+| Name registered a second time | `AddLiveEffect` returned | The name then resolves to |
+| --- | --- | --- |
+| `VulpesNexus Shear`, this plugin's own | `0` — success | the **first** registration |
+| `Adobe Transform`, Illustrator's own | `0` — success | the **first** registration |
+| `VulpesNexus Nobody`, taken by nothing | `0` — success | the second, i.e. the new one |
+
+The third row is the control: lookup does return newly registered effects, so "the first" in the other two rows is a real finding and not an artifact. **A duplicate is accepted silently and then ignored.** Two plugins claiming one effect name would not produce an error anywhere; the one that loaded first would answer for both, and a document saved by the second would render through the first one's code.
+
+There is no registry and no allocation authority, so the only defense is the name itself. Everything persistent here carries a publisher prefix — `VulpesNexus Shear` for the effect, `VulpesNexusAboutPluginsGroupName` for the Help group — which is the same convention Adobe follows with `Adobe Transform`. A collision then needs another vendor to choose the identical string, prefix included.
+
+Two things are *not* at risk, which is worth saying because they look like they would be. Parameter dictionary keys (`shearAngle`, `axisAngle`) live inside the effect's own parameter dictionary, one per effect instance, so they cannot meet another plugin's keys. And the keyboard-shortcut dictionary key of the effect's menu item is derived by the host as `"Live "` plus the effect name — `Live VulpesNexus Shear` — so it inherits whatever uniqueness the effect name has and adds no new surface.
 
 ### One thing the host was thought to have refused
 

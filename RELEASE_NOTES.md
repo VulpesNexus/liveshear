@@ -1,5 +1,19 @@
 # Release notes
 
+## 0.1.0-rc.5
+
+Everything in rc.4, and:
+
+- **The effect is at *Effect > Shear…* now**, on the *Effect* menu itself rather than in a submenu. It used to register the category *Distort & Transform*, which looked like it would put it in Illustrator's submenu of that name and does not: Illustrator files a third-party category under a group it names *Live 3rd Party* plus the category, so what appeared was a **second** *Distort & Transform* submenu next to Adobe's — and since that group name is also the submenu's label, and labels go through Windows mnemonic handling, the bare ampersand was eaten and it read *Distort  Transform*.
+
+  Adobe's own submenu can in fact be reached, by creating that third-party group next to Adobe's before the host creates it. It was built and measured, and it is not shipped: an item placed there stops responding to *Effect > Apply Last Effect*, which then returns without error and does nothing. The tables are in [LIVE_SHEAR_INVESTIGATION.md](LIVE_SHEAR_INVESTIGATION.md#where-the-menu-item-goes).
+
+- **The About window shows the name and the release**, *Shear 0.1.0*, instead of the product name and the build string. The release-candidate suffix belongs on the download; it is still on the *.aip*'s file version and in the archive name, so a binary can still be traced back to the release it came from. The two forms are now built from the same three numbers and checked against each other at compile time.
+
+- **The About window says what happens without the plugin.** A document made with the effect still draws the shear on a machine that does not have it; it just cannot be edited there. That was already in the README and is now in the window itself, where someone about to send a file will see it.
+
+- **An About-dialog harness**, at *tools/AboutHarness/*, which builds the plugin's own dialog and resource into a standalone executable so the window can be looked at — in both themes — without Illustrator. The prose does not scroll and nothing warns when it overflows, so this is how the wording above got checked.
+
 ## 0.1.0-rc.4
 
 Everything in rc.3, and:
