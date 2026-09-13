@@ -32,7 +32,9 @@ Both configurations rebuild from clean with zero warnings and zero errors. The R
 
 **It needs nothing installed alongside it.** Its dependencies are Windows system libraries, the Universal CRT — part of Windows 10 and later — and `MSVCP140.dll`, `VCRUNTIME140.dll` and `VCRUNTIME140_1.dll`. Those three are named by *Illustrator.exe* itself, so a machine that can start Illustrator already has them and no redistributable is required. Nothing from the SDK, from the developer's machine, or from the test harness is linked.
 
-The build probe reports the working tree as it stood when it ran, which during development is "not clean". The packaged release is assembled by *tools/make-release.ps1* from a clean tree after the final commit; that script refuses to pack a binary claiming Adobe as its publisher, or one carrying an absolute path from this machine.
+**What ties this artifact to that source is the commit, not the hash.** MSVC stamps a link timestamp into the PE header, so building the same source twice gives two different files: three builds of this source produced three different SHA-256s. Hash reproducibility would need `/Brepro`, which this project does not set. So the chain is: the build probe rebuilds both configurations from clean, records the commit it was at *and* whether the working tree was clean, and hashes what came out; the packaged archive is assembled from that same file rather than from a fresh build, so the binary a user receives is the one whose hash is in the evidence.
+
+The build probe reports the working tree as it stood when it ran. The record cited here was taken after the final commit, on a clean tree, and the same binary was then installed and driven through the whole suite before being packed. *tools/make-release.ps1* refuses to pack a binary claiming Adobe as its publisher, or one carrying an absolute path from this machine.
 
 ## C. Architecture
 

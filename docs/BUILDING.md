@@ -130,6 +130,33 @@ Each writes its raw output under *docs/evidence/*. [RELEASE_TEST_MATRIX.md](RELE
 
 The measurement library the probes share is *tools/harness.jsx*. Illustrator keeps the globals of one `DoJavaScript` call alive for the next, so it is sent once per session and every probe afterward is a short call into `LS.*`. Its fixtures are deliberately asymmetric: a centered square cannot tell a geometric anchor from a visible one.
 
+## Cutting a release
+
+The order matters, because the build probe rebuilds and a rebuild is not the same file.
+
+MSVC stamps a link timestamp into the binary, so building the same source twice produces two different SHA-256s. Nothing here sets `/Brepro`. That means the binary cannot be tied to its source by hash alone, and it means a suite that rebuilds halfway through has stopped testing the artifact it started with.
+
+So:
+
+```powershell
+git commit ...                                  # a clean tree first
+.	ools\probe-build.ps1                          # rebuild, record the commit and the hash
+.	ools\install.ps1                              # install that exact file
+.	oolsun-release-suite.ps1 -SkipBuildProbe    # test it without rebuilding it
+.	ools\make-release.ps1 -SkipBuild              # pack the file that was tested
+```
+
+What ties the artifact to the source is *tools/probe-build.ps1* recording the commit it built at and whether the working tree was clean, in [evidence/build.txt](evidence/build.txt), alongside the hash of what came out. Everything after that step uses that same file.
+
+Before committing, both gates:
+
+```powershell
+python .workspace	ools\housestyle.py --check <repo>
+python .workspace	ools\privacy.py --check --tracked <repo>
+```
+
+The second one matters here more than in most repositories: the probes write paths into the evidence, and the evidence is committed. Every probe transcript and result file goes through `Hide-Personal` in *tools/ai.ps1* on the way out, so a generated file comes back redacted rather than needing to be scrubbed each time.
+
 ## The scripting bridge
 
 The plugin answers `app.sendScriptMessage("LiveShear", selector, arguments)` with a set of selectors used by the probes: `version`, `log`, `registry`, `appearance`, `selection`, `geometry`, `matrix`, `apply effect`, `set param`, `delete param`, `move effect`, `remove effect`, `count effects`, `bounds`, `bounds flags`, `edit effect`, and `native shear`.

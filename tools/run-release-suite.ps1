@@ -28,7 +28,19 @@ param(
     [switch] $SkipSlow,
     # Run every probe in one Illustrator session, the way the suite used to.
     # Faster, and not reproducible: see Reset-Host below.
-    [switch] $SameHost
+    [switch] $SameHost,
+    # Leave the built artifact alone.
+    #
+    # probe-build.ps1 rebuilds both configurations, which replaces the very
+    # binary the rest of the suite is testing. MSVC stamps a link timestamp, so
+    # the rebuilt file is not byte-identical to the installed one even from
+    # identical source -- and then the artifact that was tested is not the
+    # artifact that gets packed.
+    #
+    # For a release: commit, run probe-build.ps1 once to rebuild and record the
+    # commit and hash, install that binary, run this suite with
+    # -SkipBuildProbe, and pack with make-release.ps1 -SkipBuild.
+    [switch] $SkipBuildProbe
 )
 
 $ErrorActionPreference = 'Continue'
@@ -177,7 +189,8 @@ Invoke-AiScript 'app.userInteractionLevel = UserInteractionLevel.DONTDISPLAYALER
 Write-Output ('Plugin: ' + ((Send-AiMessage version) -replace "`r?`n", ' | '))
 
 Run 'solvers'     { python (Join-Path $PSScriptRoot 'test-solvers.py') (Join-Path $evidence 'solvers.tsv') }
-Run 'built artifact' { & (Join-Path $PSScriptRoot 'probe-build.ps1') }
+if (-not $SkipBuildProbe) { Run 'built artifact' { & (Join-Path $PSScriptRoot 'probe-build.ps1') } }
+else { Write-Output ''; Write-Output '=== built artifact ==='; Write-Output 'skipped, so the binary under test stays the one that was installed' }
 Run 'arithmetic'  { & (Join-Path $PSScriptRoot 'run-mathtest.ps1') }
 Run 'anchor'      { & (Join-Path $PSScriptRoot 'probe-anchor.ps1') } -NeedsHost
 Run 'anchor verdicts' { python (Join-Path $PSScriptRoot 'solve-anchor.py') (Join-Path $evidence 'anchor.tsv') }

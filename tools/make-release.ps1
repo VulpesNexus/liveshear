@@ -30,6 +30,12 @@ $symbols = Join-Path $repo 'build\Release\LiveShear.pdb'
 if (-not $SkipBuild) {
     & (Join-Path $PSScriptRoot 'build.ps1') -Configuration Release -SdkRoot $SdkRoot | Out-Null
     Write-Output 'Built.'
+    Write-Output 'Note: this is a fresh build, so its hash will not match the one in'
+    Write-Output '      docs/evidence/build.txt -- MSVC stamps a link timestamp, and'
+    Write-Output '      building the same source twice gives two different files. For a'
+    Write-Output '      release, run tools\probe-build.ps1 first and then pack with'
+    Write-Output '      -SkipBuild, so the packed binary is the one that was inspected,'
+    Write-Output '      hashed, installed, and tested.'
 }
 if (-not (Test-Path $binary)) { throw "Build output not found: $binary" }
 
