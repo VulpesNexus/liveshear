@@ -1,10 +1,10 @@
 Live Shear -- the built artifact
-Run at 2026-09-13 18:31:51
+Run at 2026-09-13 19:40:52
 Windows 10.0.26200.0
 
 Toolchain: MSVC 14.44.35207
 SDK:       Adobe Illustrator 2026 SDK
-Commit:    e755668882067bfeaa60a87f80fd3307df39a224
+Commit:    aaad8ef02e9da13eada4a21a97593bb05c08930a
 
 [PASS] Release builds with no warnings and no errors
        0 warnings, 0 errors
@@ -17,9 +17,9 @@ File version:   0.1.0-rc.3
 Company:        VulpesNexus
 Product:        Shear for Illustrator
 Description:    Non-destructive Shear effect for Adobe Illustrator
-Copyright:      Copyright (C) 2026 VulpesNexus. Licensed under the GNU GPL version 3 or later.
+Copyright:      Copyright (C) 2026 Vixen420. GPL-3.0-or-later, with an Adobe Illustrator SDK linking exception.
 Size:           174 592 bytes
-SHA-256:        0825B3ABBB69679F12F2E3BDDC39E048D3070796C0D4E70915984AD75DD85E04
+SHA-256:        65DD27DE684C0057CE60EA2F6DF2158FF2BEC493B3A137685EC9596DD4E595B1
 
 [PASS] the binary does not claim Adobe as its publisher
        CompanyName is VulpesNexus
@@ -44,7 +44,7 @@ SHA-256:        0825B3ABBB69679F12F2E3BDDC39E048D3070796C0D4E70915984AD75DD85E04
 [PASS] no debug trace is on by default
        tracing is behind the LIVESHEAR_LOG environment variable
 [PASS] the source this was built from is identified
-       commit e755668882067bfeaa60a87f80fd3307df39a224
+       commit aaad8ef02e9da13eada4a21a97593bb05c08930a
 [PASS] the working tree was clean when it was built
        0 uncommitted change(s)
 
