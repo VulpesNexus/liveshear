@@ -55,6 +55,7 @@ namespace introspect
         so the fallback that walks the art can be held against the host's own
         answer even on artwork where the host answers first. */
     std::string DumpSelectionBounds();
+    std::string DumpBoundsFlags();
 
     /** Moves the nth post-effect of every selected object to another position
         in the stack, which is what dragging an entry in the Appearance panel

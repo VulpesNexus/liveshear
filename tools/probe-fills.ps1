@@ -100,7 +100,7 @@ foreach ($name in $Fixture) {
     # --- the live effect ---
     Js "LS.clear(); LS.target = LS.fixtures['$name'](); LS.selectOnly(LS.target);" | Out-Null
     Js 'app.redraw();' | Out-Null
-    Js ("LS.shear({0}, {1});" -f $ShearAngle, $AxisAngle) | Out-Null
+    Js ("LS.shear({0}, {1});" -f (Format-AiNumber $ShearAngle), (Format-AiNumber $AxisAngle)) | Out-Null
     Js 'app.activeDocument.selection = null; app.redraw();' | Out-Null
     $live = Join-Path $ImageFolder "$name-effect.png"
     Export-Png $live
@@ -122,7 +122,7 @@ foreach ($name in $Fixture) {
         # the same one, and a zero-angle pass first, because it reads a cached
         # selection box that a scripted selection does not refresh.
         Js "LS.send('native shear', '0,0,0,0,0,1,$patterns');" | Out-Null
-        $moved = Js ("LS.send('native shear', '{0},{1},0,0,0,1,{2}');" -f $ShearAngle, $AxisAngle, $patterns)
+        $moved = Js ("LS.send('native shear', '{0},{1},0,0,0,1,{2}');" -f (Format-AiNumber $ShearAngle), (Format-AiNumber $AxisAngle), $patterns)
         Js 'app.activeDocument.selection = null; app.redraw();' | Out-Null
         $native = Join-Path $ImageFolder ("{0}-native-patterns{1}.png" -f $name, $patterns)
         Export-Png $native

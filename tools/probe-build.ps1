@@ -52,18 +52,28 @@ if (-not (Test-Path $vswhere)) { throw 'vswhere.exe not found; install Visual St
 # both MSBuild and a C++ toolchain rather than whichever is latest.
 $msbuild = $null
 $toolsVersion = $null
+$dumpbin = $null
 foreach ($candidate in (& $vswhere -products * -requires Microsoft.Component.MSBuild -format value -property installationPath)) {
     $exe = Join-Path $candidate 'MSBuild\Current\Bin\MSBuild.exe'
     $versionFile = Join-Path $candidate 'VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt'
     if ((Test-Path $exe) -and (Test-Path $versionFile)) {
         $msbuild = $exe
         $toolsVersion = (Get-Content $versionFile -Raw).Trim()
+        $dumpbin = Join-Path $candidate ("VC\Tools\MSVC\{0}\bin\Hostx64\x64\dumpbin.exe" -f $toolsVersion)
         break
     }
 }
 if (-not $msbuild) { throw 'No Visual Studio installation with both MSBuild and a C++ toolchain was found.' }
 Note ("Toolchain: MSVC {0}" -f $toolsVersion)
 Note ("SDK:       Adobe Illustrator 2026 SDK")
+
+# Which source this artifact came from. A release report that cannot say that
+# describes a binary nobody can identify again.
+$commit = (& git -C $repo rev-parse HEAD 2>$null)
+$dirty = @(& git -C $repo status --porcelain 2>$null)
+if ($commit) {
+    Note ("Commit:    {0}{1}" -f $commit.Trim(), $(if ($dirty.Count) { ' (working tree not clean)' } else { '' }))
+}
 Note ''
 
 foreach ($configuration in @('Release', 'Debug')) {
@@ -119,6 +129,43 @@ Check 'the plugin metadata resource is present' ($ascii -match 'ADBEkind' -or $a
 Check 'the effect name that documents store is unchanged' ($ascii -match 'VulpesNexus Shear') 'VulpesNexus Shear'
 Check 'the menu entry reads as a plain Adobe command' (($ascii -match 'Distort & Transform') -and ($ascii -match 'Shear\.\.\.')) 'Effect > Distort & Transform > Shear...'
 Check 'no debug trace is on by default' ($ascii -match 'LIVESHEAR_LOG') 'tracing is behind the LIVESHEAR_LOG environment variable'
+
+Check 'the source this was built from is identified' ([bool] $commit) ("commit {0}" -f $(if ($commit) { $commit.Trim() } else { 'unknown' }))
+Check 'the working tree was clean when it was built' ($dirty.Count -eq 0) ("{0} uncommitted change(s)" -f $dirty.Count)
+
+# --- what a machine that is not this one would have to supply -------------
+#
+# The interesting question is not which DLLs the plugin names but whether a
+# user could be missing any of them. Windows supplies its own; the Universal
+# CRT is part of Windows 10 and later; and the three Visual C++ runtime files
+# are not, which would normally mean an installation note. They are named by
+# Illustrator's own executable too, though, so a machine that can start
+# Illustrator already has them and the plugin adds nothing to install.
+if (Test-Path $dumpbin) {
+    $hostExe = 'C:\Program Files\Adobe\Adobe Illustrator 2026\Support Files\Contents\Windows\Illustrator.exe'
+    $ours = @((& $dumpbin /dependents $binary) -match '^\s+\S+\.dll\s*$' | ForEach-Object { $_.Trim() })
+    Note ''
+    Note ("Depends on: {0}" -f ($ours -join ', '))
+
+    $system = '^(KERNEL32|USER32|GDI32|COMCTL32|ADVAPI32|SHELL32|OLE32|OLEAUT32|SHLWAPI|COMDLG32|WINSPOOL|UxTheme)\.dll$'
+    $ucrt = '^api-ms-win-crt-'
+    $vcredist = '^(MSVCP140|VCRUNTIME140)(_\w+)?\.dll$'
+
+    $unexpected = @($ours | Where-Object { $_ -notmatch $system -and $_ -notmatch $ucrt -and $_ -notmatch $vcredist })
+    Check 'nothing is linked but Windows and the C runtime' ($unexpected.Count -eq 0) `
+        $(if ($unexpected.Count -eq 0) { 'no SDK, developer, or test-harness DLL is named' } else { 'unexpected: ' + ($unexpected -join ', ') })
+
+    $needed = @($ours | Where-Object { $_ -match $vcredist })
+    if (Test-Path $hostExe) {
+        $hostNeeds = @((& $dumpbin /dependents $hostExe) -match '^\s+\S+\.dll\s*$' | ForEach-Object { $_.Trim() })
+        $unmet = @($needed | Where-Object { $hostNeeds -notcontains $_ })
+        Check 'the C runtime it needs is one Illustrator already needs' ($unmet.Count -eq 0) `
+            $(if ($unmet.Count -eq 0) { ("Illustrator.exe names the same {0}, so no redistributable has to be installed for the plugin" -f ($needed -join ', ')) } else { 'Illustrator does not name: ' + ($unmet -join ', ') })
+    }
+    else {
+        Note '       (Illustrator not installed here, so the runtime comparison was skipped)'
+    }
+}
 
 Note ''
 Note ("{0} passed, {1} failed" -f $script:pass, $script:fail)

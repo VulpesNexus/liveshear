@@ -1,0 +1,6 @@
+probe	group	case	expected	observed	status
+persistence	save and reopen	one effect on a path	same bounds, effect present, edit survives a second round trip	reopen True, present True, edited reopen True	PASS
+persistence	save and reopen	one effect on live text	same bounds, effect present, edit survives a second round trip	reopen True, present True, edited reopen True	PASS
+persistence	save and reopen	one effect on stroked art	same bounds, effect present, edit survives a second round trip	reopen True, present True, edited reopen True	PASS
+persistence	save and reopen	two Shear effects	same bounds, effect present, edit survives a second round trip	reopen True, present True, edited reopen True	PASS
+persistence	save and reopen	Shear plus Transform	same bounds, effect present, edit survives a second round trip	reopen True, present True, edited reopen True	PASS

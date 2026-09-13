@@ -267,6 +267,10 @@ ASErr LiveShearPlugin::HandleScriptMessage(const char* selector, AIScriptMessage
     {
         result = introspect::DumpSelectionBounds();
     }
+    else if (sel == "bounds flags")
+    {
+        result = introspect::DumpBoundsFlags();
+    }
     else if (sel == "move effect")
     {
         const std::vector<std::string> f = Split(in, ',');

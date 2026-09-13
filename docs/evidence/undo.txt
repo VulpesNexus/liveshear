@@ -1,0 +1,21 @@
+Live Shear -- undo and redo
+Run at 2026-09-13 13:31:23
+
+applying the effect changes the artwork              PASS
+one undo removes a freshly applied effect            PASS
+redo puts it back                                    PASS
+editing the angle changes the artwork                PASS
+    a parameter edit made through the script bridge cost -1 undo steps
+undo after a bridge parameter edit leaves the document coherent PASS
+driver: drove the slider through six positions and pressed OK
+the dialog session committed the last slider position PASS
+one drag through six positions costs a handful of undo steps PASS
+    a drag through six slider positions cost 1 undo steps
+deleting one of two effects changes the artwork      PASS
+    deleting an effect through the script bridge cost 1 undo steps
+undo after a bridge deletion leaves the document coherent PASS
+    reordering through the script bridge cost 1 undo steps
+undo after a bridge reorder leaves the document coherent PASS
+the source path is unchanged after all of that       PASS
+
+11 passed, 0 failed

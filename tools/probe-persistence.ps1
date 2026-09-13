@@ -49,7 +49,7 @@ foreach ($case in $cases) {
     Invoke-AiScript "LS.clear(); LS.target = LS.fixtures['$($case.Fixture)'](); LS.selectOnly(LS.target); 'built';" | Out-Null
     Invoke-AiScript 'app.redraw();' | Out-Null
     foreach ($e in $case.Effects) {
-        Invoke-AiScript ("LS.shear({0}, {1});" -f $e[0], $e[1]) | Out-Null
+        Invoke-AiScript ("LS.shear({0}, {1});" -f (Format-AiNumber $e[0]), (Format-AiNumber $e[1])) | Out-Null
     }
     if ($case.Transform) {
         Invoke-AiScript "LS.applyEffect('Adobe Transform', 'reflect=b:false;moveH_Pts=r:40');" | Out-Null

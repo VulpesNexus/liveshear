@@ -1,0 +1,13 @@
+Live Shear -- do gradients and patterns shear with the artwork?
+Run at 2026-09-13 13:49:32
+Shear 30 degrees, axis 0; images at 200 percent, antialiasing off
+
+strokedText    against native with patterns on: 0,099 %   with patterns off: 0,099 %   closest: patterns on   PASS
+calligraphicBrush against native with patterns on: 0,173 %   with patterns off: 0,173 %   closest: patterns on   PASS
+artBrush       against native with patterns on: 0,190 %   with patterns off: 0,190 %   closest: patterns on   PASS
+patternBrush   against native with patterns on: 1,853 %   with patterns off: 1,853 %   closest: patterns on   FAIL
+strokedRect    against native with patterns on: 0,000 %   with patterns off: 0,000 %   closest: patterns on   PASS
+pointText      against native with patterns on: 0,002 %   with patterns off: 0,002 %   closest: patterns on   PASS
+
+images in <temp>\liveshear-fills
+5 passed, 1 failed, 0 untested

@@ -296,7 +296,7 @@ Start-ProbeResults -Probe 'dialog'
 function New-Case([double] $startAngle = 5) {
     Invoke-AiScript "LS.clear(); LS.target = LS.fixtures['plainRect'](); LS.selectOnly(LS.target); 'built';" | Out-Null
     Invoke-AiScript 'app.redraw();' | Out-Null
-    Invoke-AiScript ("LS.shear({0}, 0);" -f $startAngle) | Out-Null
+    Invoke-AiScript ("LS.shear({0}, 0);" -f (Format-AiNumber $startAngle)) | Out-Null
     Invoke-AiScript 'app.redraw();' | Out-Null
 }
 function CaseBounds {
@@ -311,6 +311,21 @@ function StoredAngle {
 Note 'Live Shear -- dialog probe'
 Note ("Run at {0}" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'))
 Note ("Trace file: {0}" -f $(if ($TracePath) { $TracePath } else { 'not set -- preview checks will be skipped' }))
+
+# The plugin reads LIVESHEAR_LOG out of Illustrator's environment, not out of
+# this one, so setting it here after Illustrator started does nothing at all.
+# That is easy to miss and it turns a behavior check into a silent failure, so
+# ask the plugin whether it is really writing before relying on it.
+$traceIsLive = $false
+if ($TracePath) {
+    $before = if (Test-Path $TracePath) { (Get-Item $TracePath).Length } else { -1 }
+    Invoke-AiScript 'LS.clear(); LS.target = LS.fixtures["plainRect"](); LS.selectOnly(LS.target);' | Out-Null
+    Invoke-AiScript 'LS.shear(7, 0);' | Out-Null
+    Invoke-AiScript 'app.redraw();' | Out-Null
+    $after = if (Test-Path $TracePath) { (Get-Item $TracePath).Length } else { -1 }
+    $traceIsLive = ($after -gt $before)
+    Note ("Tracing is live: {0}" -f $(if ($traceIsLive) { 'yes' } else { 'no -- Illustrator was started without LIVESHEAR_LOG in its environment' }))
+}
 Note ''
 
 # --------------------------------------------------------- OK commits the value
@@ -327,7 +342,11 @@ Check 'the dialog opened and OK committed the slider value' (Near $angle 40 0.05
 $transcriptText = ($transcript -join "`n")
 $caption = if ($transcriptText -match "caption: '([^']*)'") { $Matches[1] } else { '' }
 Check 'the window title reads Shear' ($caption -eq 'Shear') ("the title bar holds '" + $caption + "'")
-Check 'the degree sign is a degree sign' ($transcriptText -match 'U\+00B0') 'no U+00B0 among the labels; the degree sign has been mangled by a code page again'
+# Said as an observation rather than as an accusation, because this detail is
+# what the generated matrix publishes and a passing row must not carry the
+# sentence that belongs to a failing one.
+$degrees = ([regex]::Matches($transcriptText, 'U\+00B0')).Count
+Check 'the degree sign is a degree sign' ($degrees -gt 0) ("U+00B0 appears {0} time(s) among the dialog's labels" -f $degrees)
 
 # A 200 x 120 box sheared 40 degrees widens by tan(40) * 120 = 100.692 pt.
 $expected = 200 + 120 * [Math]::Tan(40 * [Math]::PI / 180)
@@ -393,10 +412,29 @@ if ($TracePath) {
     Note 'driver transcript (preview off):'
     foreach ($t in $transcript) { Note ("       " + $t) }
     $duringLine = ($transcript | Where-Object { $_ -match 'last evaluation during the dialog' }) -join ''
-    $duringAngle = if ($duringLine -match 'shear=([-0-9.]+)') { [double] $Matches[1] } else { [double]::NaN }
     Invoke-AiScript 'app.redraw();' | Out-Null
     $after = CaseBounds
-    Check 'with Preview off the artwork is not redrawn at the new angle' (Near $duringAngle 5 0.05) ("the effect was last evaluated at " + $duringAngle + " degrees while the dialog was open; it started at 5")
+
+    if (-not $traceIsLive) {
+        # Without a trace there is no way to ask what the artwork did while a
+        # modal dialog held every other route shut. Saying so is the honest
+        # answer; failing the check would report a defect that was never
+        # measured.
+        Note '[SKIP] with Preview off the artwork is not redrawn at the new angle'
+        Note '       the plugin is not writing a trace, so there is nothing to read this out of'
+        Add-ProbeResult -Group 'dialog' -Case 'with Preview off the artwork is not redrawn at the new angle' `
+            -Expected 'the dialog behaves like an Adobe dialog' `
+            -Observed 'the plugin was not writing a trace during this run, and while a modal dialog is up there is no other way to ask' -Status 'INCONCLUSIVE'
+    }
+    elseif (-not $duringLine) {
+        # Better than the angle staying put: the effect was never asked to run
+        # at all while Preview was off.
+        Check 'with Preview off the artwork is not redrawn at the new angle' $true 'the effect was not evaluated at all while the dialog was open'
+    }
+    else {
+        $duringAngle = if ($duringLine -match 'shear=([-0-9.]+)') { [double] $Matches[1] } else { [double]::NaN }
+        Check 'with Preview off the artwork is not redrawn at the new angle' (Near $duringAngle 5 0.05) ("the effect was last evaluated at " + $duringAngle + " degrees while the dialog was open; it started at 5")
+    }
     Check 'and OK still commits the new angle' (Near (StoredAngle) 44 0.05) ("shearAngle after OK: " + (StoredAngle) + "; bounds " + (($after | ForEach-Object { Num $_ }) -join ', ') + " (were " + (($before | ForEach-Object { Num $_ }) -join ', ') + ")")
 }
 

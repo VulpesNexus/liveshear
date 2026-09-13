@@ -21,6 +21,7 @@
 #include "ShearDialog.h"
 #include "ShearEffect.h"
 #include "ShearMath.h"
+#include "ShearLayout.h"
 #include "LiveShearSuites.h"
 #include "LiveShearID.h"
 #include "ShearLog.h"
@@ -199,12 +200,33 @@ namespace
         Republish(dd);
     }
 
+    /** Rounds to the resolution the dialog actually offers.
+
+        The slider carries tenths of a degree and the fields show one decimal,
+        so a tenth is what this dialog can express. Without rounding here the
+        same typed number ends up as three different values: the slider rounds
+        a half away from zero, the field's formatting rounds a half to even,
+        and the state keeps the unrounded number until something re-reads the
+        field and quietly replaces it with what is on screen. Typing 18.25 then
+        committed 18.2 while the slider sat at 18.3.
+
+        Rounding once, on the way in, means the number shown, the slider
+        position, and the value stored are the same number. A script writing
+        the parameter dictionary directly is not affected: the effect honours
+        whatever it is given, to full precision. */
+    double ToDialogResolution(double v)
+    {
+        // std::round takes a half away from zero, which is what std::lround
+        // does for the slider; using the same one in both places is the point.
+        return std::round(v * kScale) / kScale;
+    }
+
     void ApplyValue(DialogData* dd, bool isShear, double v)
     {
         dd->updating = true;
         if (isShear)
         {
-            v = Clamp(v, kShearMin, kShearMax);
+            v = ToDialogResolution(Clamp(v, kShearMin, kShearMax));
             dd->state->shearAngle = v;
             SendMessageW(dd->shearSlider, TBM_SETPOS, TRUE,
                          static_cast<LPARAM>(std::lround(v * kScale)));
@@ -216,7 +238,7 @@ namespace
             // so it is wrapped into the range rather than clipped to its end:
             // 200 degrees means the same shear as -160 and should show as -160,
             // where clamping to 180 would silently change the result.
-            v = shear::SanitizeAxisAngle(v);
+            v = ToDialogResolution(shear::SanitizeAxisAngle(v));
             dd->state->axisAngle = v;
             SendMessageW(dd->axisSlider, TBM_SETPOS, TRUE,
                          static_cast<LPARAM>(std::lround(v * kScale)));
@@ -326,7 +348,7 @@ namespace
         else
             wcscpy_s(font.lfFaceName, L"Segoe UI");
 
-        font.lfHeight = -MulDiv(9, dpi, 72);
+        font.lfHeight = -MulDiv(shear::layout::kFontPointSize, dpi, 72);
         font.lfWidth = 0;
         return CreateFontIndirectW(&font);
     }
@@ -346,63 +368,79 @@ namespace
 
                 dd->dpi = DpiOf(hwnd);
                 const int dpi = dd->dpi;
-                #define S(v) MulDiv((v), dpi, 96)
+                // Every control's box comes from the table in ShearLayout.h,
+                // which is also what the layout test reads, so the dialog and
+                // the thing that checks it cannot disagree.
+                #define R(which) const shear::layout::Rect box = \
+                    shear::layout::Scale(shear::layout::kItems[shear::layout::which].rect, dpi)
 
-                MakeLabel(hwnd, inst, L"Shear Angle", S(16), S(18), S(90), S(18));
+                { R(kShearLabel);
+                  MakeLabel(hwnd, inst, L"Shear Angle", box.x, box.y, box.w, box.h); }
+                { R(kShearSlider);
                 dd->shearSlider = CreateWindowExW(0, TRACKBAR_CLASSW, L"",
                     WS_CHILD | WS_VISIBLE | WS_TABSTOP | TBS_HORZ | TBS_NOTICKS,
-                    S(110), S(14), S(220), S(26), hwnd,
-                    ControlId(kIdShearSlider), inst, nullptr);
+                    box.x, box.y, box.w, box.h, hwnd,
+                    ControlId(kIdShearSlider), inst, nullptr); }
                 SendMessageW(dd->shearSlider, TBM_SETRANGE, TRUE,
                              MAKELPARAM(static_cast<int>(kShearMin * kScale),
                                         static_cast<int>(kShearMax * kScale)));
                 SendMessageW(dd->shearSlider, TBM_SETPOS, TRUE,
                              static_cast<LPARAM>(std::lround(dd->state->shearAngle * kScale)));
+                { R(kShearEdit);
                 dd->shearEdit = CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"",
                     WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_RIGHT | ES_AUTOHSCROLL,
-                    S(340), S(16), S(60), S(22), hwnd,
-                    ControlId(kIdShearEdit), inst, nullptr);
+                    box.x, box.y, box.w, box.h, hwnd,
+                    ControlId(kIdShearEdit), inst, nullptr); }
                 SetEditValue(dd->shearEdit, dd->state->shearAngle);
-                MakeLabel(hwnd, inst, kDegreeLabel, S(404), S(18), S(14), S(18));
+                { R(kShearDegree);
+                  MakeLabel(hwnd, inst, kDegreeLabel, box.x, box.y, box.w, box.h); }
 
-                MakeLabel(hwnd, inst, L"Axis Angle", S(16), S(54), S(90), S(18));
+                { R(kAxisLabel);
+                  MakeLabel(hwnd, inst, L"Axis Angle", box.x, box.y, box.w, box.h); }
+                { R(kAxisSlider);
                 dd->axisSlider = CreateWindowExW(0, TRACKBAR_CLASSW, L"",
                     WS_CHILD | WS_VISIBLE | WS_TABSTOP | TBS_HORZ | TBS_NOTICKS,
-                    S(110), S(50), S(220), S(26), hwnd,
-                    ControlId(kIdAxisSlider), inst, nullptr);
+                    box.x, box.y, box.w, box.h, hwnd,
+                    ControlId(kIdAxisSlider), inst, nullptr); }
                 SendMessageW(dd->axisSlider, TBM_SETRANGE, TRUE,
                              MAKELPARAM(static_cast<int>(kAxisMin * kScale),
                                         static_cast<int>(kAxisMax * kScale)));
                 SendMessageW(dd->axisSlider, TBM_SETPOS, TRUE,
                              static_cast<LPARAM>(std::lround(dd->state->axisAngle * kScale)));
+                { R(kAxisEdit);
                 dd->axisEdit = CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"",
                     WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_RIGHT | ES_AUTOHSCROLL,
-                    S(340), S(52), S(60), S(22), hwnd,
-                    ControlId(kIdAxisEdit), inst, nullptr);
+                    box.x, box.y, box.w, box.h, hwnd,
+                    ControlId(kIdAxisEdit), inst, nullptr); }
                 SetEditValue(dd->axisEdit, dd->state->axisAngle);
-                MakeLabel(hwnd, inst, kDegreeLabel, S(404), S(54), S(14), S(18));
+                { R(kAxisDegree);
+                  MakeLabel(hwnd, inst, kDegreeLabel, box.x, box.y, box.w, box.h); }
 
+                { R(kPreview);
                 dd->preview = CreateWindowExW(0, L"BUTTON", L"Preview",
                     WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-                    S(16), S(92), S(90), S(22), hwnd,
-                    ControlId(kIdPreview), inst, nullptr);
+                    box.x, box.y, box.w, box.h, hwnd,
+                    ControlId(kIdPreview), inst, nullptr); }
                 SendMessageW(dd->preview, BM_SETCHECK,
                              dd->state->previewEnabled ? BST_CHECKED : BST_UNCHECKED, 0);
                 EnableWindow(dd->preview, dd->state->allowPreview ? TRUE : FALSE);
 
+                { R(kReset);
                 CreateWindowExW(0, L"BUTTON", L"Reset",
                     WS_CHILD | WS_VISIBLE | WS_TABSTOP,
-                    S(120), S(92), S(70), S(24), hwnd,
-                    ControlId(kIdReset), inst, nullptr);
+                    box.x, box.y, box.w, box.h, hwnd,
+                    ControlId(kIdReset), inst, nullptr); }
+                { R(kCancel);
                 CreateWindowExW(0, L"BUTTON", L"Cancel",
                     WS_CHILD | WS_VISIBLE | WS_TABSTOP,
-                    S(250), S(92), S(78), S(24), hwnd,
-                    ControlId(IDCANCEL), inst, nullptr);
+                    box.x, box.y, box.w, box.h, hwnd,
+                    ControlId(IDCANCEL), inst, nullptr); }
+                { R(kOk);
                 CreateWindowExW(0, L"BUTTON", L"OK",
                     WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_DEFPUSHBUTTON,
-                    S(338), S(92), S(78), S(24), hwnd,
-                    ControlId(IDOK), inst, nullptr);
-                #undef S
+                    box.x, box.y, box.w, box.h, hwnd,
+                    ControlId(IDOK), inst, nullptr); }
+                #undef R
 
                 // Give every control the standard UI font instead of the
                 // 1980s system font CreateWindow hands out by default.
@@ -551,7 +589,8 @@ bool RunShearDialog(ShearDialogState& state)
     dd.pushedAxis = state.axisAngle;
 
     const int dpi = DpiOf(parent);
-    RECT rc = { 0, 0, MulDiv(432, dpi, 96), MulDiv(160, dpi, 96) };
+    const shear::layout::Rect client = shear::layout::Scale(shear::layout::kClient, dpi);
+    RECT rc = { 0, 0, client.w, client.h };
     AdjustWindowRectEx(&rc, WS_CAPTION | WS_SYSMENU, FALSE, WS_EX_DLGMODALFRAME);
 
     const HWND hwnd = CreateWindowExW(

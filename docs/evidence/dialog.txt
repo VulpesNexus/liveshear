@@ -1,29 +1,179 @@
 Live Shear -- dialog probe
-Run at 2026-09-13 01:57:51
+Run at 2026-09-13 13:31:00
+Trace file: <temp>\claude\<workspace>\6d060ac1-74e0-42c8-867e-3dc594570345\scratchpad\shear.log
 
-plain rectangle: 100, 500, 300, 380
 driver transcript:
-       dialog found
+       dialog found, 448 by 199 pixels
+       captured the dialog to <repo>\docs\evidence\dialog.png, client area 432 by 160
+       caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
+         label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
+         label: 'ﾂｰ'   U+00B0
+         label: 'Axis Angle'   U+0041 U+0078 U+0069 U+0073 U+0020 U+0041 U+006E U+0067 U+006C U+0065
+         label: 'ﾂｰ'   U+00B0
+         label: 'Preview'   U+0050 U+0072 U+0065 U+0076 U+0069 U+0065 U+0077
+         label: 'Reset'   U+0052 U+0065 U+0073 U+0065 U+0074
+         label: 'Cancel'   U+0043 U+0061 U+006E U+0063 U+0065 U+006C
+         label: 'OK'   U+004F U+004B
        slider set to 10; numeric field now reads '10.0'
        slider set to 20; numeric field now reads '20.0'
        slider set to 30; numeric field now reads '30.0'
        slider set to 40; numeric field now reads '40.0'
-       pressing ok
+       pressing OK
+       dialog still open afterwards: False
 [PASS] the dialog opened and OK committed the slider value
-       shearAngle in the appearance after OK: 40.000000
+       shearAngle in the appearance after OK: 40
+[PASS] the window title reads Shear
+       the title bar holds 'Shear'
+[PASS] the degree sign is a degree sign
+       no U+00B0 among the labels; the degree sign has been mangled by a code page again
 [PASS] dragging through several values does not compound
        width after dragging through 10, 20, 30, 40 is 300.692 pt; a single 40 degree shear gives 300.692 pt; compounding would give far more
-driver transcript:
-       dialog found
+driver transcript (cancel):
+       dialog found, 448 by 199 pixels
+       caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
+         label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
+         label: 'ﾂｰ'   U+00B0
+         label: 'Axis Angle'   U+0041 U+0078 U+0069 U+0073 U+0020 U+0041 U+006E U+0067 U+006C U+0065
+         label: 'ﾂｰ'   U+00B0
+         label: 'Preview'   U+0050 U+0072 U+0065 U+0076 U+0069 U+0065 U+0077
+         label: 'Reset'   U+0052 U+0065 U+0073 U+0065 U+0074
+         label: 'Cancel'   U+0043 U+0061 U+006E U+0063 U+0065 U+006C
+         label: 'OK'   U+004F U+004B
        slider set to 35; numeric field now reads '35.0'
-       pressing cancel
-[PASS] Cancel restores the artwork and the parameter it started with
-       bounds before 94.751, 500, 305.249, 380; after cancel 94.751, 500, 305.249, 380; shearAngle after cancel 5.000000 (it was 5 before the dialog opened)
-driver transcript:
-       dialog found
-       typed '22.5' into the numeric field
-       pressing ok
-[PASS] a value typed into the numeric field is committed
-       shearAngle after typing 22.5 and pressing OK: 22.500000
+       pressing Cancel
+       dialog still open afterwards: False
+[PASS] cancel restores the artwork and the parameter it started with
+       bounds before 94.751, 600, 305.249, 480; after 94.751, 600, 305.249, 480; shearAngle after 5 (it was 5)
+driver transcript (escape):
+       dialog found, 448 by 199 pixels
+       caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
+         label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
+         label: 'ﾂｰ'   U+00B0
+         label: 'Axis Angle'   U+0041 U+0078 U+0069 U+0073 U+0020 U+0041 U+006E U+0067 U+006C U+0065
+         label: 'ﾂｰ'   U+00B0
+         label: 'Preview'   U+0050 U+0072 U+0065 U+0076 U+0069 U+0065 U+0077
+         label: 'Reset'   U+0052 U+0065 U+0073 U+0065 U+0074
+         label: 'Cancel'   U+0043 U+0061 U+006E U+0063 U+0065 U+006C
+         label: 'OK'   U+004F U+004B
+       slider set to 35; numeric field now reads '35.0'
+       pressing Escape
+       dialog still open afterwards: False
+[PASS] escape restores the artwork and the parameter it started with
+       bounds before 94.751, 600, 305.249, 480; after 94.751, 600, 305.249, 480; shearAngle after 5 (it was 5)
+driver transcript (close):
+       dialog found, 448 by 199 pixels
+       caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
+         label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
+         label: 'ﾂｰ'   U+00B0
+         label: 'Axis Angle'   U+0041 U+0078 U+0069 U+0073 U+0020 U+0041 U+006E U+0067 U+006C U+0065
+         label: 'ﾂｰ'   U+00B0
+         label: 'Preview'   U+0050 U+0072 U+0065 U+0076 U+0069 U+0065 U+0077
+         label: 'Reset'   U+0052 U+0065 U+0073 U+0065 U+0074
+         label: 'Cancel'   U+0043 U+0061 U+006E U+0063 U+0065 U+006C
+         label: 'OK'   U+004F U+004B
+       slider set to 35; numeric field now reads '35.0'
+       pressing the title bar close button
+       dialog still open afterwards: False
+[PASS] close restores the artwork and the parameter it started with
+       bounds before 94.751, 600, 305.249, 480; after 94.751, 600, 305.249, 480; shearAngle after 5 (it was 5)
+driver transcript (enter):
+       dialog found, 448 by 199 pixels
+       caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
+         label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
+         label: 'ﾂｰ'   U+00B0
+         label: 'Axis Angle'   U+0041 U+0078 U+0069 U+0073 U+0020 U+0041 U+006E U+0067 U+006C U+0065
+         label: 'ﾂｰ'   U+00B0
+         label: 'Preview'   U+0050 U+0072 U+0065 U+0076 U+0069 U+0065 U+0077
+         label: 'Reset'   U+0052 U+0065 U+0073 U+0065 U+0074
+         label: 'Cancel'   U+0043 U+0061 U+006E U+0063 U+0065 U+006C
+         label: 'OK'   U+004F U+004B
+       slider set to 33; numeric field now reads '33.0'
+       pressing Enter
+       dialog still open afterwards: False
+[PASS] Enter commits, like the default button
+       shearAngle after Enter: 33
+driver transcript (typed with a decimal comma):
+       dialog found, 448 by 199 pixels
+       caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
+         label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
+         label: 'ﾂｰ'   U+00B0
+         label: 'Axis Angle'   U+0041 U+0078 U+0069 U+0073 U+0020 U+0041 U+006E U+0067 U+006C U+0065
+         label: 'ﾂｰ'   U+00B0
+         label: 'Preview'   U+0050 U+0072 U+0065 U+0076 U+0069 U+0065 U+0077
+         label: 'Reset'   U+0052 U+0065 U+0073 U+0065 U+0074
+         label: 'Cancel'   U+0043 U+0061 U+006E U+0063 U+0065 U+006C
+         label: 'OK'   U+004F U+004B
+       typed '22,5' into the numeric field
+       pressing OK
+       dialog still open afterwards: False
+[PASS] a value typed with a decimal comma is committed
+       shearAngle after typing 22,5 and pressing OK: 22.5
+driver transcript (typed with trailing text):
+       dialog found, 448 by 199 pixels
+       caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
+         label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
+         label: 'ﾂｰ'   U+00B0
+         label: 'Axis Angle'   U+0041 U+0078 U+0069 U+0073 U+0020 U+0041 U+006E U+0067 U+006C U+0065
+         label: 'ﾂｰ'   U+00B0
+         label: 'Preview'   U+0050 U+0072 U+0065 U+0076 U+0069 U+0065 U+0077
+         label: 'Reset'   U+0052 U+0065 U+0073 U+0065 U+0074
+         label: 'Cancel'   U+0043 U+0061 U+006E U+0063 U+0065 U+006C
+         label: 'OK'   U+004F U+004B
+       typed '18.25 deg' into the numeric field
+       pressing OK
+       dialog still open afterwards: False
+[FAIL] a value typed with trailing text still reads as a number
+       shearAngle after typing '18.25 deg': 18.2
+driver transcript (typed past the limit):
+       dialog found, 448 by 199 pixels
+       caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
+         label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
+         label: 'ﾂｰ'   U+00B0
+         label: 'Axis Angle'   U+0041 U+0078 U+0069 U+0073 U+0020 U+0041 U+006E U+0067 U+006C U+0065
+         label: 'ﾂｰ'   U+00B0
+         label: 'Preview'   U+0050 U+0072 U+0065 U+0076 U+0069 U+0065 U+0077
+         label: 'Reset'   U+0052 U+0065 U+0073 U+0065 U+0074
+         label: 'Cancel'   U+0043 U+0061 U+006E U+0063 U+0065 U+006C
+         label: 'OK'   U+004F U+004B
+       typed '95' into the numeric field
+       pressing OK
+       dialog still open afterwards: False
+[PASS] a value typed past the limit is clamped to 89
+       shearAngle after typing 95: 89
+driver transcript (arrow keys):
+       dialog found, 448 by 199 pixels
+       caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
+         label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
+         label: 'ﾂｰ'   U+00B0
+         label: 'Axis Angle'   U+0041 U+0078 U+0069 U+0073 U+0020 U+0041 U+006E U+0067 U+006C U+0065
+         label: 'ﾂｰ'   U+00B0
+         label: 'Preview'   U+0050 U+0072 U+0065 U+0076 U+0069 U+0065 U+0077
+         label: 'Reset'   U+0052 U+0065 U+0073 U+0065 U+0074
+         label: 'Cancel'   U+0043 U+0061 U+006E U+0063 U+0065 U+006C
+         label: 'OK'   U+004F U+004B
+       3 up arrows; numeric field now reads '13.0'
+       pressing OK
+       dialog still open afterwards: False
+[PASS] three up arrows raise the angle by three degrees
+       shearAngle after three up arrows from 10: 13
+driver transcript (preview off):
+       dialog found, 448 by 199 pixels
+       caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
+         label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
+         label: 'ﾂｰ'   U+00B0
+         label: 'Axis Angle'   U+0041 U+0078 U+0069 U+0073 U+0020 U+0041 U+006E U+0067 U+006C U+0065
+         label: 'ﾂｰ'   U+00B0
+         label: 'Preview'   U+0050 U+0072 U+0065 U+0076 U+0069 U+0065 U+0077
+         label: 'Reset'   U+0052 U+0065 U+0073 U+0065 U+0074
+         label: 'Cancel'   U+0043 U+0061 U+006E U+0063 U+0065 U+006C
+         label: 'OK'   U+004F U+004B
+       clicked the Preview box
+       slider set to 44; numeric field now reads '44.0'
+       pressing OK
+       dialog still open afterwards: False
+[FAIL] with Preview off the artwork is not redrawn at the new angle
+       the effect was last evaluated at NaN degrees while the dialog was open; it started at 5
+[PASS] and OK still commits the new angle
+       shearAngle after OK: 44; bounds 42.059, 600, 357.941, 480 (were 94.751, 600, 305.249, 480)
 
-4 passed, 0 failed
+12 passed, 2 failed

@@ -1,9 +1,10 @@
 Live Shear -- the built artifact
-Run at 2026-09-13 04:48:45
+Run at 2026-09-13 13:27:01
 Windows 10.0.26200.0
 
 Toolchain: MSVC 14.44.35207
 SDK:       Adobe Illustrator 2026 SDK
+Commit:    f40c4aaea2c6c62ebc7bc35890a9b0a114488ac4 (working tree not clean)
 
 [PASS] Release builds with no warnings and no errors
        0 warnings, 0 errors
@@ -17,8 +18,8 @@ Company:        VulpesNexus
 Product:        Shear for Illustrator
 Description:    Non-destructive Shear effect for Adobe Illustrator
 Copyright:      Copyright (C) 2026 VulpesNexus. Licensed under the GNU GPL version 3 or later.
-Size:           154 112 bytes
-SHA-256:        8AEA2C66D24027C2D7C10D28B3951FE5888B0D00F167C5B955F98FD869AEA254
+Size:           162 816 bytes
+SHA-256:        4B1DF051C78924D7CA310F557055C419EEDAF5B7993809E48611B362981426E4
 
 [PASS] the binary does not claim Adobe as its publisher
        CompanyName is VulpesNexus
@@ -42,5 +43,15 @@ SHA-256:        8AEA2C66D24027C2D7C10D28B3951FE5888B0D00F167C5B955F98FD869AEA254
        Effect > Distort & Transform > Shear...
 [PASS] no debug trace is on by default
        tracing is behind the LIVESHEAR_LOG environment variable
+[PASS] the source this was built from is identified
+       commit f40c4aaea2c6c62ebc7bc35890a9b0a114488ac4
+[FAIL] the working tree was clean when it was built
+       6 uncommitted change(s)
 
-14 passed, 0 failed
+Depends on: COMCTL32.dll, USER32.dll, GDI32.dll, KERNEL32.dll, MSVCP140.dll, VCRUNTIME140.dll, VCRUNTIME140_1.dll, api-ms-win-crt-runtime-l1-1-0.dll, api-ms-win-crt-string-l1-1-0.dll, api-ms-win-crt-convert-l1-1-0.dll, api-ms-win-crt-heap-l1-1-0.dll, api-ms-win-crt-math-l1-1-0.dll, api-ms-win-crt-locale-l1-1-0.dll, api-ms-win-crt-stdio-l1-1-0.dll, api-ms-win-crt-filesystem-l1-1-0.dll, api-ms-win-crt-environment-l1-1-0.dll, api-ms-win-crt-time-l1-1-0.dll
+[PASS] nothing is linked but Windows and the C runtime
+       no SDK, developer, or test-harness DLL is named
+[PASS] the C runtime it needs is one Illustrator already needs
+       Illustrator.exe names the same MSVCP140.dll, VCRUNTIME140.dll, VCRUNTIME140_1.dll, so no redistributable has to be installed for the plugin
+
+17 passed, 1 failed

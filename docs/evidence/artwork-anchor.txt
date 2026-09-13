@@ -1,0 +1,61 @@
+Live Shear -- the reference point, one kind of artwork at a time
+Run at 2026-09-13 13:48:08
+Shearing 30 degrees; an offset is how far the native reference point sits from the effect's, in points
+
+fixture              axis     offset pt   edge drift  cross drift   verdict
+plainRect            0                0            0            0   SAME REFERENCE POINT
+plainRect            90               0            0            0   SAME REFERENCE POINT
+strokedRect          0                0            0            0   SAME REFERENCE POINT
+strokedRect          90               0            0            0   SAME REFERENCE POINT
+spike                0                0            0            0   SAME REFERENCE POINT
+spike                90               0            0            0   SAME REFERENCE POINT
+bezier               0                0            0            0   SAME REFERENCE POINT
+bezier               90               0            0            0   SAME REFERENCE POINT
+openPath             0                0            0            0   SAME REFERENCE POINT
+openPath             90               0            0            0   SAME REFERENCE POINT
+compound             0                0            0            0   SAME REFERENCE POINT
+compound             90               0            0            0   SAME REFERENCE POINT
+selfIntersecting     0                0            0            0   SAME REFERENCE POINT
+selfIntersecting     90               0            0            0   SAME REFERENCE POINT
+mixedGroup           0                0            0            0   SAME REFERENCE POINT
+mixedGroup           90               0            0            0   SAME REFERENCE POINT
+nestedGroup          0                0            0            0   SAME REFERENCE POINT
+nestedGroup          90               0            0            0   SAME REFERENCE POINT
+clipGroup            0                0            0            0   SAME REFERENCE POINT
+clipGroup            90               0            0            0   SAME REFERENCE POINT
+transformedGroup     0                0            0            0   SAME REFERENCE POINT
+transformedGroup     90               0            0            0   SAME REFERENCE POINT
+pointText            0                0     0.000977     0.000977   NOT A REFERENCE-POINT DIFFERENCE
+pointText            90        0.000423     0.000488     0.000488   SAME REFERENCE POINT
+areaText             0                0            0     0.000488   SAME REFERENCE POINT
+areaText             90        0.000423     0.000488     0.000488   SAME REFERENCE POINT
+multilineText        0         0.001269     0.000488     0.000977   NOT A REFERENCE-POINT DIFFERENCE
+multilineText        90               0            0     0.000488   SAME REFERENCE POINT
+strokedText          0        -0.000423     0.465332     0.402832   NOT A REFERENCE-POINT DIFFERENCE
+strokedText          90        0.000423     0.464355     0.402344   NOT A REFERENCE-POINT DIFFERENCE
+asymmetricText       0         0.001269     0.000488     0.000488   OFFSET 0.001269 pt
+asymmetricText       90        0.000423     0.000488     0.000977   NOT A REFERENCE-POINT DIFFERENCE
+retypedText          0         0.000423     0.000488     0.000977   NOT A REFERENCE-POINT DIFFERENCE
+retypedText          90               0            0     0.000977   NOT A REFERENCE-POINT DIFFERENCE
+resizedText          0         0.001691            0     0.000977   NOT A REFERENCE-POINT DIFFERENCE
+resizedText          90        0.000423     0.000488     0.000977   NOT A REFERENCE-POINT DIFFERENCE
+symbolInstance       0                0            0            0   SAME REFERENCE POINT
+symbolInstance       90               0            0            0   SAME REFERENCE POINT
+calligraphicBrush    0         0.033769     0.756859     0.024626   NOT A REFERENCE-POINT DIFFERENCE
+calligraphicBrush    90       -0.051301     0.782174     0.036363   NOT A REFERENCE-POINT DIFFERENCE
+artBrush             0        -0.417535     0.490803     1.045654   NOT A REFERENCE-POINT DIFFERENCE
+artBrush             90        1.215332     0.921778     0.605835   NOT A REFERENCE-POINT DIFFERENCE
+patternBrush         0        -0.557677     1.213142      2.19538   NOT A REFERENCE-POINT DIFFERENCE
+patternBrush         90       -4.303587     3.014916     2.914069   NOT A REFERENCE-POINT DIFFERENCE
+embeddedRaster       0                0            0            0   SAME REFERENCE POINT
+embeddedRaster       90               0            0            0   SAME REFERENCE POINT
+rotatedRect          0                0            0            0   SAME REFERENCE POINT
+rotatedRect          90               0            0            0   SAME REFERENCE POINT
+scaledRect           0                0            0            0   SAME REFERENCE POINT
+scaledRect           90               0            0            0   SAME REFERENCE POINT
+reflectedRect        0                0            0            0   SAME REFERENCE POINT
+reflectedRect        90               0            0            0   SAME REFERENCE POINT
+
+NOT A REFERENCE-POINT DIFFERENCE         15
+OFFSET                                   1
+SAME REFERENCE POINT                     36

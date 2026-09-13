@@ -36,7 +36,13 @@ function Run([string] $name, [scriptblock] $body) {
     try {
         $out = & $body 2>&1
         $out | ForEach-Object { Write-Output $_ }
-        $tail = ($out | Where-Object { $_ -match 'passed, \d+ failed|cases$' } | Select-Object -Last 1)
+        # A probe's own tally, not any tally. The solver self-test prints the
+        # verdicts it reached on deliberately broken rows -- "2 passed, 3
+        # failed" is that test working -- and reporting those as the probe's
+        # result said three things had failed when nothing had.
+        $lines = @($out | ForEach-Object { "$_" })
+        $tail = ($lines | Where-Object { $_ -match '^\s*\d+ checks, \d+ failed' } | Select-Object -Last 1)
+        if (-not $tail) { $tail = ($lines | Where-Object { $_ -match '^\s*\d+ passed, \d+ failed' } | Select-Object -Last 1) }
         $summary.Add(('{0,-22} {1,7:F0} s  {2}' -f $name, $sw.Elapsed.TotalSeconds, $tail))
     }
     catch {
@@ -46,6 +52,23 @@ function Run([string] $name, [scriptblock] $body) {
 }
 
 Get-AiApp | Out-Null
+
+# The plugin reads LIVESHEAR_LOG out of Illustrator's own environment. Setting
+# it in this shell after Illustrator has started does nothing, and the dialog
+# probe then cannot see what the artwork did behind a modal dialog. Restart
+# once, here, rather than let a whole probe quietly lose its instrument.
+if ($TracePath) {
+    $env:LIVESHEAR_LOG = $TracePath
+    Install-AiHarness | Out-Null
+    $before = if (Test-Path $TracePath) { (Get-Item $TracePath).Length } else { -1 }
+    Invoke-AiScript 'LS.clear(); LS.target = LS.fixtures["plainRect"](); LS.selectOnly(LS.target); LS.shear(7, 0); app.redraw();' | Out-Null
+    $after = if (Test-Path $TracePath) { (Get-Item $TracePath).Length } else { -1 }
+    if ($after -le $before) {
+        Write-Output 'Illustrator is not writing the trace; restarting it so it inherits LIVESHEAR_LOG.'
+        Restart-Ai | Out-Null
+    }
+}
+
 Install-AiHarness | Out-Null
 Invoke-AiScript 'app.userInteractionLevel = UserInteractionLevel.DONTDISPLAYALERTS; while (app.documents.length > 0) { app.documents[0].close(SaveOptions.DONOTSAVECHANGES); } app.documents.add(); "ready";' | Out-Null
 
@@ -56,6 +79,7 @@ Run 'built artifact' { & (Join-Path $PSScriptRoot 'probe-build.ps1') }
 Run 'arithmetic'  { & (Join-Path $PSScriptRoot 'run-mathtest.ps1') }
 Run 'anchor'      { & (Join-Path $PSScriptRoot 'probe-anchor.ps1') }
 Run 'anchor verdicts' { python (Join-Path $PSScriptRoot 'solve-anchor.py') (Join-Path $evidence 'anchor.tsv') }
+Run 'anchor by artwork' { & (Join-Path $PSScriptRoot 'probe-artwork-anchor.ps1') }
 Run 'release matrix' { & (Join-Path $PSScriptRoot 'probe-release.ps1') }
 Run 'matrix verdicts' { python (Join-Path $PSScriptRoot 'solve-release.py') (Join-Path $evidence 'release-matrix.tsv') }
 Run 'appearance'  { & (Join-Path $PSScriptRoot 'probe-appearance.ps1') }

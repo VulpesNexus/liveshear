@@ -1,0 +1,27 @@
+Live Shear -- parameter safety
+Run at 2026-09-13 13:30:01
+Watchdog: 45 seconds per redraw
+
+written        seconds      rendered bounds                                verdict
+0              3,60         100.000000,600.000000,300.000000,480.000000    PASS (clamped to 0 deg)
+30             3,47         65.358984,600.000000,334.641016,480.000000     PASS (clamped to 30 deg)
+89             3,38         -3337.397698,600.000000,3737.397698,480.000000 PASS (clamped to 89 deg)
+-89            3,41         -3337.397698,600.000000,3737.397698,480.000000 PASS (clamped to -89 deg)
+89.000001      3,35         -3337.397698,600.000000,3737.397698,480.000000 PASS (clamped to 89 deg)
+89.9           3,35         -3337.397698,600.000000,3737.397698,480.000000 PASS (clamped to 89 deg)
+90             3,38         -3337.397698,600.000000,3737.397698,480.000000 PASS (clamped to 89 deg)
+-90            3,55         -3337.397698,600.000000,3737.397698,480.000000 PASS (clamped to -89 deg)
+180            3,42         -3337.397698,600.000000,3737.397698,480.000000 PASS (clamped to 89 deg)
+-180           3,27         -3337.397698,600.000000,3737.397698,480.000000 PASS (clamped to -89 deg)
+1e9            3,36         -3337.397698,600.000000,3737.397698,480.000000 PASS (clamped to 89 deg)
+nan            3,24         100.000000,600.000000,300.000000,480.000000    PASS (clamped to 0 deg)
+inf            3,26         -3337.397698,600.000000,3737.397698,480.000000 PASS (clamped to 89 deg)
+-inf           3,22         -3337.397698,600.000000,3737.397698,480.000000 PASS (clamped to -89 deg)
+0.000001       3,32         99.999999,600.000000,300.000001,480.000000     PASS (clamped to 0 deg)
+0.001          3,29         99.998953,600.000000,300.001047,480.000000     PASS (clamped to 0,001 deg)
+
+--- a document that stores 90 degrees ---
+reopened in 0,70 s   bounds -3337.397697846,600.000000000,3737.397697846,480.000000000   dictionary still holds shearAngle 90.000000
+renders the same before and after the round trip: PASS
+
+17 passed, 0 failed

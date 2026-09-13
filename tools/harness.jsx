@@ -38,9 +38,15 @@ var LS = (function () {
         }
         while (d.symbols.length > 0) { d.symbols[0].remove(); }
         // Patterns accumulate otherwise: every run of a fixture that makes one
-        // leaves another swatch behind in the same document.
-        while (d.patterns.length > 0) {
-            try { d.patterns[0].remove(); } catch (e) { break; }
+        // leaves another swatch behind in the same document. The one imported
+        // from Illustrator's own library is kept, because fetching it means
+        // opening a document and this host falls over under repeated scripted
+        // open and close.
+        for (var p = d.patterns.length - 1; p >= 0; p--) {
+            try {
+                if (d.patterns[p].name === api.PATTERN_NAME) { continue; }
+                d.patterns[p].remove();
+            } catch (e) {}
         }
         return d;
     };
@@ -435,6 +441,76 @@ var LS = (function () {
         return t;
     };
 
+    /** Glyphs whose ink sits far off-centre inside the frame: descenders on one
+        side, capitals and no descender on the other. Point text is anchored at
+        its baseline, so the visible ink and the frame's own box are a long way
+        apart here, which is what makes it worth shearing. */
+    api.fixtures.asymmetricText = function () {
+        var t = api.doc().textFrames.add();
+        t.contents = 'gjpqy TTT';
+        t.position = [100, 600];
+        t.textRange.characterAttributes.size = 96;
+        return t;
+    };
+
+    /** Text whose contents were replaced after the frame was made. The frame
+        keeps its origin and the ink moves, so anything that cached a box when
+        the frame was created is caught out. */
+    api.fixtures.retypedText = function () {
+        var t = api.fixtures.pointText();
+        t.contents = 'Retyped much wider';
+        return t;
+    };
+
+    /** The same, for a font size changed after the fact. */
+    api.fixtures.resizedText = function () {
+        var t = api.fixtures.pointText();
+        t.textRange.characterAttributes.size = 24;
+        return t;
+    };
+
+    /** A raster embedded in the document. Drawn as a small PNG written to disk
+        and placed, then embedded, because there is no way to hand Illustrator
+        pixels directly from a script. */
+    api.fixtures.embeddedRaster = function () {
+        var d = api.doc();
+        var f = new File(Folder.temp.fsName + '/liveshear-raster.png');
+        if (!f.exists) {
+            // A 2x2 checker, written by hand as an uncompressed BMP -- one
+            // format simple enough to emit from ExtendScript without a
+            // library, and one Illustrator will place.
+            var bytes = api.tinyBitmap();
+            f = new File(Folder.temp.fsName + '/liveshear-raster.bmp');
+            f.encoding = 'BINARY';
+            f.open('w');
+            f.write(bytes);
+            f.close();
+        }
+        var placed = d.placedItems.add();
+        placed.file = f;
+        placed.position = [100, 600];
+        placed.width = 200;
+        placed.height = 120;
+        try { placed.embed(); } catch (e) {}
+        return d.pageItems[0];
+    };
+
+    /** A 2 by 2 24-bit BMP: header, then four pixels, bottom row first, each
+        row padded to a multiple of four bytes. */
+    api.tinyBitmap = function () {
+        function le(n, width) {
+            var s = '';
+            for (var i = 0; i < width; i++) { s += String.fromCharCode((n >> (8 * i)) & 0xFF); }
+            return s;
+        }
+        var pixels = le(0x000000, 3) + le(0xFFFFFF, 3) + le(0, 2) +   // bottom row + padding
+                     le(0xFFFFFF, 3) + le(0x000000, 3) + le(0, 2);    // top row + padding
+        var header = 'BM' + le(14 + 40 + pixels.length, 4) + le(0, 2) + le(0, 2) + le(14 + 40, 4);
+        var info = le(40, 4) + le(2, 4) + le(2, 4) + le(1, 2) + le(24, 2) +
+                   le(0, 4) + le(pixels.length, 4) + le(2835, 4) + le(2835, 4) + le(0, 4) + le(0, 4);
+        return header + info + pixels;
+    };
+
     api.fixtures.nestedGroup = function () {
         var d = api.doc();
         var outer = d.groupItems.add();
@@ -490,16 +566,81 @@ var LS = (function () {
         return r;
     };
 
-    api.fixtures.patternFill = function () {
+    // Pattern fills looked untestable for a while, and the reason turned out
+    // to be neither the tile nor Illustrator's renderer but one line of
+    // scripting. A fill assigned as
+    //
+    //     var pc = new PatternColor(); pc.pattern = doc.patterns[0];
+    //     item.fillColor = pc;
+    //
+    // reads back as a PatternColor, reports the right pattern, and draws
+    // nothing whatsoever. The identical pattern assigned as
+    //
+    //     item.fillColor = doc.swatches.getByName(name).color;
+    //
+    // draws. Measured side by side in one document, one rectangle each: the
+    // first contributes no non-white pixel, the second nearly two thousand.
+    // That is why three different ways of building a tile all seemed to fail
+    // -- every one of them ended at the same constructor.
+    //
+    // So the fixture goes through a swatch, and takes the pattern from a
+    // library Illustrator ships rather than building one, which makes it a
+    // real Adobe-authored pattern rather than a construction of ours.
+    api.PATTERN_NAME = '10 dpi 50%';
+
+    api.patternLibrary = function () {
+        return new File(app.path.fsName.replace(/\\/g, '/') +
+            '/Presets/' + app.locale +
+            '/Swatches/Patterns/Basic Graphics/Basic Graphics_Dots.ai');
+    };
+
+    /** The swatch color for api.PATTERN_NAME, imported into the working
+        document the first time and reused afterwards. Returns null if the
+        library is not where Illustrator usually puts it, so a caller can
+        report the fixture as unavailable rather than silently testing a
+        rectangle with no pattern in it. */
+    api.patternColor = function () {
         var d = api.doc();
-        var tile = api.paint(api.rect(0, 20, 10, 10), 0);
-        var pat = d.patterns.add(tile);
+        var i;
+        for (i = 0; i < d.swatches.length; i++) {
+            if (d.swatches[i].name === api.PATTERN_NAME) { return d.swatches[i].color; }
+        }
+
+        var f = api.patternLibrary();
+        if (!f.exists) { return null; }
+
+        // Carried across on the clipboard, which brings the pattern definition
+        // with it. The library document is opened read-only in effect: the
+        // scratch rectangle is removed again and it is closed without saving.
+        var lib = app.open(f);
+        var src = lib.pathItems.rectangle(200, 0, 100, 100);
+        src.stroked = false;
+        src.filled = true;
+        src.fillColor = lib.swatches.getByName(api.PATTERN_NAME).color;
+        lib.selection = null;
+        src.selected = true;
+        app.copy();
+        src.remove();
+        lib.close(SaveOptions.DONOTSAVECHANGES);
+
+        app.activeDocument = d;
+        app.paste();
+        var pasted = d.selection[0];
+        pasted.remove();
+        d.selection = null;
+
+        for (i = 0; i < d.swatches.length; i++) {
+            if (d.swatches[i].name === api.PATTERN_NAME) { return d.swatches[i].color; }
+        }
+        return null;
+    };
+
+    api.fixtures.patternFill = function () {
         var r = api.rect(100, 600, 240, 140);
-        var pc = new PatternColor();
-        pc.pattern = pat;
         r.filled = true;
-        r.fillColor = pc;
         r.stroked = false;
+        var pc = api.patternColor();
+        if (pc) { r.fillColor = pc; }
         return r;
     };
 

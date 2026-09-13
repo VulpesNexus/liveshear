@@ -19,6 +19,7 @@
 
 #include "ShearMath.h"
 #include "ShearCurve.h"
+#include "ShearLayout.h"
 
 #include <cmath>
 #include <cstdio>
@@ -328,6 +329,76 @@ int main()
         Check(shear::IsIdentity(1e-9), "a billionth of a degree is the identity");
         Check(!shear::IsIdentity(1e-5), "a hundred-thousandth of a degree is not");
         Check(!shear::IsIdentity(-1e-5), "and neither is its negative");
+    }
+
+    // ---- the dialog layout at display scales there is no monitor for -----
+    //
+    // The dialog is measured on a 96-dpi display, which is the only kind
+    // available here, so what happens at 125, 150 or 200 percent cannot be
+    // looked at. It can be computed. Every control's box comes from one table
+    // and is multiplied through one function, so the question "does anything
+    // fall out of the window, land on top of its neighbour, or shrink below a
+    // usable size" is arithmetic, and arithmetic can be checked.
+    //
+    // This is not the same as having seen it: font substitution, and the
+    // trackbar's own idea of its minimum height, are outside what this can
+    // reach. The release notes say so rather than calling scaling verified.
+    {
+        using namespace shear::layout;
+        const int scales[] = { 96, 120, 144, 192, 240 };
+
+        for (int s = 0; s < static_cast<int>(sizeof(scales) / sizeof(scales[0])); ++s)
+        {
+            const int dpi = scales[s];
+            const std::string at = " at " + std::to_string(dpi * 100 / 96) + "%";
+            const Rect client = Scale(kClient, dpi);
+
+            for (int i = 0; i < kItemCount; ++i)
+            {
+                const Rect r = Scale(kItems[i].rect, dpi);
+                const std::string who = std::string(kItems[i].name) + at;
+
+                Check(r.x >= 0 && r.y >= 0, who + " starts inside the window",
+                      std::to_string(r.x) + "," + std::to_string(r.y));
+                Check(r.Right() <= client.w, who + " ends inside the window",
+                      std::to_string(r.Right()) + " > " + std::to_string(client.w));
+                Check(r.Bottom() <= client.h, who + " fits the window's height",
+                      std::to_string(r.Bottom()) + " > " + std::to_string(client.h));
+
+                // Below about sixteen device pixels a control is hard to hit
+                // with a mouse. Scaling up only makes these bigger, so the
+                // binding case is 96.
+                if (kItems[i].focusable)
+                {
+                    Check(r.h >= 16 && r.w >= 16, who + " is big enough to click",
+                          std::to_string(r.w) + "x" + std::to_string(r.h));
+                }
+
+                for (int j = i + 1; j < kItemCount; ++j)
+                {
+                    const Rect o = Scale(kItems[j].rect, dpi);
+                    const bool apart = r.Right() <= o.x || o.Right() <= r.x ||
+                                       r.Bottom() <= o.y || o.Bottom() <= r.y;
+                    Check(apart, who + " does not overlap " + kItems[j].name,
+                          "rounding closed the gap between rows or columns");
+                }
+            }
+        }
+
+        // Tab order is creation order in Win32, so the order of the table is
+        // the order the keyboard walks. It should read left to right and top
+        // to bottom, which is what someone tabbing through expects.
+        int previous = -1;
+        bool ordered = true;
+        for (int i = 0; i < kItemCount; ++i)
+        {
+            if (!kItems[i].focusable) continue;
+            const Rect r = kItems[i].rect;
+            const int rank = r.y * 1000 + r.x;
+            if (rank <= previous) ordered = false;
+            previous = rank;
+        }
+        Check(ordered, "tab order runs left to right and top to bottom");
     }
 
     std::printf("\n%d checks, %d failed\n", gChecks, gFailures);

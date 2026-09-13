@@ -1,0 +1,34 @@
+Live Shear -- stability
+Run at 2026-09-13 13:31:42
+
+--- a zero shear is exactly nothing ---
+identity at axis 0, 25 redraws                           PASS
+identity at axis 17, 25 redraws                          PASS
+identity at axis 45, 25 redraws                          PASS
+identity at axis 90, 25 redraws                          PASS
+identity at axis 137, 25 redraws                         PASS
+identity at axis 180, 25 redraws                         PASS
+identity at axis -63, 25 redraws                         PASS
+--- editing the angle many times and returning to it ---
+100 parameter edits then back to 30 degrees              PASS
+and back to zero, against artwork never sheared          PASS
+--- the source geometry after all of that ---
+source anchors identical to a fresh fixture              PASS
+--- how long one evaluation takes ---
+Timed inside Illustrator rather than across the scripting bridge. A round
+trip over COM costs around a tenth of a second, which is more than the
+effect does and would bury it; timing the loop in one call removes it.
+
+fixture                 redraws  with the effect   per evaluation
+plainRect               3119 ms          4686 ms         46,86 ms
+bezier                  3111 ms          4731 ms         47,31 ms
+multilineText           3118 ms          4688 ms         46,88 ms
+manyChildren            3114 ms          4727 ms         47,27 ms
+compound                3115 ms          4669 ms         46,69 ms
+
+--- a document with 200 independent Shear effects ---
+build 13046 ms   redraw 86 ms   save 572 ms   reopen 699 ms   200 paths   249576 bytes
+memory after building 2855 MB, after reopening 3013 MB
+all 200 objects survived the round trip                  PASS
+
+11 passed, 0 failed

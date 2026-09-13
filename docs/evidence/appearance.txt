@@ -1,0 +1,28 @@
+Live Shear -- appearance composition
+Run at 2026-09-13 14:10:57
+Transform effect used as the partner: reflect=b:false;scaleH_Factor=r:1.6;scaleV_Factor=r:0.7
+
+--- plainRect ---
+plainRect : Transform over Shear matches Transform over native PASS
+plainRect : Shear over Transform matches native over expanded PASS
+plainRect : the two stack orders differ                  PASS
+plainRect : two Shear effects match two native shears    PASS
+--- selfIntersecting ---
+selfIntersecting : Transform over Shear matches Transform over native PASS
+selfIntersecting : Shear over Transform matches native over expanded PASS
+selfIntersecting : the two stack orders differ           PASS
+selfIntersecting : two Shear effects match two native shears PASS
+--- bezier ---
+bezier : Transform over Shear matches Transform over native PASS
+bezier : Shear over Transform matches native over expanded PASS
+bezier : the two stack orders differ                     PASS
+bezier : two Shear effects match two native shears       PASS
+--- two instances: independence, reorder, delete ---
+two separate entries in the appearance                   PASS
+editing one instance leaves the other alone              PASS
+40 reorders leave the result unchanged                   PASS
+swapping the two instances changes the result            PASS
+deleting the second leaves the first intact              PASS
+deleting the only effect restores the artwork            PASS
+
+18 passed, 0 failed

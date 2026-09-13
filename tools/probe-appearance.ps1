@@ -59,6 +59,20 @@ function Check([string] $name, [bool] $ok, [string] $detail) {
 
 Install-AiHarness | Out-Null
 Start-ProbeResults -Probe 'appearance'
+
+# Illustrator's shear action returns success whether or not it sheared
+# anything: with nothing it can act on it raises a modal alert, which
+# DONTDISPLAYALERTS answers with Continue, and the action carries on past the
+# step it skipped. So every use of it here asks the artwork instead, and a
+# comparison against artwork that was never sheared is stopped rather than
+# reported as a difference.
+$script:oracleFailures = 0
+function Assert-Oracle([string] $moved, [string] $fixture) {
+    if ($moved -notmatch 'moved') {
+        $script:oracleFailures++
+        Note ("       [oracle] {0}: Illustrator's own shear did not move the artwork; the comparison that follows is void" -f $fixture)
+    }
+}
 $script:group = 'composition'
 $transform = 'reflect=b:false;scaleH_Factor=r:1.6;scaleV_Factor=r:0.7'
 
@@ -72,66 +86,70 @@ foreach ($name in $Fixture) {
     $script:group = $name
 
     # 1. Transform above a live Shear, against Transform above a native shear.
-    Js "LS.clear(); LS.target = LS.fixtures['$name'](); LS.selectOnly(LS.target);" | Out-Null
+    Js "LS.clear(); LS.target = LS.fixtures['$name'](); LS.target.name = 'subject'; LS.selectOnly(LS.target);" | Out-Null
     Js 'app.redraw();' | Out-Null
     Js 'LS.shear(30, 0);' | Out-Null
     Js "LS.applyEffect('Adobe Transform', '$transform');" | Out-Null
     Js 'app.redraw();' | Out-Null
-    $liveOverTransform = Js 'LS.vb(LS.target);'
+    $liveOverTransform = Js 'LS.vb(LS.named("subject"));'
 
-    Js "LS.clear(); LS.target = LS.fixtures['$name'](); LS.selectOnly(LS.target);" | Out-Null
+    Js "LS.clear(); LS.target = LS.fixtures['$name'](); LS.target.name = 'subject'; LS.selectOnly(LS.target);" | Out-Null
     Js 'app.redraw();' | Out-Null
-    Js 'LS.nativeShearPrimed(30, 0);' | Out-Null
-    Js 'app.redraw(); LS.selectOnly(LS.target);' | Out-Null
+    Assert-Oracle (Js 'LS.nativeShearChecked("subject", 30, 0);') "$name"
+
+    Js 'app.redraw(); LS.selectOnly(LS.named("subject"));' | Out-Null
     Js "LS.applyEffect('Adobe Transform', '$transform');" | Out-Null
     Js 'app.redraw();' | Out-Null
-    $nativeOverTransform = Js 'LS.vb(LS.target);'
+    $nativeOverTransform = Js 'LS.vb(LS.named("subject"));'
     Check "$name : Transform over Shear matches Transform over native" (Same $liveOverTransform $nativeOverTransform) "$liveOverTransform vs $nativeOverTransform"
 
     # 2. A live Shear above a Transform, against a native shear of the expanded
     #    Transform result.
-    Js "LS.clear(); LS.target = LS.fixtures['$name'](); LS.selectOnly(LS.target);" | Out-Null
+    Js "LS.clear(); LS.target = LS.fixtures['$name'](); LS.target.name = 'subject'; LS.selectOnly(LS.target);" | Out-Null
     Js 'app.redraw();' | Out-Null
     Js "LS.applyEffect('Adobe Transform', '$transform');" | Out-Null
     Js 'LS.shear(30, 0);' | Out-Null
     Js 'app.redraw();' | Out-Null
-    $shearOverTransform = Js 'LS.vb(LS.target);'
+    $shearOverTransform = Js 'LS.vb(LS.named("subject"));'
 
-    Js "LS.clear(); LS.target = LS.fixtures['$name'](); LS.selectOnly(LS.target);" | Out-Null
+    Js "LS.clear(); LS.target = LS.fixtures['$name'](); LS.target.name = 'subject'; LS.selectOnly(LS.target);" | Out-Null
     Js 'app.redraw();' | Out-Null
     Js "LS.applyEffect('Adobe Transform', '$transform');" | Out-Null
     Js 'app.redraw();' | Out-Null
     Js 'app.executeMenuCommand("expandStyle");' | Out-Null
-    Js 'app.executeMenuCommand("selectall"); LS.target = app.activeDocument.selection[0]; app.redraw();' | Out-Null
-    Js 'LS.nativeShearPrimed(30, 0);' | Out-Null
+    Js 'app.executeMenuCommand("selectall"); LS.target = app.activeDocument.selection[0]; LS.target.name = "subject"; app.redraw();' | Out-Null
+    Assert-Oracle (Js 'LS.nativeShearChecked("subject", 30, 0);') "$name"
+
     Js 'app.redraw();' | Out-Null
-    $nativeOverExpanded = Js 'LS.vb(LS.target);'
+    $nativeOverExpanded = Js 'LS.vb(LS.named("subject"));'
     Check "$name : Shear over Transform matches native over expanded" (Same $shearOverTransform $nativeOverExpanded) "$shearOverTransform vs $nativeOverExpanded"
 
     Check "$name : the two stack orders differ" (-not (Same $liveOverTransform $shearOverTransform)) "both $liveOverTransform"
 
     # 3. Two Shear instances against two successive native shears.
-    Js "LS.clear(); LS.target = LS.fixtures['$name'](); LS.selectOnly(LS.target);" | Out-Null
+    Js "LS.clear(); LS.target = LS.fixtures['$name'](); LS.target.name = 'subject'; LS.selectOnly(LS.target);" | Out-Null
     Js 'app.redraw();' | Out-Null
     Js 'LS.shear(30, 0);' | Out-Null
     Js 'LS.shear(-12, 90);' | Out-Null
     Js 'app.redraw();' | Out-Null
-    $twoEffects = Js 'LS.vb(LS.target);'
+    $twoEffects = Js 'LS.vb(LS.named("subject"));'
 
-    Js "LS.clear(); LS.target = LS.fixtures['$name'](); LS.selectOnly(LS.target);" | Out-Null
+    Js "LS.clear(); LS.target = LS.fixtures['$name'](); LS.target.name = 'subject'; LS.selectOnly(LS.target);" | Out-Null
     Js 'app.redraw();' | Out-Null
-    Js 'LS.nativeShearPrimed(30, 0);' | Out-Null
-    Js 'app.redraw(); LS.selectOnly(LS.target);' | Out-Null
-    Js 'LS.nativeShearPrimed(-12, 90);' | Out-Null
+    Assert-Oracle (Js 'LS.nativeShearChecked("subject", 30, 0);') "$name"
+
+    Js 'app.redraw(); LS.selectOnly(LS.named("subject"));' | Out-Null
+    Assert-Oracle (Js 'LS.nativeShearChecked("subject", -12, 90);') "$name"
+
     Js 'app.redraw();' | Out-Null
-    $twoNative = Js 'LS.vb(LS.target);'
+    $twoNative = Js 'LS.vb(LS.named("subject"));'
     Check "$name : two Shear effects match two native shears" (Same $twoEffects $twoNative) "$twoEffects vs $twoNative"
 }
 
 # 4. Independence, reordering, and deletion, on one fixture.
 Note '--- two instances: independence, reorder, delete ---'
 $script:group = 'two instances'
-Js "LS.clear(); LS.target = LS.fixtures['plainRect'](); LS.selectOnly(LS.target);" | Out-Null
+Js "LS.clear(); LS.target = LS.fixtures['plainRect'](); LS.target.name = 'subject'; LS.selectOnly(LS.target);" | Out-Null
 Js 'app.redraw();' | Out-Null
 Js 'LS.shear(30, 0);' | Out-Null
 Js 'LS.shear(-12, 90);' | Out-Null
@@ -150,41 +168,41 @@ Check 'editing one instance leaves the other alone' $secondIntact 'the second in
 # Reorder, many times, then check the result is back where it started.
 Js 'LS.send("set param", "0|shearAngle|real|30");' | Out-Null
 Js 'app.redraw();' | Out-Null
-$beforeReorder = Js 'LS.vb(LS.target);'
+$beforeReorder = Js 'LS.vb(LS.named("subject"));'
 $reorderErrors = 0
 for ($i = 0; $i -lt 20; $i++) {
     if ((Js 'LS.send("move effect", "0,1");') -notmatch 'result 0') { $reorderErrors++ }
     if ((Js 'LS.send("move effect", "0,1");') -notmatch 'result 0') { $reorderErrors++ }
 }
 Js 'app.redraw();' | Out-Null
-$afterReorder = Js 'LS.vb(LS.target);'
+$afterReorder = Js 'LS.vb(LS.named("subject"));'
 Check '40 reorders leave the result unchanged' (($reorderErrors -eq 0) -and (Same $beforeReorder $afterReorder)) "$reorderErrors errors, $beforeReorder vs $afterReorder"
 
 # One swap must change the result, since the two shears do not commute.
 Js 'LS.send("move effect", "0,1");' | Out-Null
 Js 'app.redraw();' | Out-Null
-$swapped = Js 'LS.vb(LS.target);'
+$swapped = Js 'LS.vb(LS.named("subject"));'
 Check 'swapping the two instances changes the result' (-not (Same $beforeReorder $swapped)) "both $swapped"
 
 # Delete one; the other must still work.
 Js 'LS.send("move effect", "0,1");' | Out-Null
 Js 'LS.send("remove effect", "1");' | Out-Null
 Js 'app.redraw();' | Out-Null
-$afterDelete = Js 'LS.vb(LS.target);'
-Js "LS.clear(); LS.target = LS.fixtures['plainRect'](); LS.selectOnly(LS.target);" | Out-Null
+$afterDelete = Js 'LS.vb(LS.named("subject"));'
+Js "LS.clear(); LS.target = LS.fixtures['plainRect'](); LS.target.name = 'subject'; LS.selectOnly(LS.target);" | Out-Null
 Js 'app.redraw();' | Out-Null
 Js 'LS.shear(30, 0);' | Out-Null
 Js 'app.redraw();' | Out-Null
-$onlyFirst = Js 'LS.vb(LS.target);'
+$onlyFirst = Js 'LS.vb(LS.named("subject"));'
 Check 'deleting the second leaves the first intact' (Same $afterDelete $onlyFirst) "$afterDelete vs $onlyFirst"
 
 # Deleting the last one must restore the original artwork exactly.
-$original = Js "LS.clear(); LS.target = LS.fixtures['plainRect'](); app.redraw(); LS.vb(LS.target);"
+$original = Js "LS.clear(); LS.target = LS.fixtures['plainRect'](); LS.target.name = 'subject'; app.redraw(); LS.vb(LS.target);"
 Js 'LS.selectOnly(LS.target); LS.shear(30, 0);' | Out-Null
 Js 'app.redraw();' | Out-Null
 Js 'LS.send("remove effect", "0");' | Out-Null
 Js 'app.redraw();' | Out-Null
-$restored = Js 'LS.vb(LS.target);'
+$restored = Js 'LS.vb(LS.named("subject"));'
 Check 'deleting the only effect restores the artwork' (Same $original $restored) "$original vs $restored"
 
 Note ''

@@ -1,0 +1,13 @@
+probe	group	case	expected	observed	status
+export	pdf	plainRect exported to pdf	bounds match the canvas, no rasterization	bounds match True, raster False, items PathItem, 44664 bytes	PASS
+export	svg	plainRect exported to svg	bounds match the canvas, no rasterization	bounds match True, raster False, items PathItem, 448 bytes	PASS
+export	pdf	strokedRect exported to pdf	bounds match the canvas, no rasterization	bounds match True, raster False, items PathItem, 45632 bytes	PASS
+export	svg	strokedRect exported to svg	bounds match the canvas, no rasterization	bounds match True, raster False, items PathItem, 594 bytes	PASS
+export	pdf	pointText exported to pdf	bounds match the canvas, no rasterization	bounds match True, raster False, items TextFrame, 50798 bytes	PASS
+export	svg	pointText exported to svg	bounds match the canvas, no rasterization	bounds match True, raster False, items TextFrame, 2588734 bytes	PASS
+export	pdf	mixedGroup exported to pdf	bounds match the canvas, no rasterization	bounds match True, raster False, items GroupItem,PathItem, 45512 bytes	PASS
+export	svg	mixedGroup exported to svg	bounds match the canvas, no rasterization	bounds match True, raster False, items GroupItem,PathItem, 603 bytes	PASS
+export	pdf	gradientFill exported to pdf	bounds match the canvas, no rasterization	bounds match True, raster False, items PathItem, 45546 bytes	PASS
+export	svg	gradientFill exported to svg	bounds match the canvas, no rasterization	bounds match True, raster False, items PathItem, 754 bytes	PASS
+export	pdf	clipGroup exported to pdf	bounds match the canvas, no rasterization	bounds match True, raster False, items GroupItem,PathItem, 44658 bytes	PASS
+export	svg	clipGroup exported to svg	bounds match the canvas, no rasterization	bounds match True, raster False, items GroupItem,PathItem, 1760 bytes	PASS

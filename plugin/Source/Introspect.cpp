@@ -1025,6 +1025,17 @@ namespace
             out << "  index " << from << " out of range (" << n << " post-effects)\n";
             return out.str();
         }
+        // The destination has to be checked too, and separately: removing the
+        // effect first leaves n - 1 of them, so n - 1 is a legal destination
+        // and means the end. This message arrives from a script, which is to
+        // say from outside, and an index the caller made up must not reach the
+        // host unexamined.
+        if (!remove && (to < 0 || to > n - 1))
+        {
+            sAIArtStyleParser->DisposeParser(parser);
+            out << "  destination " << to << " out of range (0 to " << (n - 1) << ")\n";
+            return out.str();
+        }
 
         AIParserLiveEffect effect = nullptr;
         if (sAIArtStyleParser->GetNthPostEffect(parser, from, &effect) || effect == nullptr)
@@ -1091,6 +1102,52 @@ std::string DumpSelectionBounds()
                     << Real(r.right) << "\t" << Real(r.bottom) << "\n";
             else
                 out << "refused\t\t\t\n";
+        }
+    }
+    sAIMdMemory->MdMemoryDisposeHandle(reinterpret_cast<AIMdMemoryHandle>(store));
+    return out.str();
+}
+
+//  What GetArtTransformBounds actually returns for each combination of the
+//  bounds flags, on whatever is selected.
+//
+//  The SDK's own description of these is not enough to predict the answer.
+//  kNoExtendedBounds says it excludes the glyphs of area text and implies
+//  kNoStrokeBounds; kControlBounds says that those flags only apply when it is
+//  off. Reading that as "kControlBounds | kNoExtendedBounds excludes glyphs"
+//  is wrong, and it was wrong here for a while. This prints the table so the
+//  choice can be made from what the host does rather than from what the header
+//  appears to promise.
+std::string DumpBoundsFlags()
+{
+    struct Combination { const char* name; ai::int32 flags; };
+    static const Combination kCombinations[] = {
+        { "visible",                        kVisibleBounds },
+        { "visible|noStroke",               kVisibleBounds | kNoStrokeBounds },
+        { "visible|noExtended",             kVisibleBounds | kNoExtendedBounds },
+        { "visible|noStroke|noExtended",    kVisibleBounds | kNoStrokeBounds | kNoExtendedBounds },
+        { "control",                        kControlBounds },
+        { "control|noStroke",               kControlBounds | kNoStrokeBounds },
+        { "control|noExtended",             kControlBounds | kNoExtendedBounds },
+        { "control|noStroke|noExtended",    kControlBounds | kNoStrokeBounds | kNoExtendedBounds }
+    };
+
+    std::ostringstream out;
+    AIArtHandle** store = nullptr;
+    ai::int32 count = 0;
+    if (SelectedTopLevelArt(&store, &count) || count == 0) return "No selection.\n";
+
+    out << "index\tflags\terr\tleft\ttop\tright\tbottom\n";
+    for (ai::int32 i = 0; i < count; ++i)
+    {
+        for (const Combination& c : kCombinations)
+        {
+            AIRealRect r = { 0, 0, 0, 0 };
+            const ASErr err = sAIArt->GetArtTransformBounds((*store)[i], nullptr, c.flags, &r);
+            out << i << "\t" << c.name << "\t" << err << "\t";
+            if (err) out << "\t\t\t\n";
+            else out << Real(r.left) << "\t" << Real(r.top) << "\t"
+                     << Real(r.right) << "\t" << Real(r.bottom) << "\n";
         }
     }
     sAIMdMemory->MdMemoryDisposeHandle(reinterpret_cast<AIMdMemoryHandle>(store));

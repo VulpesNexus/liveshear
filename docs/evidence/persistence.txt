@@ -1,0 +1,7 @@
+one effect on a path     reopen bounds True  effect present True  edited reopen True  PASS
+one effect on live text  reopen bounds True  effect present True  edited reopen True  PASS
+one effect on stroked art reopen bounds True  effect present True  edited reopen True  PASS
+two Shear effects        reopen bounds True  effect present True  edited reopen True  PASS
+Shear plus Transform     reopen bounds True  effect present True  edited reopen True  PASS
+
+5 passed, 0 failed
