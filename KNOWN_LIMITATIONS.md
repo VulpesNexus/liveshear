@@ -9,7 +9,7 @@ Each entry says what kind of thing it is, because they are not all the same kind
 - **Host behavior** — Illustrator does this, to every effect, and the plugin follows.
 - **Untested** — nobody has been able to run it, and it is not claimed either way.
 
-Behavior that is simply how the effect works — how it composes with other effects, where it anchors — is described in [README.md](README.md) rather than here. Problems that were found and fixed are not listed at all. The evidence behind every entry is in [docs/RELEASE_TEST_MATRIX.md](docs/RELEASE_TEST_MATRIX.md) and [docs/evidence/](docs/evidence/).
+Behavior that is simply how the effect works — how it composes with other effects, where it anchors — is described in [docs/BEHAVIOR.md](docs/BEHAVIOR.md) rather than here. Problems that were found and fixed are not listed at all. The evidence behind every entry is in [docs/RELEASE_TEST_MATRIX.md](docs/RELEASE_TEST_MATRIX.md) and [docs/evidence/](docs/evidence/).
 
 ## Windows only
 
