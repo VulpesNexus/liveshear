@@ -274,6 +274,22 @@ function Hide-Personal {
                 $s = $s.Replace($rule.From.Replace('\', '/'), $rule.To)
             }
             if ($name) { $s = $s -replace ('(?<![A-Za-z0-9])' + [regex]::Escape($name) + '(?![A-Za-z0-9])'), '<user>' }
+            # Everything above replaces a path this machine knows the spelling
+            # of, which fails the moment the text has been somewhere that
+            # changed the spelling. A path came back from Illustrator with the
+            # en dash in a folder name re-encoded as mojibake: it matched no
+            # rule, was written into the evidence, and was committed. So
+            # anything still shaped like an absolute path is redacted whatever
+            # it spells. The lookbehind keeps URLs out, where the "s" of
+            # "https:" is otherwise a perfectly good drive letter.
+            # Spaces are consumed on purpose: the folder being hidden is very
+            # likely to contain one, and stopping at the first space would
+            # redact as far as the drive and publish the folder name after
+            # it -- which is the half that identifies anybody. It
+            # runs to a comma, a quote, or the end of the line, which
+            # over-redacts a sentence now and then -- the safe direction for a
+            # net that only ever sees what the rules above already missed.
+            $s = $s -replace '(?<![A-Za-z])[A-Za-z]:[\\/](?![\\/])[^\r\n"'',;]*', '<path>'
             $s
         }
         $out

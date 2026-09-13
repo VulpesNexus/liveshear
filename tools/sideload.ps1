@@ -71,8 +71,22 @@ if (-not $PrefsPath) {
 if (-not (Test-Path $PrefsPath)) { throw "No Illustrator preferences at $PrefsPath" }
 
 $stateDir = Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) 'LiveShear'
-$statePath = Join-Path $stateDir 'sideload-previous.txt'
+# Both of these are per generation. Illustrator keeps a separate preferences
+# file for every version it has ever installed, so more than one can be
+# sideloaded at once -- which is the normal state of affairs on a machine that
+# has last year's Illustrator and this year's side by side. A single shared
+# state file meant the second generation recorded no previous value at all,
+# and restoring it then wrote the *other* version's old path into it and
+# deleted the record both of them depended on.
+$statePath = Join-Path $stateDir ("sideload-previous.{0}.txt" -f $Generation)
 $backupPath = Join-Path $stateDir ("Adobe Illustrator Prefs.{0}.backup" -f $Generation)
+
+# A value saved before the state file was split by generation belongs to the
+# generation whose backup sits beside it.
+$legacyStatePath = Join-Path $stateDir 'sideload-previous.txt'
+if ((Test-Path $legacyStatePath) -and -not (Test-Path $statePath) -and (Test-Path $backupPath)) {
+    [IO.File]::Move($legacyStatePath, $statePath)
+}
 
 # Latin-1 round-trips every byte through a string unchanged, which is what
 # lets the hex payload and the rest of the file survive being edited as text.
