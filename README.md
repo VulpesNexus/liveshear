@@ -2,7 +2,7 @@
 
 A non-destructive **Shear** effect for Adobe Illustrator, at *Effect > Shear…*.
 
-<p align="center"><img src="docs/shear-dialog.png" alt="The Shear dialog, drawn in Illustrator's dark interface colors: a Shear Angle slider reading 5.0 degrees, an Axis Angle slider reading 0.0 degrees, a ticked Preview check box, and Reset, Cancel, and OK buttons." width="460"></p>
+<p align="center"><img src="docs/shear-in-use.png" alt="A line of live type reading Lorem ipsum, leaning to the right, selected on an Illustrator artboard. The Shear dialog is open below it, drawn in Illustrator's interface colors: a Shear Angle slider reading 10.0 degrees, an Axis Angle slider reading 0.0 degrees, a ticked Preview check box, and Reset, Cancel, and OK buttons. The Appearance panel on the right lists Type, Characters, a Shear entry with an fx badge, and Opacity." width="880"></p>
 
 ## Why
 
@@ -16,7 +16,7 @@ This adds it. The artwork underneath is never touched — text stays live text, 
 
 Quit Illustrator first. It reads its plugin folders only at startup, and holds the *.aip* open while it runs, so a file in use cannot be replaced.
 
-Download *LiveShear-0.1.0-rc.5.zip* from the [latest release](../../releases/latest) and put *LiveShear.aip* in
+Download *LiveShear-0.1.0-rc.6.zip* from the [latest release](../../releases/latest) and put *LiveShear.aip* in
 
 ```
 %LOCALAPPDATA%\Adobe Illustrator Plug-ins\30

@@ -905,6 +905,61 @@ namespace
                            reinterpret_cast<LPCWSTR>(&OwnInstance), &mod);
         return reinterpret_cast<HINSTANCE>(mod);
     }
+
+    /** Where the dialog opens: the middle of Illustrator's window, which is
+        where the host puts its own.
+
+        CW_USEDEFAULT cannot do this. It is documented to apply to overlapped
+        windows only, and for a popup -- which this is, being WS_POPUPWINDOW --
+        the x and y are simply taken as zero. That is not a fallback position,
+        it is the top-left corner of the primary monitor, and it is where this
+        dialog opened every time.
+
+        Centering on the owner is the whole of it; the rest is making sure the
+        result is somewhere a person can reach. The window is pushed back
+        inside the work area of whatever monitor it lands on, so an Illustrator
+        sitting against a screen edge -- or spanning two -- cannot put the
+        dialog half off the desktop or under the taskbar. */
+    POINT DialogOrigin(HWND owner, int width, int height)
+    {
+        RECT over = { 0, 0, 0, 0 };
+        bool haveOwner = false;
+        // A minimized window's rectangle is off in the far negative corner, so
+        // it would center the dialog somewhere nobody can see.
+        if (owner != nullptr && IsWindow(owner) && !IsIconic(owner))
+        {
+            haveOwner = GetWindowRect(owner, &over) != FALSE &&
+                        over.right > over.left && over.bottom > over.top;
+        }
+
+        MONITORINFO mi;
+        ZeroMemory(&mi, sizeof(mi));
+        mi.cbSize = sizeof(mi);
+        const HMONITOR mon = haveOwner
+            ? MonitorFromRect(&over, MONITOR_DEFAULTTONEAREST)
+            : MonitorFromWindow(owner, MONITOR_DEFAULTTOPRIMARY);
+        if (mon == nullptr || GetMonitorInfoW(mon, &mi) == FALSE)
+        {
+            mi.rcWork.left = 0;
+            mi.rcWork.top = 0;
+            mi.rcWork.right = GetSystemMetrics(SM_CXSCREEN);
+            mi.rcWork.bottom = GetSystemMetrics(SM_CYSCREEN);
+        }
+        if (!haveOwner) over = mi.rcWork;
+
+        POINT p;
+        p.x = over.left + ((over.right - over.left) - width) / 2;
+        p.y = over.top + ((over.bottom - over.top) - height) / 2;
+
+        // The far edges are clamped first and the near ones second, so that a
+        // dialog larger than the work area keeps its title bar and its first
+        // controls rather than its bottom corner.
+        if (p.x + width > mi.rcWork.right) p.x = mi.rcWork.right - width;
+        if (p.y + height > mi.rcWork.bottom) p.y = mi.rcWork.bottom - height;
+        if (p.x < mi.rcWork.left) p.x = mi.rcWork.left;
+        if (p.y < mi.rcWork.top) p.y = mi.rcWork.top;
+        return p;
+    }
 }
 
 bool RunShearDialog(ShearDialogState& state)
@@ -956,11 +1011,16 @@ bool RunShearDialog(ShearDialogState& state)
     RECT rc = { 0, 0, client.w, client.h };
     AdjustWindowRectEx(&rc, WS_CAPTION | WS_SYSMENU, FALSE, WS_EX_DLGMODALFRAME);
 
+    // Worked out before the window exists rather than moved afterwards: the
+    // window is created visible, so positioning it later would draw it in the
+    // corner first and then jump.
+    const POINT origin = DialogOrigin(parent, rc.right - rc.left, rc.bottom - rc.top);
+
     const HWND hwnd = CreateWindowExW(
         WS_EX_DLGMODALFRAME | WS_EX_CONTROLPARENT,
         kClassName, L"Shear",
         WS_POPUPWINDOW | WS_CAPTION | WS_VISIBLE,
-        CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top,
+        origin.x, origin.y, rc.right - rc.left, rc.bottom - rc.top,
         parent, nullptr, inst, &dd);
     if (hwnd == nullptr)
     {
@@ -970,7 +1030,13 @@ bool RunShearDialog(ShearDialogState& state)
         shearlog::Write(o.str());
         return false;
     }
-    shearlog::Write("dialog: opened");
+    {
+        std::ostringstream o;
+        o.imbue(std::locale::classic());
+        o << "dialog: opened at " << origin.x << "," << origin.y
+          << " size " << (rc.right - rc.left) << "x" << (rc.bottom - rc.top);
+        shearlog::Write(o.str());
+    }
 
     if (parent) EnableWindow(parent, FALSE);
     SetFocus(dd.shearEdit);

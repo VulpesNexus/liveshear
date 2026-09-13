@@ -93,8 +93,28 @@ public static class Dlg {
     // driver can put Shift down and up for real.
     [DllImport("user32.dll")]
     public static extern void keybd_event(byte vk, byte scan, uint flags, UIntPtr extra);
+    [DllImport("user32.dll")]
+    public static extern bool SetWindowPos(IntPtr h, IntPtr after, int x, int y, int cx, int cy, uint flags);
+    [DllImport("user32.dll")]
+    public static extern IntPtr MonitorFromWindow(IntPtr h, uint flags);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    public static extern bool GetMonitorInfoW(IntPtr mon, ref MONITORINFO mi);
     [StructLayout(LayoutKind.Sequential)]
     public struct RECT { public int Left, Top, Right, Bottom; }
+    [StructLayout(LayoutKind.Sequential)]
+    public struct MONITORINFO { public int cbSize; public RECT rcMonitor, rcWork; public int dwFlags; }
+
+    // The work area of the monitor a window is on -- the desktop minus the
+    // taskbar. What "still somewhere a person can reach" means.
+    public static bool WorkAreaOf(IntPtr h, out RECT work) {
+        work = new RECT();
+        MONITORINFO mi = new MONITORINFO();
+        mi.cbSize = Marshal.SizeOf(typeof(MONITORINFO));
+        IntPtr mon = MonitorFromWindow(h, 2);   // MONITOR_DEFAULTTONEAREST
+        if (mon == IntPtr.Zero || !GetMonitorInfoW(mon, ref mi)) return false;
+        work = mi.rcWork;
+        return true;
+    }
 
     // Finding the dialog by class name alone is unreliable: it is registered
     // with the ANSI entry point from inside the plugin. Walking every visible
@@ -149,6 +169,32 @@ public static class Dlg {
     $rect = New-Object Dlg+RECT
     [Dlg]::GetWindowRect($dialog, [ref] $rect) | Out-Null
     $lines.Add(("dialog found, {0} by {1} pixels" -f ($rect.Right - $rect.Left), ($rect.Bottom - $rect.Top)))
+
+    # Where it opened, which is not the same question as how big it is. The
+    # dialog is a popup window, and CW_USEDEFAULT does not pick a position for
+    # a popup -- it is documented to set x and y to zero -- so every invocation
+    # used to open in the top-left corner of the primary monitor no matter
+    # where Illustrator was. Nothing here looked at a coordinate, so nothing
+    # noticed.
+    $ai = Get-Process Illustrator -ErrorAction SilentlyContinue |
+          Where-Object { $_.MainWindowHandle -ne [IntPtr]::Zero } | Select-Object -First 1
+    if ($ai) {
+        $owner = New-Object Dlg+RECT
+        [Dlg]::GetWindowRect($ai.MainWindowHandle, [ref] $owner) | Out-Null
+        $work = New-Object Dlg+RECT
+        [Dlg]::WorkAreaOf($dialog, [ref] $work) | Out-Null
+        $dx = [int](($rect.Left + $rect.Right) / 2 - ($owner.Left + $owner.Right) / 2)
+        $dy = [int](($rect.Top + $rect.Bottom) / 2 - ($owner.Top + $owner.Bottom) / 2)
+        $inside = $rect.Left -ge $work.Left -and $rect.Top -ge $work.Top -and
+                  $rect.Right -le $work.Right -and $rect.Bottom -le $work.Bottom
+        $lines.Add(("placed at {0},{1}; Illustrator's window is {2},{3} to {4},{5}; centers differ by {6},{7} pixels" -f `
+            $rect.Left, $rect.Top, $owner.Left, $owner.Top, $owner.Right, $owner.Bottom, $dx, $dy))
+        $lines.Add(("work area is {0},{1} to {2},{3}; the dialog is entirely inside it: {4}" -f `
+            $work.Left, $work.Top, $work.Right, $work.Bottom, $inside))
+    }
+    else {
+        $lines.Add(("placed at {0},{1}; Illustrator's own window could not be found to compare against" -f $rect.Left, $rect.Top))
+    }
 
     # A picture of the dialog, so "the labels are not clipped and the fields are
     # usable" is something a reader can check rather than take on trust.
@@ -364,6 +410,39 @@ Check 'the window title reads Shear' ($caption -eq 'Shear') ("the title bar hold
 $degrees = ([regex]::Matches($transcriptText, 'U\+00B0')).Count
 Check 'the degree sign is a degree sign' ($degrees -gt 0) ("U+00B0 appears {0} time(s) among the dialog's labels" -f $degrees)
 
+# --------------------------------------------------------------- where it opens
+#
+# The dialog is a popup window, and CW_USEDEFAULT picks no position for one:
+# it is documented to set x and y to zero instead. So the dialog opened in the
+# top-left corner of the primary monitor every single time, and no check here
+# had ever looked at a coordinate.
+function Get-Placement([string] $text) {
+    $m = [regex]::Match($text, "placed at (-?\d+),(-?\d+);.*centers differ by (-?\d+),(-?\d+) pixels")
+    if (-not $m.Success) { return $null }
+    $w = [regex]::Match($text, "the dialog is entirely inside it: (\w+)")
+    [pscustomobject]@{
+        X      = [int] $m.Groups[1].Value
+        Y      = [int] $m.Groups[2].Value
+        Dx     = [int] $m.Groups[3].Value
+        Dy     = [int] $m.Groups[4].Value
+        Inside = $w.Success -and $w.Groups[1].Value -eq 'True'
+        Line   = $m.Value
+    }
+}
+
+$place = Get-Placement $transcriptText
+# Four pixels, not zero: the centering divides by two in integers, and the two
+# sides round independently here and in the plugin. The failure this guards
+# against is measured in hundreds.
+Check 'the dialog opens centered on Illustrator, not in a corner' `
+    ($null -ne $place -and [Math]::Abs($place.Dx) -le 4 -and [Math]::Abs($place.Dy) -le 4) `
+    $(if ($null -eq $place) { 'the driver could not read the placement back' }
+      else { "{0}; a top-left corner placement would be 0,0" -f $place.Line })
+Check 'and entirely inside the monitor work area' `
+    ($null -ne $place -and $place.Inside) `
+    $(if ($null -eq $place) { 'the driver could not read the placement back' }
+      else { "opened at {0},{1}, with no part of it off the desktop or under the taskbar" -f $place.X, $place.Y })
+
 # A 200 x 120 box sheared 40 degrees widens by tan(40) * 120 = 100.692 pt.
 $expected = 200 + 120 * [Math]::Tan(40 * [Math]::PI / 180)
 Check 'dragging through several values does not compound' (Near ($afterOk[2] - $afterOk[0]) $expected 0.02) ("width after dragging through 10, 20, 30, 40 is " + (Num ($afterOk[2] - $afterOk[0])) + " pt; a single 40 degree shear gives " + (Num $expected) + " pt; compounding would give far more")
@@ -460,6 +539,99 @@ if ($TracePath) {
         Check 'with Preview off the artwork is not redrawn at the new angle' (Near $duringAngle 5 0.05) ("the effect was last evaluated at " + $duringAngle + " degrees while the dialog was open; it started at 5")
     }
     Check 'and OK still commits the new angle' (Near (StoredAngle) 44 0.05) ("shearAngle after OK: " + (StoredAngle) + "; bounds " + (($after | ForEach-Object { Num $_ }) -join ', ') + " (were " + (($before | ForEach-Object { Num $_ }) -join ', ') + ")")
+}
+
+# ------------------------------------- the clamp, with Illustrator off the edge
+#
+# Centering is easy to get right in the middle of a screen and easy to get
+# wrong at its edge, and the clamp that handles the edge is the part no
+# ordinary run exercises. So Illustrator is pushed left until the middle of its
+# window is within half a dialog of the desktop edge -- centering alone would
+# then put a good part of the dialog past it -- and the dialog is opened there.
+# The window's placement is saved first and put back afterwards, maximized
+# state included.
+Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+public static class HostWin {
+    [StructLayout(LayoutKind.Sequential)] public struct RECT { public int Left, Top, Right, Bottom; }
+    [StructLayout(LayoutKind.Sequential)] public struct POINT { public int X, Y; }
+    [StructLayout(LayoutKind.Sequential)] public struct WINDOWPLACEMENT {
+        public int length, flags, showCmd;
+        public POINT ptMinPosition, ptMaxPosition;
+        public RECT rcNormalPosition;
+    }
+    [DllImport("user32.dll")] public static extern bool GetWindowPlacement(IntPtr h, ref WINDOWPLACEMENT p);
+    [DllImport("user32.dll")] public static extern bool SetWindowPlacement(IntPtr h, ref WINDOWPLACEMENT p);
+    [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr h, out RECT r);
+    [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr h, IntPtr after, int x, int y, int cx, int cy, uint flags);
+    [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr h, int cmd);
+}
+"@ -ErrorAction SilentlyContinue
+
+$aiProc = Get-Process Illustrator -ErrorAction SilentlyContinue |
+          Where-Object { $_.MainWindowHandle -ne [IntPtr]::Zero } | Select-Object -First 1
+if (-not $aiProc) {
+    Note '[SKIP] the dialog is pushed back on screen when Illustrator sits against the edge'
+    Note '       Illustrator has no main window handle to move'
+    Add-ProbeResult -Group 'dialog' -Case 'the dialog is pushed back on screen when Illustrator sits against the edge' `
+        -Expected 'the dialog behaves like an Adobe dialog' `
+        -Observed 'Illustrator reported no main window, so it could not be moved to the edge' -Status 'INCONCLUSIVE'
+}
+else {
+    $hwnd = $aiProc.MainWindowHandle
+    $saved = New-Object HostWin+WINDOWPLACEMENT
+    $saved.length = [Runtime.InteropServices.Marshal]::SizeOf([type] 'HostWin+WINDOWPLACEMENT')
+    $havePlacement = [HostWin]::GetWindowPlacement($hwnd, [ref] $saved)
+    try {
+        [HostWin]::ShowWindow($hwnd, 9) | Out-Null        # SW_RESTORE
+        Start-Sleep -Milliseconds 600
+        $r = New-Object HostWin+RECT
+        [HostWin]::GetWindowRect($hwnd, [ref] $r) | Out-Null
+        $width = $r.Right - $r.Left
+        # Left edge here puts the window's own middle 60 pixels from the
+        # desktop's, which is far less than half the dialog's width.
+        $movedTo = 60 - [int]($width / 2)
+        # SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE
+        [HostWin]::SetWindowPos($hwnd, [IntPtr]::Zero, $movedTo, 0, 0, 0, 0x0015) | Out-Null
+        Start-Sleep -Milliseconds 600
+        [HostWin]::GetWindowRect($hwnd, [ref] $r) | Out-Null
+        Note ("moved Illustrator to {0},{1}; its middle is now at x={2}" -f $r.Left, $r.Top, [int](($r.Left + $r.Right) / 2))
+
+        New-Case 5
+        $transcript = Invoke-Dialog -Angles @(12) -Button 'cancel'
+        Note 'driver transcript (Illustrator against the left edge):'
+        foreach ($t in $transcript) { Note ("       " + $t) }
+        $edge = Get-Placement (($transcript -join "`n"))
+
+        if ($null -eq $edge) {
+            Check 'the dialog is pushed back on screen when Illustrator sits against the edge' $false `
+                'the driver could not read the placement back'
+        }
+        elseif ([Math]::Abs($edge.Dx) -le 4) {
+            # Centering and clamping agreed, which means the window never got
+            # near enough to the edge for the clamp to have anything to do.
+            # Reporting a pass here would be reporting an arrangement, not a
+            # result.
+            Note '[----] the dialog is pushed back on screen when Illustrator sits against the edge'
+            Note ('       ' + $edge.Line)
+            Add-ProbeResult -Group 'dialog' -Case 'the dialog is pushed back on screen when Illustrator sits against the edge' `
+                -Expected 'the dialog behaves like an Adobe dialog' `
+                -Observed ('Illustrator did not end up close enough to the edge for centering to overshoot it, so the clamp had nothing to do: ' + $edge.Line) `
+                -Status 'NOT DISCRIMINATING'
+        }
+        else {
+            Check 'the dialog is pushed back on screen when Illustrator sits against the edge' $edge.Inside `
+                ("centering alone would have put it {0} pixels past the edge; it opened at {1},{2}, entirely on the desktop" -f `
+                 [Math]::Abs($edge.Dx), $edge.X, $edge.Y)
+        }
+    }
+    finally {
+        if ($havePlacement) { [HostWin]::SetWindowPlacement($hwnd, [ref] $saved) | Out-Null }
+        else { [HostWin]::ShowWindow($hwnd, 3) | Out-Null }   # SW_MAXIMIZE
+        Start-Sleep -Milliseconds 600
+        Note 'Illustrator put back where it was'
+    }
 }
 
 Invoke-AiScript 'LS.clear(); "cleared";' | Out-Null

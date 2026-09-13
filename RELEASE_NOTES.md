@@ -1,5 +1,15 @@
 # Release notes
 
+## 0.1.0-rc.6
+
+Everything in rc.5, and:
+
+- **The dialog opens in the middle of Illustrator's window**, where the host puts its own, instead of in the top-left corner of the primary monitor. It was created with `CW_USEDEFAULT` for its position, which reads like "let Windows choose" and is not: that value applies to overlapped windows only, and for a popup — which this dialog is — the coordinates are documented to be taken as zero. So it was not falling back to a corner, it was being placed there, every time. It is now centered on Illustrator and then pushed back inside the work area of whatever monitor that lands on, so a window against a screen edge cannot put it half off the desktop or under the taskbar.
+
+- **The dialog probe looks at where the window opened**, which nothing had ever done — it measured the dialog's size, its caption, its labels, and everything it did, and never once a coordinate. It now compares the dialog's center against Illustrator's, and checks the window lands entirely inside the monitor work area. The edge case is driven rather than assumed: Illustrator is moved until its own middle is 60 pixels from the desktop edge, far closer than half a dialog, and the dialog has to come back on screen from there.
+
+- **A new illustration in the README**, showing the effect on live type with the *Appearance* panel beside it, rather than the dialog on its own.
+
 ## 0.1.0-rc.5
 
 Everything in rc.4, and:
