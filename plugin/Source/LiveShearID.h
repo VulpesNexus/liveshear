@@ -77,7 +77,7 @@
 #define kShearVersionMajor          0
 #define kShearVersionMinor          1
 #define kShearVersionPatch          0
-#define kShearVersionString         "0.1.0-rc.6"
+#define kShearVersionString         "0.1.0"
 
 #define LS_STRINGIFY2(x)            #x
 #define LS_STRINGIFY(x)             LS_STRINGIFY2(x)

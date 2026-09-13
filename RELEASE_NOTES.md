@@ -1,5 +1,13 @@
 # Release notes
 
+## 0.1.0
+
+The first stable release, and 0.1.0-rc.6 with the suffix taken off: the only change to the plugin is the version it reports. Nothing about the geometry, the dialog, the menu item, or the parameter handling is different from the last candidate, and the whole suite was run again against this exact binary rather than carried over from it — the counts and every individual result are in [docs/RELEASE_TEST_MATRIX.md](docs/RELEASE_TEST_MATRIX.md).
+
+The README is shorter. Where the shear anchors and how it stacks, which had grown into the longest section in it, is now [docs/BEHAVIOR.md](docs/BEHAVIOR.md); the README keeps the part a person needs in order to use the effect and links to the rest.
+
+What the release candidates below added, in one list: the dialog opens in the middle of Illustrator rather than the corner of the screen, it is drawn in Illustrator's own colors, the effect is at *Effect > Shear…* on the *Effect* menu itself, there is a proper About window under *Help > About VulpesNexus Plug-ins*, and the plugin installs into the shared plugin folder alongside your other Illustrator plugins.
+
 ## 0.1.0-rc.6
 
 Everything in rc.5, and:

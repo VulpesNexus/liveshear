@@ -2,11 +2,11 @@
 
 ## A. Verdict
 
-**RELEASE CANDIDATE WITH DOCUMENTED LIMITATIONS.**
+**RELEASABLE, WITH DOCUMENTED LIMITATIONS.** Shipped as 0.1.0.
 
 The binary has been run in Illustrator, and every result below was measured against the artifact being packaged rather than against an earlier one. Source artwork is safe in every case the suite can construct: the effect's own path anchors are compared before and after in all 61 artwork cases and never move. The reference point matches Illustrator's own shear command for every kind of artwork the suite can build, along both axes. Claims in the README, the release notes, and the limitations list were checked one at a time against the evidence behind them, and several were weakened or corrected because the evidence did not support them.
 
-What keeps this from being an unqualified release candidate is a short list of bounded, named limitations, none of which risks a document:
+What keeps this from being an unqualified release is a short list of bounded, named limitations, none of which risks a document, and none of which the release candidates closed:
 
 - **Display scaling above 100% has never been seen.** The layout is proven by arithmetic at five scales; the rendering is not proven at all.
 - **GPU preview could not be compared**, because this machine has no GPU preview to compare against.
@@ -20,7 +20,7 @@ Section T says what would have to change for those qualifications to come off.
 
 | | |
 | --- | --- |
-| Plugin version | 0.1.0-rc.6 |
+| Plugin version | 0.1.0 |
 | Binary | *LiveShear.aip*; size and SHA-256 in [evidence/build.txt](evidence/build.txt) |
 | Commit | recorded in the same file, with whether the working tree was clean |
 | Illustrator | 2026, version 30.7.0, 64-bit — **this binary has been loaded and driven by it** |
@@ -219,7 +219,7 @@ Raw output from every probe is in [evidence/](evidence/). [RELEASE_TEST_MATRIX.m
 
 ### Which evidence describes the binary being shipped
 
-Every file under *evidence/* except two was written after the build recorded in [evidence/build.txt](evidence/build.txt), against the binary that hash names. The exceptions are **native-shear.tsv** and **sequence-crash.tsv**, which come from probes deliberately run outside the suite and were last written against an earlier build. Nothing in this release touches what they measure — it moved the effect's menu item, changed two strings in the About window, and added one read-only bridge selector, none of which is reachable from the effect's geometry or from the crash comparison — but the matrix does not distinguish the two cases, so it is said here instead.
+Every file under *evidence/* except two was written after the build recorded in [evidence/build.txt](evidence/build.txt), against the binary that hash names. The exceptions are **native-shear.tsv** and **sequence-crash.tsv**, which come from probes deliberately run outside the suite and were last written against an earlier build. Nothing in this release touches what they measure — 0.1.0 changes only the version the plugin reports, and the candidate before it moved where the dialog window opens, neither of which is reachable from the effect's geometry or from the crash comparison — but the matrix does not distinguish the two cases, so it is said here instead.
 
 That distinction is worth making because it has already caught something. In the run for this release the persistence probe printed its heading, died on an RPC failure when Illustrator dropped the connection, and left its previous results in place; the suite's summary showed nothing wrong, and the matrix would have quoted rows measured against a different binary as though they described this one. Comparing each evidence file's timestamp against the build record is what found it. That check belongs in the release sequence, not in a person's memory.
 
