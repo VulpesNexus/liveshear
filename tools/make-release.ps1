@@ -91,17 +91,23 @@ Write-Output 'No build-machine paths in the binary.'
 $buildRecord = Join-Path $repo 'docs\evidence\build.txt'
 if (Test-Path $buildRecord) {
     $builtAt = (Get-Item $buildRecord).LastWriteTimeUtc
-    $runSeparately = @('native-shear.tsv', 'sequence-crash.tsv', 'crash-ab.tsv')
+    # build.tsv is the build probe's own result, written in the same instant as
+    # the record it would be compared against; a strict comparison makes it look
+    # older than itself.
+    $exempt = @('native-shear.tsv', 'sequence-crash.tsv', 'crash-ab.tsv', 'build.tsv')
     $stale = @(Get-ChildItem (Join-Path $repo 'docs\evidence') -Filter *.tsv |
                Where-Object { $_.LastWriteTimeUtc -lt $builtAt -and
-                              $runSeparately -notcontains $_.Name })
+                              $exempt -notcontains $_.Name })
     if ($stale.Count -gt 0) {
-        $stale | ForEach-Object { Write-Output ("  stale: {0}" -f $_.Name) }
-        throw ("{0} evidence file(s) predate the build in docs\evidence\build.txt, so the matrix " +
-               "would describe a binary this archive does not contain. Re-run those probes, or add " +
-               "them to `$runSeparately in this script if they are meant to be run outside the suite." -f $stale.Count)
+        $stale | ForEach-Object {
+            Write-Output ("  stale: {0}  written {1}" -f $_.Name, $_.LastWriteTime.ToString('yyyy-MM-dd HH:mm:ss'))
+        }
+        $message = "{0} evidence file(s) predate the build in docs\evidence\build.txt, so the matrix would " +
+                   "describe a binary this archive does not contain. Re-run those probes, or add them to " +
+                   "the exempt list in this script if they are meant to be run outside the suite."
+        throw ($message -f $stale.Count)
     }
-    Write-Output ("Evidence checked: every probe result postdates the build, bar {0} run outside the suite." -f $runSeparately.Count)
+    Write-Output 'Evidence checked: every probe result postdates the build it describes.'
 }
 
 # --- assemble -------------------------------------------------------------
