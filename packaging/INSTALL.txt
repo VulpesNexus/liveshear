@@ -1,0 +1,79 @@
+Shear for Illustrator {VERSION} — Adobe Illustrator plugin
+Windows x64. Built against the Illustrator 2026 SDK, tested on 30.7.0.
+
+
+DO NOT DOUBLE-CLICK LiveShear.aip
+
+  It is a plugin, not a document. Double-clicking it, or dragging it onto
+  Illustrator, makes Illustrator try to OPEN it as artwork, and it answers:
+
+      "LiveShear.aip" cannot be opened because the file format is unknown.
+
+  Nothing is wrong with the file when that happens. A plugin is installed by
+  putting it in a folder Illustrator reads at startup, which is the three
+  steps below.
+
+
+INSTALL
+
+  1. Quit Illustrator.
+
+  2. Put LiveShear.aip in
+       %LOCALAPPDATA%\Adobe Illustrator Plug-ins\30
+     Create that folder if it is not there. Paste the path into the address
+     bar of a File Explorer window to reach it.
+
+     The 30 is Illustrator 2026's version number. Next year's Illustrator
+     gets its own folder beside it: a plugin built against one year's SDK is
+     not guaranteed to load in another, and this one does not load in
+     Illustrator 2025.
+
+  3. Start Illustrator, open
+       Edit > Preferences > Plug-ins & Scratch Disks
+     tick "Additional Plug-ins Folder", choose the folder from step 2, and
+     restart Illustrator.
+
+  No administrator rights are needed at any point.
+
+  SHARE THAT FOLDER with your other Illustrator plugins. Illustrator has one
+  Additional Plug-ins Folder, not a list, so giving each plugin a folder of
+  its own means pointing the preference at the newest one silently stops the
+  rest from loading. Everything in the one folder loads.
+
+
+DID IT WORK
+
+  Effect > Distort & Transform > Shear...
+
+  If that entry is not there, the plugin did not load. Check that Illustrator
+  was fully restarted after step 3, and that the preference points at the
+  folder holding the .aip rather than at its parent.
+
+
+USING IT
+
+  Select some artwork and choose Effect > Distort & Transform > Shear...
+
+  Shear Angle   how far it leans, -89 to 89 degrees
+  Axis Angle    the direction the shear runs along; 0 is horizontal
+  Preview       updates the artwork as you drag
+  Cancel, Escape, and the close button all put everything back.
+
+  The effect stays editable in the Appearance panel. The artwork underneath
+  is untouched: text stays live text, paths stay editable paths, and deleting
+  the effect gives back exactly what you started with.
+
+
+UNINSTALL
+
+  Quit Illustrator and delete LiveShear.aip. Nothing else is installed: no
+  services, no registry entries, no startup items.
+
+
+LICENSE
+
+  GPL-3.0-or-later, with an Adobe Illustrator SDK linking exception.
+  See LICENSE and LICENSE-EXCEPTION. It comes with ABSOLUTELY NO WARRANTY.
+
+  Copyright (C) 2026 Vixen420.
+  https://github.com/VulpesNexus/liveshear

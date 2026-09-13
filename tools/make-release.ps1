@@ -96,6 +96,19 @@ foreach ($doc in @('README.md', 'LICENSE', 'LICENSE-EXCEPTION', 'KNOWN_LIMITATIO
     else { Write-Output ("  missing, not packed: {0}" -f $doc) }
 }
 
+# INSTALL.txt carries the version in its first line, so it is a template, and
+# it is the file a downloader actually reads: the README is long and the .aip
+# sits next to it looking openable. A tester double-clicked the .aip and got
+# Illustrator's "the file format is unknown" alert, which says nothing about
+# what to do instead. This is what says it.
+$installTemplate = Join-Path $repo 'packaging\INSTALL.txt'
+if (Test-Path $installTemplate) {
+    $installText = [IO.File]::ReadAllText($installTemplate).Replace('{VERSION}', $version)
+    $utf8 = New-Object Text.UTF8Encoding($false)
+    [IO.File]::WriteAllText((Join-Path $stage 'INSTALL.txt'), $installText, $utf8)
+    Write-Output '  INSTALL.txt written from packaging\INSTALL.txt'
+}
+
 $archive = Join-Path $dist ("LiveShear-" + $version + ".zip")
 if (Test-Path $archive) { [IO.File]::Delete($archive) }
 Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $archive

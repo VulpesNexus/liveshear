@@ -20,6 +20,7 @@
 
 #include <winres.h>
 #include "LiveShearID.h"
+#include "Resource.h"
 
 #ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -60,3 +61,6 @@ BEGIN
 END
 
 plugin pipl "plugin.pipl"
+
+// The About dialog, in its own file so a harness can compile the same template.
+#include "LiveShearAbout.rc"

@@ -36,12 +36,28 @@
 #define kShearDescription           "Non-destructive Shear effect for Adobe Illustrator"
 #define kShearHomePage              "https://github.com/VulpesNexus"
 
+/* Wide flavors of the same text, for the Windows dialogs. The two-step
+   expansion is what makes the argument expand before L is pasted onto it.
+
+   The non-ASCII characters are escapes rather than literal glyphs so every
+   source file that uses them stays plain ASCII: this machine's code page is
+   932, and a literal copyright sign in a wide literal would be decoded through
+   whatever the compiler guessed the file's encoding was. */
+#define LS_WIDEN2(x)                L ## x
+#define LS_WIDEN(x)                 LS_WIDEN2(x)
+#define LS_WVERSION                 LS_WIDEN(kShearVersionString)
+
+#define LS_COPY                     L"\x00A9"   /* U+00A9 copyright sign */
+
+#define LS_REPO_URL                 L"https://github.com/VulpesNexus/liveshear"
+#define LS_AUTHOR_URL               L"https://github.com/VulpesNexus"
+
 /** Release version. Keep in step with the version resource, the README, and
     the name of the distribution archive. */
 #define kShearVersionMajor          0
 #define kShearVersionMinor          1
 #define kShearVersionPatch          0
-#define kShearVersionString         "0.1.0-rc.3"
+#define kShearVersionString         "0.1.0-rc.4"
 
 /** PERSISTENT. Unique, non-localized name of the custom live effect, stored in
     saved documents. It must never change once anything has been saved with it;

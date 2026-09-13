@@ -1,5 +1,13 @@
 # Release notes
 
+## 0.1.0-rc.4
+
+Everything in rc.3, and:
+
+- **A proper About window**, at *Help > About VulpesNexus Plug-ins > Shear…*, replacing the plain text alert the SDK's helper puts up. It is the same window *Subgroup* shows — same layout, same two bands, same controls — because every Illustrator plugin here wears one About box, and it takes its colors from Illustrator like the Shear dialog does, down to the title bar.
+- **One menu group for every plugin from this publisher.** Adobe's default files third-party plugins under *About SDK Plug-ins*, which reads as though they were Adobe's own samples. Both this plugin and *Subgroup* now appear under *About VulpesNexus Plug-ins* instead — verified by asking Illustrator for its menu groups, which reports one publisher group and no SDK one.
+- **An INSTALL.txt in the archive**, because a tester double-clicked *LiveShear.aip* and got Illustrator's *"the file format is unknown"* alert. That alert means Illustrator tried to *open* the plugin as artwork; nothing is wrong with the file. The new file says so before it says anything else.
+
 ## 0.1.0-rc.3
 
 Everything in rc.2, and:

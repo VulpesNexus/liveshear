@@ -20,6 +20,8 @@
 #include "Introspect.h"
 #include "ShearLog.h"
 #include "ShearDialog.h"
+#include "ShearAbout.h"
+#include "ShearTheme.h"
 #include "SDKDef.h"
 #include "SDKAboutPluginsHelper.h"
 
@@ -207,10 +209,63 @@ ASErr LiveShearPlugin::LiveEffectInterpolate(AILiveEffectInterpParamMessage* mes
     return fShear.Interpolate(message);
 }
 
+#ifdef WIN_ENV
+/* Illustrator's own dialog colors, turned into the plain struct the About
+   dialog takes. This is the seam: the host is asked here, so ShearAbout.cpp
+   still compiles without a line of Illustrator in it.
+
+   ShearTheme already reads the suite for the Shear dialog, so the numbers come
+   from one place and the two windows cannot end up different shades of the
+   same theme. */
+static ShearAboutTheme AboutThemeFromHost()
+{
+    const sheartheme::Theme host = sheartheme::Read();
+
+    ShearAboutTheme about;
+    if (!host.fromHost) return about;   /* system colors, as the default already is */
+
+    about.panel        = host.editBackground;
+    about.panelText    = host.editText;
+    about.band         = host.background;
+    about.bandText     = host.text;
+    about.rule         = host.border;
+    about.link         = host.focusRing;
+
+    /* The host answered, so the window is ours to draw entirely: a stock OK
+       button and a white caption would be the two pieces left in system
+       colors. */
+    about.ownerDrawButton = true;
+    about.button          = host.control;
+    about.buttonText      = host.text;
+    about.buttonBorder    = host.border;
+    about.darkTitleBar    = host.dark;
+    return about;
+}
+#endif
+
 ASErr LiveShearPlugin::GoMenuItem(AIMenuMessage* message)
 {
     if (message->menuItem == this->fAboutPluginMenu)
     {
+#ifdef WIN_ENV
+        /* Our own module, not the host's: the dialog resource lives in the
+           .aip. Taken from the address of a function in this module rather
+           than cached from DllMain, which the SDK's entry point does not hand
+           us. */
+        HMODULE self = nullptr;
+        if (GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+                               GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                               reinterpret_cast<LPCWSTR>(&ShearShowAboutDialog),
+                               &self) && self != nullptr)
+        {
+            if (ShearShowAboutDialog(self, GetActiveWindow(), AboutThemeFromHost()))
+                return kNoErr;
+        }
+#endif
+
+        /* Last resort: a plain alert, same words. Reached only if the dialog
+           could not be created -- an old common-controls library, or a
+           resource that failed to load. */
         SDKAboutPluginsHelper aboutPluginsHelper;
         const std::string about =
             std::string(kShearProductName) + " " + kShearVersionString + "\n" +
@@ -244,6 +299,49 @@ ASErr LiveShearPlugin::HandleScriptMessage(const char* selector, AIScriptMessage
     else if (sel == "log")
     {
         result = shearlog::Read();
+    }
+    else if (sel == "menu groups")
+    {
+        /* Every menu group Illustrator holds, by name. The About group is
+           shared between this plugin and the others from the same publisher,
+           and "shared" is only observable from here: the menu bar cannot be
+           read from scripting, and Illustrator's own shell does not answer the
+           Alt key the way a stock menu bar would, so a screen capture is not
+           available either. */
+        std::ostringstream o;
+        ai::int32 count = 0;
+        if (!sAIMenu->CountMenuGroups(&count))
+        {
+            for (ai::int32 i = 0; i < count; ++i)
+            {
+                AIMenuGroup group = nullptr;
+                if (sAIMenu->GetNthMenuGroup(i, &group) || group == nullptr) continue;
+                const char* name = nullptr;
+                if (sAIMenu->GetMenuGroupName(group, &name) || name == nullptr) continue;
+                o << name << "\n";
+            }
+        }
+        result = o.str();
+    }
+    else if (sel == "about")
+    {
+        /* Opens the About dialog, so a probe can photograph it. The menu item
+           that normally opens it is added without a name, so there is no
+           command string for executeMenuCommand to reach it by. */
+#ifdef WIN_ENV
+        HMODULE self = nullptr;
+        if (GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+                               GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                               reinterpret_cast<LPCWSTR>(&ShearShowAboutDialog),
+                               &self) && self != nullptr)
+        {
+            result = ShearShowAboutDialog(self, GetActiveWindow(), AboutThemeFromHost())
+                         ? "shown" : "the dialog could not be created";
+        }
+        else result = "could not find this plugin's own module";
+#else
+        result = "Windows only";
+#endif
     }
     else if (sel == "registry")
     {

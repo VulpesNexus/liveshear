@@ -12,9 +12,11 @@ This adds it. The artwork underneath is never touched — text stays live text, 
 
 ## Install
 
+**Do not double-click *LiveShear.aip*.** It is a plugin, not a document. Double-clicking it, or dragging it onto Illustrator, makes Illustrator try to *open* it as artwork, and it answers *"LiveShear.aip" cannot be opened because the file format is unknown.* Nothing is wrong with the file when that happens — a plugin is installed by putting it where Illustrator looks at startup, which is what follows.
+
 Quit Illustrator first. It reads its plugin folders only at startup, and holds the *.aip* open while it runs, so a file in use cannot be replaced.
 
-Download *LiveShear-0.1.0-rc.3.zip* from the [latest release](../../releases/latest) and put *LiveShear.aip* in
+Download *LiveShear-0.1.0-rc.4.zip* from the [latest release](../../releases/latest) and put *LiveShear.aip* in
 
 ```
 %LOCALAPPDATA%\Adobe Illustrator Plug-ins\30
