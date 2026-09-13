@@ -35,6 +35,10 @@ FIXTURES = {
     "areaText": ("Live area text", "text flowed into a rectangular frame"),
     "multilineText": ("Multi-line text", "two lines of point text"),
     "strokedText": ("Stroked text", "point text with a 6 pt character stroke"),
+    "asymmetricText": ("Text with off-centre ink", "glyphs with descenders on one side and none on the other"),
+    "retypedText": ("Text edited after the frame was made", "point text whose contents were replaced"),
+    "resizedText": ("Text resized after the frame was made", "point text whose size was changed"),
+    "embeddedRaster": ("Embedded rasters", "a bitmap placed and embedded in the document"),
     "symbolInstance": ("Symbol instances", "an instance of a symbol made from a stroked rectangle"),
     "gradientFill": ("Linear gradients", "a linear gradient fill"),
     "radialFill": ("Radial gradients", "a radial gradient fill"),
@@ -59,12 +63,10 @@ FIXTURES = {
 # Things the artwork model contains that the suite does not exercise. Listed
 # so the matrix cannot be read as a claim about them.
 UNTESTED = [
-    ("Pattern fills", "a pattern swatch fill", "The object is exercised and its bounds match the native command, but whether the pattern inside it leans with the shape could not be seen: a pattern built through Illustrator's scripting interface does not render at all, so there is nothing to compare. Gradients are verified in pixels."),
     ("Variable-width strokes", "a stroke whose width profile varies along the path", "No case builds one: the width profile is not reachable from Illustrator's scripting interface, so a fixture would have to be drawn by hand."),
     ("Scatter brushes", "a brush that scatters copies of art along a path", "No scatter brush ships in the default document profile used by the fixtures."),
     ("Meshes", "a gradient mesh object", "Not exercised."),
-    ("Placed and linked images", "a linked or embedded raster", "The earlier behavior suite applied the effect to an embedded raster without error; no case measures the result against the native command."),
-    ("Blends", "a blend between two objects, and the effect's own Interpolate handler", "The Interpolate handler is implemented but no case drives it."),
+    ("Linked images", "an image linked rather than embedded", "An embedded raster is exercised and anchors exactly where the native command does; a linked one is not built by any fixture."),
     ("Graphs", "a graph object", "Not exercised."),
     ("3D and raster effects below the Shear in the stack", "an effect that rasterizes before the shear runs", "Composition was measured against Adobe's Transform and against Offset Path, not against a raster effect."),
     ("Non-Windows hosts", "macOS", "The plugin is Windows-only; the dialog is plain Win32."),

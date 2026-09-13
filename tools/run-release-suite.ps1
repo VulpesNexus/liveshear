@@ -87,6 +87,9 @@ Run 'persistence' { & (Join-Path $PSScriptRoot 'probe-persistence.ps1') }
 Run 'export'      { & (Join-Path $PSScriptRoot 'probe-export.ps1') }
 Run 'fills'       { & (Join-Path $PSScriptRoot 'probe-fills.ps1') }
 Run 'limits'      { & (Join-Path $PSScriptRoot 'probe-limits.ps1') }
+Run 'schema'      { & (Join-Path $PSScriptRoot 'probe-schema.ps1') }
+Run 'blend'       { & (Join-Path $PSScriptRoot 'probe-blend.ps1') -TracePath $TracePath }
+Run 'generated art' { & (Join-Path $PSScriptRoot 'probe-generated-art.ps1') }
 Run 'dialog'      { & (Join-Path $PSScriptRoot 'probe-dialog.ps1') -TracePath $TracePath }
 Run 'undo'        { & (Join-Path $PSScriptRoot 'probe-undo.ps1') }
 Run 'preview mode' { & (Join-Path $PSScriptRoot 'probe-gpu.ps1') }

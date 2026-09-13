@@ -30,7 +30,9 @@ if (-not $Case) {
                 'bezier', 'openPath', 'compound', 'selfIntersecting',
                 'mixedGroup', 'nestedGroup', 'clipGroup', 'transformedGroup',
                 'pointText', 'areaText', 'multilineText', 'strokedText',
-                'symbolInstance', 'gradientFill', 'radialFill', 'patternFill',
+                'asymmetricText', 'retypedText', 'resizedText',
+                'symbolInstance', 'embeddedRaster',
+                'gradientFill', 'radialFill', 'patternFill',
                 'calligraphicBrush', 'artBrush', 'patternBrush',
                 'rotatedRect', 'scaledRect', 'reflectedRect', 'preShearedRect',
                 'tinyPath', 'hugePath', 'farFromOrigin', 'negativeCoords',
@@ -69,9 +71,21 @@ foreach ($spec in $Case) {
         # has been seen to do nothing for a run of attempts in a long session.
         # So the oracle is checked, retried, and finally reported as not moved
         # rather than compared against unsheared artwork.
-        # Below a hundredth of a degree the native shear moves the geometry by
-        # less than Illustrator will report, so there is nothing to check for.
-        $moved = [math]::Abs([double] $shear) -lt 0.01
+        # This used to read
+        #
+        #     $moved = [math]::Abs([double] $shear) -lt 0.01
+        #
+        # on the grounds that below a hundredth of a degree the native shear
+        # moves the geometry by less than Illustrator will report. That is not
+        # true, and because it seeded the flag with $true the loop below never
+        # ran at all: the oracle was never sheared, and the live result was
+        # then compared against artwork nothing had been done to. All three of
+        # the small-angle failures in the matrix were this.
+        #
+        # Measured instead: at 0.001 degrees the native command widens the
+        # fixture by 0.002094396 pt, against 0.002094395 expected, and the
+        # bounds are reported to nine decimals. There is plenty to check for.
+        $moved = $false
         for ($attempt = 1; $attempt -le 3 -and -not $moved; $attempt++) {
             Invoke-AiScript 'LS.compareSelectOracle();' | Out-Null
             Invoke-AiScript 'app.redraw();' | Out-Null

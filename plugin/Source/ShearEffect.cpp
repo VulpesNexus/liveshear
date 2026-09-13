@@ -211,8 +211,22 @@ ASErr ShearEffect::Interpolate(AILiveEffectInterpParamMessage* message)
     ReadParameters(message->endParams, &endShear, &endAxis);
 
     const double t = static_cast<double>(message->percent);
+    const double shear = startShear + (endShear - startShear) * t;
+    const double axis = shear::InterpolateAxisAngle(startAxis, endAxis, t);
     WriteParameters(message->outParams,
-                    static_cast<AIReal>(startShear + (endShear - startShear) * t),
-                    static_cast<AIReal>(shear::InterpolateAxisAngle(startAxis, endAxis, t)));
+                    static_cast<AIReal>(shear), static_cast<AIReal>(axis));
+
+    // Traced because there is no other way to know this ran. Illustrator calls
+    // it while building a blend, from inside an operation that hands nothing
+    // back to a script, so without this the only evidence would be the shape
+    // of the result.
+    if (shearlog::Enabled())
+    {
+        std::ostringstream o;
+        o << "Interpolate: t=" << t
+          << " shear " << static_cast<double>(startShear) << " -> " << static_cast<double>(endShear) << " = " << shear
+          << "; axis " << static_cast<double>(startAxis) << " -> " << static_cast<double>(endAxis) << " = " << axis;
+        shearlog::Write(o.str());
+    }
     return kNoErr;
 }

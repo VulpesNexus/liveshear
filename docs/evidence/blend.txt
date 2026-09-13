@@ -1,0 +1,40 @@
+Live Shear -- blending two objects that carry different Shear effects
+Run at 2026-09-13 14:15:46
+Trace file: <temp>\claude\<workspace>\6d060ac1-74e0-42c8-867e-3dc594570345\scratchpad\shear.log
+
+Tracing is live: yes
+
+--- straight down the middle: shear 30 axis 0  ->  shear 10 axis 40 ---
+       after Object > Blend > Make: 1 items
+[PASS] straight down the middle: Illustrator calls the interpolation handler
+       the handler ran 1 time(s) while the blend was built; 4 objects after expanding
+[PASS] straight down the middle: every step takes the short way round
+       t=0.5 -> axis 20; the two ends are 40 degrees apart going the short way, and every step is inside that. A naive midpoint would have given 20.
+[PASS] straight down the middle: the shear angle is a straight line between the two
+       all 1 steps are exactly on the line from 30 to 10
+--- 0 to 179 the short way: shear 20 axis 0  ->  shear 20 axis 179 ---
+       after Object > Blend > Make: 1 items
+[PASS] 0 to 179 the short way: Illustrator calls the interpolation handler
+       the handler ran 1 time(s) while the blend was built; 4 objects after expanding
+[PASS] 0 to 179 the short way: every step takes the short way round
+       t=0.5 -> axis 179.5; the two ends are 1 degrees apart going the short way, and every step is inside that. A naive midpoint would have given 89.5.
+[PASS] 0 to 179 the short way: the shear angle is a straight line between the two
+       all 1 steps are exactly on the line from 20 to 20
+--- 1 to 179 across zero: shear 20 axis 1  ->  shear 20 axis 179 ---
+       after Object > Blend > Make: 1 items
+[PASS] 1 to 179 across zero: Illustrator calls the interpolation handler
+       the handler ran 1 time(s) while the blend was built; 4 objects after expanding
+[PASS] 1 to 179 across zero: every step takes the short way round
+       t=0.5 -> axis 180; the two ends are 2 degrees apart going the short way, and every step is inside that. A naive midpoint would have given 90.
+[PASS] 1 to 179 across zero: the shear angle is a straight line between the two
+       all 1 steps are exactly on the line from 20 to 20
+--- 89 to -89 across ninety: shear 20 axis 89  ->  shear 20 axis -89 ---
+       after Object > Blend > Make: 1 items
+[PASS] 89 to -89 across ninety: Illustrator calls the interpolation handler
+       the handler ran 1 time(s) while the blend was built; 4 objects after expanding
+[PASS] 89 to -89 across ninety: every step takes the short way round
+       t=0.5 -> axis -90; the two ends are 2 degrees apart going the short way, and every step is inside that. A naive midpoint would have given 0.
+[PASS] 89 to -89 across ninety: the shear angle is a straight line between the two
+       all 1 steps are exactly on the line from 20 to 20
+
+12 passed, 0 failed

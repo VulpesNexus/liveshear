@@ -86,6 +86,17 @@ def test_release():
             release_row("source moved", "1,2,3,4", "1,2,3,4", after="9,9"),
             # The oracle never moved, so there was nothing to compare against.
             release_row("oracle stuck", "1,2,3,4", "1,2,3,4", oracle="did not move"),
+            # A brush, whose artwork Illustrator regenerates when the path is
+            # transformed destructively. This one is allowed to differ.
+            release_row("patternBrush", "1,2,3,4", "1,2,5,4"),
+            # The same difference on a fixture that is not regenerated must
+            # still fail, or the excuse would be a hole big enough to lose a
+            # real defect through.
+            release_row("plainRect", "1,2,3,4", "1,2,5,4"),
+            # And a brush that rewrote its own source geometry is still a
+            # failure: being allowed to look different is not being allowed to
+            # damage the artwork.
+            release_row("artBrush", "1,2,3,4", "1,2,5,4", after="9,9"),
             # The probe itself failed on this case.
             ["errored", "30", "0", "ERROR", "", "", "", "", "something broke", ""]]
 
@@ -105,7 +116,16 @@ def test_release():
           str(got.get("oracle stuck")))
     check(got.get("errored") == "FAIL", "a case the probe could not run fails",
           str(got.get("errored")))
-    check(len(got) == 6, "every row produced a verdict", str(len(got)))
+    check(got.get("patternBrush") == "EXPECTED",
+          "artwork Illustrator regenerates is allowed to differ",
+          str(got.get("patternBrush")))
+    check(got.get("plainRect") == "FAIL",
+          "the same difference on artwork it does not regenerate still fails",
+          str(got.get("plainRect")))
+    check(got.get("artBrush") == "FAIL",
+          "a brush that moved its own source geometry still fails",
+          str(got.get("artBrush")))
+    check(len(got) == 9, "every row produced a verdict", str(len(got)))
 
 
 # ---- the anchor solver --------------------------------------------------
