@@ -208,7 +208,7 @@ Nothing here is a correctness, persistence, serialization, or documentation bloc
 
 1. **Run the dialog on a display above 100%.** Needs a scaled monitor, or a second display this machine can be told to scale without disturbing the one in use.
 2. **Compare GPU and CPU preview.** Needs a machine with a GPU that Illustrator will use.
-3. **Run it on Windows 10, and on a neighboring Illustrator version.**
+3. **Run it on Windows 10.** A neighboring Illustrator version has since been tried and is settled rather than outstanding: Illustrator 2025, given its own folder and its own preference, did not load this build at all, and neither did *Subgroup*'s. A build per Illustrator generation is the answer, not a wider claim for this one. The forward direction — a 2026 build under Illustrator 2027 — cannot be tested until that version exists.
 4. **Decide whether the crash deserves a stronger experiment** than three runs per arm, or whether "not necessary for it, influence unmeasured" is the honest end of it.
 
 ## U. Evidence

@@ -4,13 +4,13 @@
     it just happen to look dark on this machine?
 
 .DESCRIPTION
-    The dialog asks the host for its own dialog colours through AIUIThemeSuite
+    The dialog asks the host for its own dialog colors through AIUIThemeSuite
     and paints itself with them. A screen capture at one brightness cannot tell
     that apart from a fixed dark palette that happens to match, so this walks
     Illustrator through its brightness settings and captures the dialog at each
     one.
 
-    What is checked is not a colour anybody chose. It is that the pixels of the
+    What is checked is not a color anybody chose. It is that the pixels of the
     dialog move when the host's setting moves, in the same direction, and that
     at the lightest setting the dialog is light rather than dark. A palette
     baked into the plugin would give the same picture every time.
@@ -18,7 +18,7 @@
     Illustrator has to be restarted between settings. Writing uiBrightness
     through scripting stores the number -- reading it back returns the new one
     -- but the running application goes on drawing itself at the old
-    brightness, and goes on reporting the old colours through the theme suite
+    brightness, and goes on reporting the old colors through the theme suite
     with it. Only a restart applies it. A first attempt at this probe set the
     preference four times without restarting, got an identical picture every
     time, and would have read as "the dialog ignores the host" when what it
@@ -117,7 +117,7 @@ public class ThemeDlg {
         #
         # Not the top-left corner: PrintWindow with PW_RENDERFULLCONTENT draws
         # the caption too, so the first rows of the bitmap are title bar and
-        # read as the caption's colour rather than the dialog's. The bottom
+        # read as the caption's color rather than the dialog's. The bottom
         # margin, below the row of buttons, is bare background.
         $corner = $bmp.GetPixel([int] ($w / 2), $h - 3)
         $total = 0.0
@@ -144,7 +144,7 @@ public class ThemeDlg {
 # Tracing has to be on before Illustrator is launched, because the plugin
 # reads the variable at startup and the launches happen below. It is set on
 # this process so every Illustrator started from here inherits it, and that is
-# what lets the probe check where the colours came from rather than only what
+# what lets the probe check where the colors came from rather than only what
 # they looked like.
 $trace = Join-Path ([IO.Path]::GetTempPath()) 'liveshear-theme-probe.log'
 if (Test-Path $trace) { [IO.File]::Delete($trace) }
@@ -261,9 +261,9 @@ if ($usable.Count -ge 2) {
 }
 
 $fromHost = @($rows | Where-Object { $_.Reported -match 'from host' }).Count
-Add-ProbeResult -Group 'theme' -Case 'the colours came from the host, not from the system' `
+Add-ProbeResult -Group 'theme' -Case 'the colors came from the host, not from the system' `
     -Expected 'the plugin logs which source it used' `
-    -Observed ("{0} of {1} openings read the colours from Illustrator" -f $fromHost, $rows.Count) `
+    -Observed ("{0} of {1} openings read the colors from Illustrator" -f $fromHost, $rows.Count) `
     -Status $(if ($fromHost -eq $rows.Count) { 'PASS' } else { 'FAIL' })
 
 Invoke-AiScript 'LS.clear();' | Out-Null

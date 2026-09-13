@@ -1,7 +1,7 @@
-//  ShearTheme.h -- the colours Illustrator is currently drawing its own
+//  ShearTheme.h -- the colors Illustrator is currently drawing its own
 //  dialogs with.
 //
-//  A plain Win32 dialog is light grey with black text whatever the host looks
+//  A plain Win32 dialog is light gray with black text whatever the host looks
 //  like, which is wrong three times out of four: Illustrator's interface has
 //  four brightness settings and the darkest is the default. The host will say
 //  what it is using, so the dialog asks instead of guessing, and asks about
@@ -19,9 +19,9 @@ namespace sheartheme
     struct Theme
     {
         /** False when the host could not be asked, in which case everything
-            below came from the system colours instead and the dialog will
+            below came from the system colors instead and the dialog will
             look like an ordinary Windows one. That is the honest fallback:
-            it is better than painting a guessed dark grey over a light host. */
+            it is better than painting a guessed dark gray over a light host. */
         bool fromHost = false;
         bool dark = false;
 
@@ -33,7 +33,7 @@ namespace sheartheme
         COLORREF border = 0;
         COLORREF focusRing = 0;
 
-        // Derived. The suite has no colour for the face of a raised button, so
+        // Derived. The suite has no color for the face of a raised button, so
         // these are the dialog background moved away from itself by an amount
         // that reads the same on a dark theme and a light one.
         COLORREF control = 0;

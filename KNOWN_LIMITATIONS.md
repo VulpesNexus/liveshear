@@ -17,7 +17,7 @@ Behavior that is simply how the effect works — how it composes with other effe
 
 ## One host version has been tested
 
-**Support boundary.** Everything measured here was measured on Illustrator 2026, version 30.7.0, 64-bit. The plugin is built against the Illustrator 2026 SDK and uses only documented, long-stable interfaces, so neighboring versions are expected to work — but expected is not verified, and nothing else has been run. **Affected:** anyone on another version. **Source art is safe** either way: a plugin that fails to load cannot damage a document. **Workaround:** try it; if the effect does not appear in the *Effect* menu, the plugin did not load. **Planned:** testing widens as versions become available.
+**Support boundary.** Everything measured here was measured on Illustrator 2026, version 30.7.0, 64-bit. This build is for that version: given its own folder and its own preference under **Illustrator 2025, it did not load at all**. An earlier version of this entry said neighboring versions were expected to work; one was then tried, and that expectation was wrong. Whether a 2026 build loads in Illustrator 2027 cannot be tested until that version exists. **Affected:** anyone on another version. **Source art is safe** either way: a plugin that fails to load cannot damage a document. **Workaround:** none for an older Illustrator — it needs a build made against that version's SDK. If the effect does not appear in the *Effect* menu, the plugin did not load. **Planned:** a build per Illustrator generation, each in its own folder.
 
 ## One version of Windows has been tested
 

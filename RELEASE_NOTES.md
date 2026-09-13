@@ -1,5 +1,15 @@
 # Release notes
 
+## 0.1.0-rc.3
+
+Everything in rc.2, and:
+
+- **The dialog is drawn in Illustrator's own colors.** It asks the host what it paints its dialogs with and uses that — background, text, fields, borders, focus ring, and the title bar — so it matches whatever *Edit > Preferences > User Interface > Brightness* is set to instead of being a light gray Windows box in a dark application. Measured rather than eyeballed: driven from Illustrator's darkest setting to its lightest, the dialog's own pixels go from RGB(50,50,50) to RGB(240,240,240), following the host both times. Illustrator applies that preference when it starts, so the dialog that matches is one opened after a restart.
+- **It does not load in Illustrator 2025.** Now tried rather than assumed: given its own folder and its own preference, Illustrator 2025 did not load this build. rc.2's notes said neighboring versions were expected to work. One was tried, and that was wrong. Whether a 2026 build loads in Illustrator 2027 cannot be known until that version exists.
+- **Install into the shared plugin folder**, *%LOCALAPPDATA%\\Adobe Illustrator Plug-ins\\30*, alongside your other Illustrator plugins. Illustrator has only one Additional Plug-ins Folder, so a folder holding this plugin alone stops the others from loading.
+
+Nothing about the shear itself changed: the geometry, the reference point, persistence, and the parameter handling are the same code, re-measured against this binary.
+
 ## 0.1.0-rc.2
 
 First release candidate that has been run in Illustrator. Every bullet below was measured against the binary being packaged, not against an earlier one; what was not measured is not claimed. [docs/RELEASE_TEST_MATRIX.md](docs/RELEASE_TEST_MATRIX.md) lists every check and its result, and [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md) lists what it does not do.

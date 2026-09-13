@@ -1,4 +1,4 @@
-//  ShearTheme.cpp -- reading Illustrator's own dialog colours.
+//  ShearTheme.cpp -- reading Illustrator's own dialog colors.
 
 #include "IllustratorSDK.h"
 #include "ShearTheme.h"
@@ -25,8 +25,8 @@ namespace
         return RGB(Channel(c.red), Channel(c.green), Channel(c.blue));
     }
 
-    /** Moves a colour towards white or towards black by a fixed number of
-        levels. Taking the direction from the theme rather than from the colour
+    /** Moves a color towards white or towards black by a fixed number of
+        levels. Taking the direction from the theme rather than from the color
         keeps a button face distinguishable at every brightness: on a dark
         theme a raised control is lighter than the dialog, on a light one it is
         darker, and the medium settings in between never invert. */
@@ -80,7 +80,7 @@ namespace sheartheme
         AIUIThemeSuite* const suite = sAIUITheme;
         if (suite == nullptr || suite->GetUIThemeColor == nullptr)
         {
-            shearlog::Write("theme: the host has no UI theme suite; using system colours");
+            shearlog::Write("theme: the host has no UI theme suite; using system colors");
             return FromSystem();
         }
 
@@ -113,7 +113,7 @@ namespace sheartheme
 
         if (!ok)
         {
-            shearlog::Write("theme: the host declined a colour; using system colours");
+            shearlog::Write("theme: the host declined a color; using system colors");
             return FromSystem();
         }
 

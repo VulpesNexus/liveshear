@@ -12,7 +12,7 @@ Once installed, the effect appears at *Effect > Distort & Transform > Shear…*,
 - Windows 10 or 11
 - No Visual C++ redistributable. The three runtime files the plugin uses are the same ones *Illustrator.exe* names itself, so a machine that can start Illustrator already has them.
 
-**Verified on** Illustrator 30.7.0, 64-bit, Windows 11 build 10.0.26200 — that one configuration. Windows 10 and other Illustrator versions are expected to work and have not been run; see [Host versions](#host-versions).
+**Verified on** Illustrator 30.7.0, 64-bit, Windows 11 build 10.0.26200 — that one configuration. It does **not** load in Illustrator 2025, which was tried; Windows 10 has not been run. See [Host versions](#host-versions).
 
 ## Installing
 
@@ -34,9 +34,11 @@ That folder is under *Program Files*, so Windows asks for administrator rights. 
 
 You do not need administrator rights at all. Illustrator has always had a second place to look, and it can be anywhere you can write:
 
-1. Make a folder for it, for example *%LOCALAPPDATA%\\Illustrator Plug-ins*, and put *LiveShear.aip* in it.
+1. Make *%LOCALAPPDATA%\\Adobe Illustrator Plug-ins\\30* and put *LiveShear.aip* in it. The *30* is Illustrator 2026's version number; next year's Illustrator gets its own folder beside it, because a plugin built for one year is not guaranteed to load in another.
 2. Start Illustrator, open *Edit > Preferences > Plug-ins & Scratch Disks*, tick **Additional Plug-ins Folder**, and choose that folder.
 3. Restart Illustrator.
+
+**That folder is shared with every other Illustrator plugin you install this way**, and it has to be: Illustrator has only one Additional Plug-ins Folder, so pointing it at a folder holding just this plugin stops any other one you installed there from loading. Put them all in the one folder — Illustrator loads them all.
 
 This is worth knowing: on a machine where the signed-in account is an ordinary user rather than an administrator, Windows does not offer a button to click past — it asks for an administrator's password, which you may simply not have. The Additional Plug-ins Folder needs none.
 
@@ -87,7 +89,11 @@ The short version: Windows only; the shear angle stops at ±89°; the reference 
 
 ## Host versions
 
-Everything claimed here was measured against Illustrator 30.7.0 on Windows 11. The plugin is built against the Illustrator 2026 SDK and uses only documented, long-stable interfaces, so neighboring versions are *expected* to work — but expected is not verified, and nothing else has been host-tested. If you run it on another version, treat it as untested.
+Everything claimed here was measured against Illustrator 30.7.0 on Windows 11.
+
+This build is for **Illustrator 2026**. It was given its own folder and its own preference under Illustrator 2025, and Illustrator 2025 did not load it — so this is not a case of "probably fine on nearby versions." An earlier draft of this section said neighboring versions were expected to work; one of them was then tried, and it did not.
+
+Whether a 2026 build will load in Illustrator 2027 is a different question, and an open one: that version does not exist yet, so it cannot be tried. Assume each Illustrator needs a build made for it, and keep each year's build in its own folder.
 
 ## For developers
 

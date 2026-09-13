@@ -46,7 +46,7 @@ Both ask for administrator rights once, because the plugin folder lives under *P
 For development that is the wrong way round, and on a machine where your account is not an administrator it is not available at all — Windows asks for an administrator's password rather than offering a button. Use Illustrator's Additional Plug-ins Folder instead, which needs no rights whatsoever:
 
 ```powershell
-.\tools\sideload.ps1 -Path "$env:LOCALAPPDATA\LiveShear\Plug-ins"   # point Illustrator at a folder you own
+.\tools\sideload.ps1 -Path "$env:LOCALAPPDATA\Adobe Illustrator Plug-ins\30"   # the shared folder, 30 being Illustrator 2026
 .\tools\sideload.ps1 -Show                                          # what it is set to now
 .\tools\sideload.ps1 -Restore                                       # put the setting back
 ```

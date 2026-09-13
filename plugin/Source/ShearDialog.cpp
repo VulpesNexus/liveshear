@@ -91,7 +91,7 @@ namespace
         HWND axisEdit = nullptr;
         HWND preview = nullptr;
 
-        /** Illustrator's own dialog colours, read once when the window is
+        /** Illustrator's own dialog colors, read once when the window is
             created. The dialog is modal, so the host's brightness cannot
             change underneath it. */
         sheartheme::Theme theme;
@@ -365,17 +365,17 @@ namespace
         return CreateFontIndirectW(&font);
     }
 
-    void FillSolid(HDC dc, const RECT& rc, COLORREF colour)
+    void FillSolid(HDC dc, const RECT& rc, COLORREF color)
     {
-        const HBRUSH brush = CreateSolidBrush(colour);
+        const HBRUSH brush = CreateSolidBrush(color);
         if (brush == nullptr) return;
         FillRect(dc, &rc, brush);
         DeleteObject(brush);
     }
 
-    void FrameSolid(HDC dc, const RECT& rc, COLORREF colour)
+    void FrameSolid(HDC dc, const RECT& rc, COLORREF color)
     {
-        const HBRUSH brush = CreateSolidBrush(colour);
+        const HBRUSH brush = CreateSolidBrush(color);
         if (brush == nullptr) return;
         FrameRect(dc, &rc, brush);
         DeleteObject(brush);
@@ -396,12 +396,12 @@ namespace
 
     /** Frames a rectangle with a border n pixels thick, from the outside in,
         because FrameRect only ever draws one pixel. */
-    void FrameThick(HDC dc, RECT rc, COLORREF colour, int n)
+    void FrameThick(HDC dc, RECT rc, COLORREF color, int n)
     {
-        for (int i = 0; i < n; ++i) { FrameSolid(dc, rc, colour); InsetBy(rc, 1); }
+        for (int i = 0; i < n; ++i) { FrameSolid(dc, rc, color); InsetBy(rc, 1); }
     }
 
-    void DrawButtonText(HDC dc, HWND button, const RECT& rc, COLORREF colour, HFONT font)
+    void DrawButtonText(HDC dc, HWND button, const RECT& rc, COLORREF color, HFONT font)
     {
         wchar_t text[64];
         text[0] = L'\0';
@@ -409,15 +409,15 @@ namespace
 
         const HGDIOBJ oldFont = font != nullptr ? SelectObject(dc, font) : nullptr;
         SetBkMode(dc, TRANSPARENT);
-        SetTextColor(dc, colour);
+        SetTextColor(dc, color);
         RECT box = rc;
         DrawTextW(dc, text, -1, &box, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
         if (oldFont != nullptr) SelectObject(dc, oldFont);
     }
 
-    /** A push button in the host's colours: a flat face with a one-pixel
+    /** A push button in the host's colors: a flat face with a one-pixel
         border, which is what Illustrator's own buttons look like at every
-        brightness. The default button is marked with the focus-ring colour
+        brightness. The default button is marked with the focus-ring color
         rather than by being a different shape. */
     void DrawPushButton(DialogData* dd, const DRAWITEMSTRUCT* di)
     {
@@ -617,8 +617,8 @@ namespace
                 const int dpi = dd->dpi;
 
                 // Ask the host what it looks like before building anything, so
-                // every control is created into a known set of colours rather
-                // than repainted out of the system grey afterwards.
+                // every control is created into a known set of colors rather
+                // than repainted out of the system gray afterwards.
                 dd->theme = sheartheme::Read();
                 dd->backBrush = CreateSolidBrush(dd->theme.background);
                 dd->editBrush = CreateSolidBrush(dd->theme.editBackground);
@@ -742,7 +742,7 @@ namespace
             case WM_PAINT:
                 // The edit fields lost their system bevel, which could not be
                 // recoloured, so their border is drawn here in the host's own
-                // line colour -- outside each field, on the dialog's face.
+                // line color -- outside each field, on the dialog's face.
                 if (dd != nullptr)
                 {
                     PAINTSTRUCT ps;
