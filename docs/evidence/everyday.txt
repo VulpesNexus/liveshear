@@ -1,5 +1,5 @@
 Live Shear -- ordinary things a person does
-Run at 2026-09-13 21:45:44
+Run at 2026-09-14 00:43:37
 
 --- selecting three objects and applying the effect once ---
 [PASS] all three objects get the effect

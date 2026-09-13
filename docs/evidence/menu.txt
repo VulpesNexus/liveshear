@@ -3,7 +3,7 @@
     command string	Live VulpesNexus Shear
 the item is on the Effect menu, not in a submenu         PASS
 no submenu of its own has come back                      PASS
-it is not inside one of Adobe s own submenus             PASS
+it is not inside one of Adobe's own submenus             PASS
 the item still reads Shear...                            PASS
     driver reported: dialogs: 1
 the command string reaches the item                      PASS

@@ -1,5 +1,5 @@
 probe	group	case	expected	observed	status
-shutdown	shutdown	no documents open	quits promptly, nothing left running, nothing in the event log	quit in 1,7 s; still running False; event log: nothing	PASS
-shutdown	shutdown	one document with a Shear effect	quits promptly, nothing left running, nothing in the event log	quit in 1,8 s; still running False; event log: nothing	PASS
-shutdown	shutdown	three documents, two with effects	quits promptly, nothing left running, nothing in the event log	quit in 3,0 s; still running False; event log: nothing	PASS
-shutdown	shutdown	after the dialog has been opened	quits promptly, nothing left running, nothing in the event log	quit in 2,0 s; still running False; event log: nothing	PASS
+shutdown	shutdown	no documents open	quits promptly, nothing left running, nothing in the event log	quit in 1,6 s; still running False; event log: nothing	PASS
+shutdown	shutdown	one document with a Shear effect	quits promptly, nothing left running, nothing in the event log	quit in 1,9 s; still running False; event log: nothing	PASS
+shutdown	shutdown	three documents, two with effects	quits promptly, nothing left running, nothing in the event log	quit in 2,8 s; still running False; event log: nothing	PASS
+shutdown	shutdown	after the dialog has been opened	quits promptly, nothing left running, nothing in the event log	quit in 2,5 s; still running False; event log: nothing	PASS

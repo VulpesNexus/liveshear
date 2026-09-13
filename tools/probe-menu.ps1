@@ -136,7 +136,7 @@ Check 'the item is on the Effect menu, not in a submenu' ($group -eq 'Effects 3r
     'menu placement' 'the group is Effects 3rd Party' ("the group is '{0}'" -f $group)
 Check 'no submenu of its own has come back' (-not ($group -like 'Live 3rd Party*')) `
     'menu placement' 'no group named Live 3rd Party...' ("the group is '{0}'" -f $group)
-Check 'it is not inside one of Adobe s own submenus' (-not ($group -like 'Live Vector*')) `
+Check 'it is not inside one of Adobe''s own submenus' (-not ($group -like 'Live Vector*')) `
     'menu placement' 'no group named Live Vector... -- that placement breaks Apply Last Effect' `
     ("the group is '{0}'" -f $group)
 Check 'the item still reads Shear...' ($itemText -like 'Shear*') `
