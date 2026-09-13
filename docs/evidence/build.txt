@@ -1,10 +1,10 @@
 Live Shear -- the built artifact
-Run at 2026-09-13 14:44:15
+Run at 2026-09-13 15:07:21
 Windows 10.0.26200.0
 
 Toolchain: MSVC 14.44.35207
 SDK:       Adobe Illustrator 2026 SDK
-Commit:    d74bd69e377c76bd43e40ca13ccf9cf602e541ca (working tree not clean)
+Commit:    8e98f934d0d11bcdec193200292a9a097e416ec3 (working tree not clean)
 
 [PASS] Release builds with no warnings and no errors
        0 warnings, 0 errors
@@ -19,7 +19,7 @@ Product:        Shear for Illustrator
 Description:    Non-destructive Shear effect for Adobe Illustrator
 Copyright:      Copyright (C) 2026 VulpesNexus. Licensed under the GNU GPL version 3 or later.
 Size:           166 400 bytes
-SHA-256:        1F2E778BFAC8CA3F583F1F6E800FE4033981878AFC0E3435D4A7D0A1F912EE44
+SHA-256:        642C35CCB83611BBB4B6BC358588A12328111118EA62AA1F6F07B396CA5140A9
 
 [PASS] the binary does not claim Adobe as its publisher
        CompanyName is VulpesNexus
@@ -44,9 +44,9 @@ SHA-256:        1F2E778BFAC8CA3F583F1F6E800FE4033981878AFC0E3435D4A7D0A1F912EE44
 [PASS] no debug trace is on by default
        tracing is behind the LIVESHEAR_LOG environment variable
 [PASS] the source this was built from is identified
-       commit d74bd69e377c76bd43e40ca13ccf9cf602e541ca
+       commit 8e98f934d0d11bcdec193200292a9a097e416ec3
 [FAIL] the working tree was clean when it was built
-       29 uncommitted change(s)
+       54 uncommitted change(s)
 
 Depends on: COMCTL32.dll, USER32.dll, GDI32.dll, KERNEL32.dll, MSVCP140.dll, VCRUNTIME140.dll, VCRUNTIME140_1.dll, api-ms-win-crt-runtime-l1-1-0.dll, api-ms-win-crt-string-l1-1-0.dll, api-ms-win-crt-convert-l1-1-0.dll, api-ms-win-crt-heap-l1-1-0.dll, api-ms-win-crt-math-l1-1-0.dll, api-ms-win-crt-locale-l1-1-0.dll, api-ms-win-crt-stdio-l1-1-0.dll, api-ms-win-crt-filesystem-l1-1-0.dll, api-ms-win-crt-environment-l1-1-0.dll, api-ms-win-crt-time-l1-1-0.dll
 [PASS] nothing is linked but Windows and the C runtime

@@ -2,29 +2,37 @@
 
 ## A. Verdict
 
-**NOT RELEASE READY.** Not because anything is known to be wrong, but because this build has not been run in Illustrator.
+**RELEASE CANDIDATE WITH DOCUMENTED LIMITATIONS.**
 
-Installing a plugin means copying it into Illustrator's folder under *Program Files*, which needs administrator rights and a prompt answered by a person. That prompt has not been answered, so the binary that carries the reference-point fix, the parameter clamps, the dialog work, and the new identity has never been loaded by the host. Everything below distinguishes what has been measured from what is waiting on that.
+The binary has been run in Illustrator, and every result below was measured against the artifact being packaged rather than against an earlier one. Source artwork is safe in every case the suite can construct: the effect's own path anchors are compared before and after in all 61 artwork cases and never move. The reference point matches Illustrator's own shear command for every kind of artwork the suite can build, along both axes. Claims in the README, the release notes, and the limitations list were checked one at a time against the evidence behind them, and several were weakened or corrected because the evidence did not support them.
 
-A release candidate needs the suite in [RELEASE_TEST_MATRIX.md](RELEASE_TEST_MATRIX.md) run against this binary, and its remaining sections filled. The suite is written, debugged against a running Illustrator, and starts with one command:
+What keeps this from being an unqualified release candidate is a short list of bounded, named limitations, none of which risks a document:
 
-```powershell
-.\tools\run-release-suite.ps1
-```
+- **Display scaling above 100% has never been seen.** The layout is proven by arithmetic at five scales; the rendering is not proven at all.
+- **GPU preview could not be compared**, because this machine has no GPU preview to compare against.
+- **Windows 10, and Illustrator versions other than 30.7.0, are expected rather than verified.**
+- **Brushed and stroked-text artwork cannot match the destructive command**, and no live effect can — including Adobe's own, which was measured as the control. On that artwork the effect is the more exact of the two.
+- **Illustrator itself crashes under sustained scripted document churn.** The plugin is not necessary for it; whether it influences how often is not established, and is not claimed.
+
+Section T says what would have to change for those qualifications to come off.
 
 ## B. Exact build
 
 | | |
 | --- | --- |
-| Plugin version | 0.1.0-rc.1 |
-| Binary | *LiveShear.aip*, 154,112 bytes, SHA-256 `D434A1A815638CEE2CD41B365F339D2E0C3E33E92530BDD0F271A8E214985AD6` |
-| Commit | see *git log*; this document is written against the head of `main` |
-| Illustrator | 2026, version 30.7.0, 64-bit — the version the earlier work was measured against; **this build has not been loaded by it** |
+| Plugin version | 0.1.0-rc.2 |
+| Binary | *LiveShear.aip*; size and SHA-256 in [evidence/build.txt](evidence/build.txt) |
+| Commit | recorded in the same file, with whether the working tree was clean |
+| Illustrator | 2026, version 30.7.0, 64-bit — **this binary has been loaded and driven by it** |
 | SDK | Adobe Illustrator 2026 SDK, build 114 |
 | Compiler | MSVC 14.44.35207, C++17, `/W4`, x64 |
 | Windows | Windows 11, 10.0.26200 |
 
-Both configurations rebuild from clean with zero warnings and zero errors. The Release binary links only the retail C runtime, exports the entry point Illustrator looks for, carries the PIPL resource, names *VulpesNexus* rather than Adobe as its publisher, and contains no path from the machine that built it. Fourteen checks, all passing: [evidence/build.txt](evidence/build.txt).
+Both configurations rebuild from clean with zero warnings and zero errors. The Release binary links only the retail C runtime, exports the entry point Illustrator looks for, carries the PIPL resource, names *VulpesNexus* rather than Adobe as its publisher, and contains no path from the machine that built it.
+
+**It needs nothing installed alongside it.** Its dependencies are Windows system libraries, the Universal CRT — part of Windows 10 and later — and `MSVCP140.dll`, `VCRUNTIME140.dll` and `VCRUNTIME140_1.dll`. Those three are named by *Illustrator.exe* itself, so a machine that can start Illustrator already has them and no redistributable is required. Nothing from the SDK, from the developer's machine, or from the test harness is linked.
+
+The build probe reports the working tree as it stood when it ran, which during development is "not clean". The packaged release is assembled by *tools/make-release.ps1* from a clean tree after the final commit; that script refuses to pack a binary claiming Adobe as its publisher, or one carrying an absolute path from this machine.
 
 ## C. Architecture
 
@@ -34,112 +42,177 @@ It is not an extension of Adobe's *Transform* effect because it cannot be: that 
 
 ## D. Native equivalence
 
-Pending the host run. The claim to be re-established for this binary is that each fixture, built twice and sheared once by the live effect and once by *Object > Transform > Shear*, renders to the same visible bounds within a ten-millionth of a point, with the live copy's own path anchors unchanged.
+Each fixture is built twice, one copy carrying the live effect and the other sheared by *Object > Transform > Shear* with the same angles, and the two are compared on visible bounds. The live copy's own path anchors are compared before and after, because an effect that rewrote its own source would still look right and would still be wrong.
 
-What is already established, and does not depend on the build: the native command's transform is `R(φ)·H(θ)·R(−φ)` about the reference point, matched across 23 host cases to 3×10⁻⁶, and the matrix the plugin builds for the same parameters is that matrix — checked here at 2,541 points without a host, including the determinant at every angle and axis and the reference point as a fixed point ([evidence/mathtest.txt](evidence/mathtest.txt)).
+**61 cases: 55 matched, 4 differ for a reason that is proven rather than argued, and 2 could not be measured. None failed.** [RELEASE_TEST_MATRIX.md](RELEASE_TEST_MATRIX.md), [evidence/release-verdicts.tsv](evidence/release-verdicts.tsv).
+
+**Not one case moved the source geometry.**
+
+The tolerance is five thousandths of a point, about two microns — four hundred times finer than a 2400 dpi imagesetter can place a dot. It is not tighter because Illustrator will not report bounds more precisely than that where text is involved: the residues that turn up are 0.000488 and 0.000977 pt, which are 1/2048 and 1/1024 exactly, the last bit of a float32 rather than a measurement of anything.
+
+The four that differ for a proven reason are the three brushes and stroked text; section R establishes why that is the only possible answer, and why on those four this effect is the one that gets the shear exactly right. The two that could not be measured are a zero-height line and a single-anchor path — Illustrator's own command declines to shear either, so there is nothing to compare against, and they are recorded as inconclusive rather than as agreement.
+
+The arithmetic underneath is checked separately and without a host: **3,092 checks**, covering the matrix at every angle and axis, the determinant, the reference point as a fixed point, the exact extent of cubic Béziers against a hundred thousand samples each, the angle sanitizing, and the dialog layout at five display scales. [evidence/mathtest.txt](evidence/mathtest.txt).
 
 ## E. Reference point
 
-**Settled.** Illustrator's own shear anchors on the center of the selection's **geometric** bounds: the Bézier outline, with strokes, effects, and the glyphs of area text excluded.
+**Settled, and it moved during this sprint.** Illustrator's own shear anchors on the center of the selection's **geometric** bounds: the Bézier outline, with strokes, effects, and the glyphs of area text excluded.
 
-That was measured rather than reasoned about. A shear along axis 0 displaces x in proportion to distance from the reference point's y and leaves y alone, so a straight-line fit through the artwork a native shear actually produced recovers the y exactly; axis 90 recovers the x. Against fixtures whose geometric and visible centers lie far apart — an acute triangle whose mitered join reaches 600 pt past its geometry, and a group whose two members carry different stroke weights — every discriminating case comes back geometric, residuals around 10⁻¹⁰. Fixtures whose two centers coincide cannot tell them apart and are reported as not discriminating rather than counted as agreement. [evidence/anchor.tsv](evidence/anchor.tsv), [evidence/anchor-verdicts.tsv](evidence/anchor-verdicts.tsv).
+Two independent measurements agree.
 
-The effect had been anchoring on visible bounds, which on that triangle put its reference point 295 pt away from the native one. It now asks the host for geometric bounds, twice, and when the host refuses — which it does for art outside the document tree, exactly the situation a live effect's `Go` runs in — computes the same box itself, solving each cubic's derivative for the true extremes rather than settling for the control hull. That fallback is the one code path that cannot be reached on demand from a host test, which is why it is covered by the arithmetic test instead: every curve extent is checked against a hundred thousand samples of the same curve.
+The first fits the anchor out of artwork the native command actually produced. A shear along axis 0 displaces x in proportion to distance from the reference point's y and leaves y alone, so a straight-line fit through the anchors recovers the y exactly; axis 90 recovers the x. Every discriminating case comes back geometric, with residuals around 10⁻¹⁰. Fixtures whose geometric and visible centers coincide cannot tell the two apart and are reported as not discriminating rather than counted as agreement. [evidence/anchor-verdicts.tsv](evidence/anchor-verdicts.tsv).
 
-The reference point is taken from the artwork the appearance pipeline hands the effect, not from the original object. That is deliberate and it is what makes the effect compose: an *Offset Path* or a *Transform* below it moves the reference point with the artwork, exactly as stacking two transforms should.
+The second works for artwork that has no path anchors to fit a line through — text, symbols, rasters. Two shears of the same angle about different reference points differ by a pure translation and nothing else, so subtracting the two bounding boxes recovers how far apart the reference points were, in points. **44 of 52 cases: the same reference point, exactly. Not one case anywhere shows a reference point in a different place.** The remaining 8 are the brushes and stroked text, where the two results differ by more than a translation — which means the difference is in what was transformed, not in where it was anchored. [evidence/artwork-anchor.txt](evidence/artwork-anchor.txt).
+
+That covers paths open, closed, compound, and self-intersecting; groups plain, nested, clipped, and transformed; point, area, multi-line, stroked, retyped, resized, and deliberately off-center text; symbol instances; embedded rasters; and artwork rotated, scaled, or reflected before the effect was applied.
+
+**Three things were wrong and were fixed, all found by pointing the measurement at artwork nobody had measured before:**
+
+1. **The bounds flags were an invalid combination.** `kControlBounds` cannot be combined with `kNoStrokeBounds` or `kNoExtendedBounds`; together they return `kBadParameterErr`. Every request the effect made of the host failed, and it fell back to computing the box itself every single time. The previous release report explained those failures as the host declining to measure art outside the document tree — a satisfying story that was not what was happening. The SDK header is also wrong that `kNoExtendedBounds` implies `kNoStrokeBounds`: on a mitered triangle it leaves the 600 pt spike of the miter in. The flag table this was read off is in [evidence/bounds-flags.txt](evidence/bounds-flags.txt), and the `bounds flags` script selector prints it on demand.
+
+2. **A clipping group anchors on its clip path**, not on the union of its children — even though the geometric bounds Illustrator *reports* for such a group are that union. Measured at 10 pt in y and 20 pt in x on one fixture, and settled with a clip path larger than what it clips, where the mask's box and the visible result are different rectangles: the native command follows the mask.
+
+3. **Area text anchors on its frame, not its glyphs.** A frame whose ascenders overshoot its rectangle came back 3 pt taller than the rectangle, putting the reference point 1.5 pt from the native one.
+
+The effect walks the artwork itself in preference to asking the host, for two reasons that are now measured rather than assumed: it measures paths from their segments, solving each cubic's derivative for the true extremes rather than taking the hull of the control points; and the host's own answer for a clipping group is the wrong box for this purpose. Where it does ask — text, symbols, rasters — it asks one leaf at a time, with flags that return exactly what the DOM calls `geometricBounds`.
+
+The reference point is taken from the artwork the appearance pipeline hands the effect, not from the original object. That is deliberate, it is what makes the effect compose, and section G proves it rather than asserting it.
 
 ## F. Supported artwork
 
-See [SUPPORT_MATRIX.md](SUPPORT_MATRIX.md), which is generated from the release matrix rather than written by hand, and which lists what the suite does not cover as untested rather than omitting it. Pending the host run.
+[SUPPORT_MATRIX.md](SUPPORT_MATRIX.md), generated from the release matrix rather than written by hand, and listing what the suite does not cover as untested rather than omitting it.
 
-One result is already in, and it is worth stating because bounds cannot reach it. **Gradients shear with the artwork**: a linear and a radial gradient fill, rendered by the effect and by the native command, exported at the same size and compared pixel by pixel, differ in not one sampled pixel.
+**Gradients and pattern fills shear with the artwork.** Rendered by the effect and by the native command, exported at the same size and compared pixel by pixel, a linear gradient, a radial gradient, and a pattern fill differ in **not one sampled pixel**. The pattern case also discriminates: with the native command's *Patterns* option off, 4.073% of pixels differ, so the comparison can see a pattern that failed to shear and is not merely holding two identical blanks against each other.
 
-**Pattern fills could not be tested at all**, and the probe says so rather than reporting agreement. A pattern swatch built through Illustrator's scripting interface does not render — not sheared, not unsheared, not at all. The object is there and reports a `PatternColor` fill; the page comes out blank. Three ways of building the tile were tried, including the grouped bounding-box form Adobe's own documentation describes. The probe now renders each fixture unsheared first and refuses to compare anything whose picture the shear did not change, which is what turned a meaningless pass into an honest UNTESTED.
+Pattern fills were reported as untestable in the previous release report, on the grounds that Illustrator would not draw one. That was wrong, and it is worth recording because the wrong conclusion was the comfortable one. A pattern assigned as `new PatternColor()` with its `.pattern` set reads back correctly through the DOM and draws nothing whatsoever; the identical pattern assigned from a swatch draws. Measured side by side in one document: the first contributes no non-white pixel, the second nearly two thousand. Three different ways of building a tile had all failed for that one reason — every one of them ended at the same constructor.
 
 ## G. Appearance composition
 
-Pending the host run. The checks written and debugged: a *Transform* above a live Shear against a *Transform* above a native shear; a live Shear above a *Transform* against a native shear of that *Transform* expanded into real geometry; that the two stack orders differ; two Shear effects against two successive native shears; that editing one instance leaves the other alone; forty reorders; and deleting one of two.
+**18 of 18.** [evidence/appearance.txt](evidence/appearance.txt).
+
+Substitution holds in both directions, which is the strong form of the claim:
+
+- A *Transform* above a live Shear renders exactly what that *Transform* renders above Illustrator's own shear.
+- A live Shear above a *Transform* renders exactly what Illustrator's own shear renders on that *Transform* expanded into real geometry.
+- The two stack orders differ from each other, so the effect is not ignoring its position.
+- Two Shear effects on one object render as two successive native shears.
+- Editing one instance leaves the other alone; forty reorders leave the result unchanged; swapping them changes it; deleting one leaves the other intact; deleting the last restores the artwork.
+
+Stack-order dependence is therefore a consequence of composition semantics and not an implementation accident. It is described in the README as how the effect works, rather than in the limitations as a defect.
 
 ## H. Persistence
 
-Pending re-run against this binary. The same five cases passed against the previous build: one effect on a path, on live text, and on stroked art; two Shear effects; and Shear with a *Transform*. Each is saved, closed, reopened, edited through the parameter dictionary, saved and reopened again.
+**5 of 5.** One effect on a path, on live text, and on stroked art; two Shear effects; and Shear with a *Transform*. Each is saved, closed, reopened, edited through the parameter dictionary, then saved and reopened again. [evidence/persistence.txt](evidence/persistence.txt).
 
 ## I. Export
 
-Pending re-run against this binary. PDF and SVG passed against the previous build for a rectangle, point text, and a gradient fill: the exported file, opened back in Illustrator, has the same visible bounds as the canvas, and contains no raster image. Point text stays a text frame in both formats.
+**12 of 12.** PDF and SVG, for a rectangle, a stroked rectangle, point text, a group, a gradient fill, and a clipping group: the exported file, opened back in Illustrator, has the same visible bounds as the canvas and contains no raster image. Point text is still a text frame in both formats. [evidence/export.txt](evidence/export.txt).
 
-## J. Dialog
+## J. Serialization and parameter safety
 
-Pending the host run for this binary. Checks written, and all of them already exercised against the previous one: OK commits; Cancel, Escape, and the title bar's close button each restore both the artwork and the parameter; Enter commits; dragging through several positions does not compound; a value typed with a decimal comma, with trailing text, or past the limit; the arrow keys; the title and labels read back as the code points they should be; and Preview off leaving the artwork alone until OK — that last one read out of the plugin's own trace, because while a modal dialog is up there is no other way to ask what the artwork did.
+Two questions, both answered against this binary.
 
-Nine of those passed against the previous binary and four failed, which is the right answer: the four are the decimal comma, the arrow keys, Preview off, and the text encoding, and all four are what this build changed.
+**Hostile values.** One function makes an angle safe, and every route a value can arrive by passes through it. 90°, ±180°, 10⁹, ±∞ and NaN all come out inside ±89°, wherever they were written — including straight into the parameter dictionary by a script, and including a saved document that stores 90, which reopens clamped rather than hanging. Each redraw runs behind a watchdog, so a value that made the effect fail to return would be reported as a hang rather than hanging the run. [evidence/limits.txt](evidence/limits.txt).
 
-The probe captures the dialog to *evidence/dialog.png*, which is how the text problem was found in the first place and is worth keeping for that reason alone.
+**Hostile shapes.** A parameter block this version did not write: no schema key at all, a schema number from a version that does not exist yet, a nonsense schema, a missing angle, a missing axis, an angle stored as text, an angle stored as a flag, and a block with no keys at all. Every one renders safely and deterministically. [evidence/schema.txt](evidence/schema.txt).
 
-**High-DPI scaling is not exercised here.** The display this runs on reports 96 dots per inch, so the dialog is measured at its unscaled size — 448 by 199 pixels, client area 432 by 160, nothing clipped, every control reachable. The scaling path reads `GetDpiForWindow` and multiplies every coordinate and the font height through it, but a display that would make it do anything is not available, so it is untested rather than verified.
+The schema number is worth having rather than decorative, and that was measured too: a block carrying a later version's keys survives **the plugin's own dialog writing it back** — not merely the test bridge — and the block is stamped with the version that last wrote it, so it says what it means rather than what it used to mean. That is what lets a reference-point control be added later without making existing documents ambiguous.
 
-## K. Parameter safety
+## K. Blends
 
-One function makes a shear angle safe, and every route a value can arrive by passes through it: the slider, the numeric field, a pasted string, a parameter dictionary read out of a saved document, another plugin writing the dictionary directly. Anything that is not a finite number becomes zero; anything past ±89° is clamped to it.
+**12 of 12.** [evidence/blend.txt](evidence/blend.txt).
 
-The limit is 89° because Illustrator itself becomes pathological approaching a right angle: a native shear of 89° returns at once, one of 89.9° did not return at all in the run that measured it. The clamps are verified without a host — 90, ±180, 10³⁰⁰, ±∞, and NaN all come out inside the range ([evidence/mathtest.txt](evidence/mathtest.txt)). What is pending is the host half: that a document which stores 90° opens clamped rather than hanging, with a watchdog on the clock to tell a wrong answer from no answer.
+The effect implements Illustrator's interpolation handler, and until this sprint nothing had ever driven it — executable code in a shipped binary that the host may call on its own. Illustrator **does** call it while building a blend. Since no script can observe that, the handler writes to the plugin's trace and the probe reads it back.
 
-## L. Undo and redo
+The axis takes the short way round modulo 180, which is the arithmetic that is easy to get wrong, and it was checked where a naive midpoint would give the wrong answer: an axis of 179° blended with 0° passes through 179.5° rather than 89.5°; 179° with 1° passes through 180° rather than 90°; 89° with −89° passes through −90° rather than 0°.
 
-Partly established, against the previous build. **One pass through the dialog costs one undo step**, however many slider positions it went through; applying the effect is one step; redo puts it back. To be re-run against this binary.
+## L. Dialog
 
-Edits made through the plugin's scripting bridge are not undo steps, because they rebuild the art style through the SDK rather than as one of Illustrator's own operations. Nothing a person does in the interface goes through that bridge.
+Driven through the window manager from a second process, because the call that opens the dialog blocks until it closes. The checks that need to know what the artwork did *during* the dialog read the plugin's own trace, and the probe now verifies that tracing is actually live before relying on it — Illustrator reads `LIVESHEAR_LOG` from its own environment, so setting it after Illustrator has started does nothing, and a check that silently loses its instrument is worse than one that says so.
 
-## M. Performance
+OK commits; Cancel, Escape, and the title bar's close button each restore both the artwork and the parameter; Enter commits; dragging through several positions does not compound; a value typed with a decimal comma or with trailing text commits; the arrow keys nudge; and the title and labels read back as the code points they should be.
 
-Pending the host run. The measurement is the cost of one hundred re-evaluations, with and without the effect, on a rectangle, a Bézier path, multi-line text, a group of two hundred children, and a compound path; plus building, saving, and reopening a document with two hundred independent Shear effects.
+That last check exists because **a screen capture of the dialog found a defect no numeric check would have.** The window class was registered with the narrow entry point while `DefWindowProc` resolved to the wide one, so the title "Shear" was stored as its own bytes reinterpreted as UTF-16 and displayed as 桓槌r; the degree sign, written as UTF-8 into an ANSI call, came through the machine's code page as two half-width katakana. Every string the dialog touches now goes through the wide entry points, and the *Appearance* panel's description goes through `SetUnicodeStringEntry` rather than a plain `char*`. The picture is kept at [evidence/dialog.png](evidence/dialog.png).
 
-## N. Memory and resources
+Also fixed here: the dialog rounded one typed number three different ways. The slider rounded a half away from zero, the field's formatting rounded a half to even, and the state kept the unrounded number until something re-read the field — typing 18.25 committed 18.2 while the slider sat at 18.3. Rounding happens once now, on the way in, so the number shown, the slider position, and the value stored are the same number. The resolution that gives is a tenth of a degree, and that is stated in the limitations.
 
-Pending the host run for the differential measurement. By inspection: the effect acquires no suites of its own beyond the import table the SDK manages, creates no temporary art, and holds no handle past the callback that gave it. The dialog registers one window class lazily and unregisters it at shutdown, creates one font and deletes it after its modal loop rather than during `WM_DESTROY`, when the controls still hold it, and hands the application's own quit message back instead of swallowing it.
+**High-DPI scaling is not exercised.** The only display available reports 96 dots per inch. What can be checked without a monitor is arithmetic, and it is: every control's box comes from one table in *ShearLayout.h*, which the dialog builds from and the test reads, and the test walks it at 100%, 125%, 150%, 200%, and 250% checking that nothing leaves the window, nothing overlaps, every focusable control stays at least sixteen pixels across, and the tab order still reads left to right and top to bottom. That covers the layout and not the rendering: font substitution, and the trackbar's own idea of its minimum height, are outside it. The release notes do not claim scaling works.
 
-### What the code review found
+## M. Undo and redo
 
-One dedicated read of every source file, looking for the things that go wrong in SDK plugins: unchecked suite calls, stale handles, resource paths that only free on the happy path, degrees confused with radians, sign flips with no explanation, and assumptions about the host that nothing tests.
+**One pass through the dialog costs one undo step**, however many slider positions it went through. Applying the effect is one step, and redo puts it back. Deleting an effect and reordering the stack through the script bridge each cost one undo step too, and undo leaves the document coherent; a parameter edit made through the bridge is not an undo step, which is stated in the limitations. The source path is unchanged after all of it. [evidence/undo.txt](evidence/undo.txt).
 
-Fixed during this sprint, each described where it lives:
+## N. Performance
 
-- The reference point came from the wrong box, and the code said "geometric bounds" while asking for and then falling back to something else. It now asks for what it means and says which route answered, in the trace and through the `bounds` script selector.
-- The parameter clamp lived in the dialog, so it did not apply to a value arriving from a saved document. It moved into `ShearMath.h`, and every read and every write passes through it.
-- `DeleteObject` on the dialog's font ran during `WM_DESTROY`, while the child controls still held it. `DestroyWindow` sends that message to the parent before it destroys the children.
-- The modal loop consumed `WM_QUIT`, so an application quit arriving while the dialog was open would have been swallowed. It is re-posted for Illustrator's own loop now.
-- The window class was registered and never unregistered. If the module were unloaded with it still registered, its window procedure would point into freed memory.
-- Six `reinterpret_cast<HMENU>(int)` conversions, which are narrowing in reverse on 64-bit. They go through `INT_PTR` now, which is what made the build clean at warning level 4.
-- The arrow keys never reached the numeric fields, because `IsDialogMessage` treats them as navigation between controls and consumed them first.
-- **The dialog's own text was mangled, and a screen capture of it is what found that.** Two separate faults, both from mixing the narrow and wide Windows entry points. The window class was registered with `RegisterClassExA` while `DefWindowProc` resolved to the wide variant, because the project builds with `UNICODE` defined — so the title "Shear" was stored as its own bytes reinterpreted as UTF-16 and came out as `U+6853 U+6165 U+0072`, which reads 桓槌r. And the degree sign, written as UTF-8 into an ANSI call, was converted through the machine's code page: on this one, page 932, it became `U+FF82 U+FF70`, two half-width katakana. Every string the dialog touches now goes through the wide entry points, so no code page is involved at all. The Appearance panel's one-line description had the same problem for the same reason and now goes through `SetUnicodeStringEntry` rather than a plain `char*`. The dialog probe reads the title and the labels back as code points, and those two checks fail against the old binary and pass against this one.
-- A preview that would change nothing still asked Illustrator to re-render, once per slider position.
-- The binary claimed Adobe as its publisher, named *Adobe Illustrator* as its product, and filed itself under *About SDK Plug-ins* as an Adobe sample. All three came from the SDK's sample defaults, whose own header says third parties should supply their own.
-- The linker stamped the absolute path of the build machine's symbol file into the shipped binary.
+About **47 ms per evaluation** including Illustrator's own redraw, against 31 ms for the same loop with nothing to recompute — and essentially flat from one rectangle to a group of two hundred children, which is what one matrix and one `TransformArt` call should look like. A document with two hundred independent Shear effects builds, saves, and reopens with all two hundred objects intact.
 
-Left alone deliberately: the scripting bridge, which is in the shipped binary so that the binary the tests pass against is the binary that ships, and which grants no privilege a script does not already have through Illustrator's own scripting and action interfaces.
+The earlier figures for this were negative, because the measurement was taken across the COM bridge and the round trip dwarfed the effect. Timing inside a single scripting call fixed it. [evidence/stability.txt](evidence/stability.txt).
 
-No further substantive issue was found on the last read.
+## O. Ordinary use
 
-## O. Host crash
+Every other probe shears one scripted object in an empty document, which is not how anyone uses Illustrator. This one asks what a person would do in the first five minutes that nothing else had ever done. [evidence/everyday.txt](evidence/everyday.txt).
 
-Illustrator 30.7.0 dies with an access violation inside *Illustrator.exe* during long runs of scripted document create/close, and it does so with this plugin uninstalled: three runs of forty cycles that never touch the effect completed 9, 32, and 40 ([evidence/crash-control.txt](evidence/crash-control.txt)). With the plugin installed the same runs completed 2, 20, and 3 — three runs per arm with that spread cannot distinguish a real effect from noise, and it has never been claimed that they can.
+Selecting three objects at once and applying the effect gives all three the effect, **each sheared about its own center** — which is not what Illustrator's own command does with a multiple selection, since that shears the whole selection about one center. Neither is wrong: a live effect is applied per object and can only anchor on what it is handed. It is written into the README rather than left as a surprise.
 
-The three-arm experiment that would settle it is written and pending: plugin absent, plugin installed but unused, plugin installed and exercised, six trials each, with arms B and C interleaved. Arm A runs inside the missing-plugin probe, because that probe already arranges for the plugin to be uninstalled and doing it twice would mean two more prompts to answer.
+Also covered: text set along a path, a graphic style carrying the effect to another object, shearing one child of a group without disturbing its siblings, duplicating a sheared object and editing the duplicate, and copying one into another document.
 
-## P. Without the plugin
+## P. Memory, resources, and what the code review found
 
-Pending re-run against this binary. Against the previous build: Illustrator shows its standard missing-plugin warning naming *Shear (LiveShear.aip)*, opens the document, and draws the artwork sheared from the cached result. The source geometry is neither expanded nor flattened, text stays live, and a file re-saved from that state loses nothing. What stops is the effect itself, so an edit made without the plugin renders against the old shape — Illustrator's standard behavior for any missing effect.
+The effect acquires no suites of its own beyond the import table the SDK manages, creates no temporary art, and holds no handle past the callback that gave it. The dialog registers one window class lazily and unregisters it at shutdown, creates one font, and deletes it after its modal loop rather than during `WM_DESTROY`, when the controls still hold it, and hands the application's own quit message back instead of swallowing it. Illustrator quits cleanly in 1.4 to 3.5 seconds from each of four states the plugin can leave it in, with nothing new in the Windows event log.
 
-## Q. Known limitations
+Fixed across the two hardening sprints, each described where it lives: the reference point came from the wrong box; the parameter clamp lived in the dialog and so did not apply to a value from a saved document; `DeleteObject` on the dialog's font ran while the child controls still held it; the modal loop consumed `WM_QUIT`; the window class was never unregistered; six `reinterpret_cast<HMENU>(int)` conversions were narrowing in reverse on 64-bit; the arrow keys never reached the numeric fields because `IsDialogMessage` consumed them; the dialog mangled its own text; a preview that would change nothing still asked Illustrator to re-render; the binary claimed Adobe as its publisher; and the linker stamped the build machine's symbol path into the shipped binary.
 
-[KNOWN_LIMITATIONS.md](../KNOWN_LIMITATIONS.md). The ones that stand regardless of the host run: Windows only; one host version tested; the shear angle stops at 89°; the reference point is always the center; GPU preview could not be compared because the machine has no GPU preview to compare against; documents opened without the plugin keep drawing but stop updating.
+Found and fixed in this sprint: the script bridge bounds-checked the source index of `move effect` but handed its *destination* index to `InsertNthPostEffect` unchecked.
 
-## R. Release blockers
+**The script bridge ships enabled, deliberately**, so that the binary the tests pass against is the binary that ships. It is documented in [BUILDING.md](BUILDING.md) as a test interface with no stability guarantee. It grants no privilege a script does not already have through Illustrator's own scripting and action interfaces, and every argument that reaches a host API is range-checked first.
 
-1. **This build has not been run in Illustrator.** Everything in sections D, F, G, H, I, J, L, M, N, O, and P is pending on that. It needs one administrator prompt answered.
+## Q. The host crash
 
-Nothing else is known to be outstanding.
+Illustrator 30.7.0 dies with an access violation inside *Illustrator.exe* under sustained scripted document churn.
 
-## S. Evidence
+**Proven: this plugin is not necessary for it.** Three runs of forty create/close cycles that never touch the effect, with the plugin uninstalled, completed 9, 32, and 40 ([evidence/crash-control.txt](evidence/crash-control.txt)).
 
-Raw output from every probe is in [evidence/](evidence/). The matrix in [RELEASE_TEST_MATRIX.md](RELEASE_TEST_MATRIX.md) is generated from it by *tools/make-test-matrix.py*; the support matrix by *tools/make-support-matrix.py*. Nothing in either is transcribed by hand.
+**Not proven, and not claimed: that having the plugin loaded makes no difference to how often it happens.** With the plugin installed the same runs completed 2, 20, and 3. Three runs per arm with that spread cannot distinguish a real effect from noise, and it has never been claimed that they can.
+
+During this sprint the full suite crashed three times, at three different fault offsets — `0xdfdd45`, `0x849dee`, and the earlier `0x18162a7` — always well into a long run. Twice it happened at the same probe, which looked like a reproducible sequence, so it was controlled: the same composition-then-save work, with the effect and without it, alternated, each trial in a fresh Illustrator. **Neither arm crashed in six trials**, which says the specific sequence is not the cause and points back at cumulative session load. [evidence/sequence-crash.txt](evidence/sequence-crash.txt).
+
+The practical consequence is in the test suite rather than the product: every probe that drives Illustrator now gets a fresh one, because a result that depends on how much work preceded it is not a measurement. A fourth run did not crash outright but began failing checks that pass cleanly in isolation — forty reorders came back with eighteen errors where a fresh host gives eighteen passes out of eighteen.
+
+**This is a host defect under scripted automation, not something a person using Illustrator will meet:** nothing anyone does in the interface creates and destroys documents at that rate.
+
+## R. Artwork Illustrator generates from a path
+
+A brush is not artwork, it is a rule for making artwork out of a path, and that leaves two defensible answers. Transforming the path destructively lays the brush along it again; a live effect is handed the art the brush already produced and can only transform that, because the brush definition is not what arrives and there is no way back to it.
+
+So the question is not whether this effect matches the destructive command — it cannot — but whether it behaves the way a live effect is supposed to. **Adobe's own *Transform* effect settles that.** Put through the same vertical scale, Adobe's effect differs from Adobe's own command by 1.276% of sampled pixels on a pattern brush, 0.167% on an art brush and 0.220% on a calligraphic brush, while a plain rectangle, a stroked rectangle, and stroked text — the controls — differ in **not one pixel**. [evidence/generated-art.txt](evidence/generated-art.txt).
+
+Those three brushes are therefore recorded as EXPECTED rather than FAIL in the matrix, and the solver's own self-test guards the excuse: the same difference on a fixture that is not regenerated still fails, and a brush that moved its own source geometry still fails.
+
+**Stroked text belongs with them**, and one measurement settles it without needing any oracle at all.
+
+A shear along the horizontal axis maps (x, y) to (x + (y − c)·tan θ, y). The y is untouched, so the vertical extent of the artwork cannot change. Anything that does change it did not come from the shear.
+
+Sheared 30° horizontally, the effect moves the top and bottom of stroked text by **exactly zero**, and the destructive command moves them by **0.40 pt**. The same holds for all three brushes — 2.20 pt, 1.05 pt, and 0.02 pt for the destructive command, zero for the effect — while a plain rectangle and a stroked rectangle, the controls, move zero either way.
+
+So on this artwork the two routes do not merely differ: the effect is the one that keeps the shear exact, and the destructive command is the one that changes something the shear did not do, because it regenerates the stroke around the sheared outline. The 0.40 pt difference in visible bounds is that regeneration, and rendered it comes to 0.099% of sampled pixels — edge antialiasing on a 6 pt stroke around 96 pt glyphs.
+
+## S. Without the plugin
+
+Illustrator shows its standard missing-plugin warning naming *Shear (LiveShear.aip)*, opens the document, and draws the artwork sheared from the cached result. The source geometry is neither expanded nor flattened, text stays live, and a file re-saved from that state loses nothing. What stops is the effect itself, so an edit made without the plugin renders against the old shape — Illustrator's standard behavior for any missing effect.
+
+## T. What would have to change
+
+Nothing here is a correctness, persistence, serialization, or documentation blocker. To take the qualifications off the verdict:
+
+1. **Run the dialog on a display above 100%.** Needs a scaled monitor, or a second display this machine can be told to scale without disturbing the one in use.
+2. **Compare GPU and CPU preview.** Needs a machine with a GPU that Illustrator will use.
+3. **Run it on Windows 10, and on a neighboring Illustrator version.**
+4. **Decide whether the crash deserves a stronger experiment** than three runs per arm, or whether "not necessary for it, influence unmeasured" is the honest end of it.
+
+## U. Evidence
+
+Raw output from every probe is in [evidence/](evidence/). [RELEASE_TEST_MATRIX.md](RELEASE_TEST_MATRIX.md) is generated from it by *tools/make-test-matrix.py*, and [SUPPORT_MATRIX.md](SUPPORT_MATRIX.md) by *tools/make-support-matrix.py*. Nothing in either is transcribed by hand.
+
+Both generators, and the two solvers that turn measurements into verdicts, are themselves tested against rows whose right answer is known by construction — **15 checks** — because a bug in a solver would turn a real failure into a green matrix, which is the one kind of bug that running more tests cannot catch. That test earned its place this sprint: the release probe was skipping the oracle entirely for any angle below a hundredth of a degree, on a premise that turned out to be false, and comparing a sheared result against artwork nothing had been done to.
+
+Every path in the evidence is written through a redaction step, so nothing in it names the machine it was measured on.

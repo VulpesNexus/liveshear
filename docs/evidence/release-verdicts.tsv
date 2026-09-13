@@ -1,10 +1,62 @@
 probe	group	case	expected	observed	status
-release	art types	plainRect at 0.000001 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 1.05e-06 pt; source geometry unchanged	FAIL
-release	art types	plainRect at 0.001 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 1.05e-03 pt; source geometry unchanged	FAIL
-release	art types	plainRect at -0.001 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 1.05e-03 pt; source geometry unchanged	FAIL
 release	art types	plainRect at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
-release	art types	pointText at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 9.77e-04 pt; source geometry unchanged	FAIL
+release	art types	strokedRect at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	spike at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	roundJoin at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	bevelJoin at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	dashedStroke at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	bezier at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	openPath at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	compound at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	selfIntersecting at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	mixedGroup at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	nestedGroup at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
 release	art types	clipGroup at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
-release	art types	areaText at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 4.88e-04 pt; source geometry unchanged	FAIL
-release	art types	patternBrush at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 2.20e+00 pt; source geometry unchanged	FAIL
-release	art types	strokedText at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 4.03e-01 pt; source geometry unchanged	FAIL
+release	art types	transformedGroup at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	pointText at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 9.77e-04 pt; source geometry unchanged	PASS
+release	art types	areaText at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 4.88e-04 pt; source geometry unchanged	PASS
+release	art types	multilineText at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 9.77e-04 pt; source geometry unchanged	PASS
+release	art types	strokedText at 30 deg, axis 0	matches Illustrator's own shear, source untouched	differs from the destructive command by 4.03e-01 pt, and must: a stroke on live text is laid along the path again when the path is transformed destructively, while a live effect is handed the art the generator already produced. Adobe's own Transform effect differs from Adobe's own command here too (docs/evidence/generated-art.txt). Source geometry unchanged	EXPECTED
+release	art types	asymmetricText at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 9.77e-04 pt; source geometry unchanged	PASS
+release	art types	retypedText at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 9.77e-04 pt; source geometry unchanged	PASS
+release	art types	resizedText at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 9.77e-04 pt; source geometry unchanged	PASS
+release	art types	symbolInstance at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	embeddedRaster at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	gradientFill at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	radialFill at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	patternFill at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	calligraphicBrush at 30 deg, axis 0	matches Illustrator's own shear, source untouched	differs from the destructive command by 3.98e-01 pt, and must: a calligraphic brush is laid along the path again when the path is transformed destructively, while a live effect is handed the art the generator already produced. Adobe's own Transform effect differs from Adobe's own command here too (docs/evidence/generated-art.txt). Source geometry unchanged	EXPECTED
+release	art types	artBrush at 30 deg, axis 0	matches Illustrator's own shear, source untouched	differs from the destructive command by 1.05e+00 pt, and must: an art brush is laid along the path again when the path is transformed destructively, while a live effect is handed the art the generator already produced. Adobe's own Transform effect differs from Adobe's own command here too (docs/evidence/generated-art.txt). Source geometry unchanged	EXPECTED
+release	art types	patternBrush at 30 deg, axis 0	matches Illustrator's own shear, source untouched	differs from the destructive command by 2.20e+00 pt, and must: a pattern brush is laid along the path again when the path is transformed destructively, while a live effect is handed the art the generator already produced. Adobe's own Transform effect differs from Adobe's own command here too (docs/evidence/generated-art.txt). Source geometry unchanged	EXPECTED
+release	art types	rotatedRect at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	scaledRect at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	reflectedRect at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	preShearedRect at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	tinyPath at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	hugePath at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	farFromOrigin at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	negativeCoords at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	zeroHeight at 30 deg, axis 0	matches Illustrator's own shear, source untouched	Illustrator's own shear reported success but left the oracle untouched after three attempts; nothing to compare against	INCONCLUSIVE
+release	art types	zeroWidth at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	singleAnchor at 30 deg, axis 0	matches Illustrator's own shear, source untouched	Illustrator's own shear reported success but left the oracle untouched after three attempts; nothing to compare against	INCONCLUSIVE
+release	art types	manyChildren at 30 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	plainRect at -20 deg, axis 90	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	plainRect at 45 deg, axis 37.5	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	spike at -20 deg, axis 90	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	spike at 45 deg, axis 37.5	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	mixedGroup at -20 deg, axis 90	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	mixedGroup at 45 deg, axis 37.5	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	pointText at -20 deg, axis 90	matches Illustrator's own shear, source untouched	largest difference from the native result 4.88e-04 pt; source geometry unchanged	PASS
+release	art types	pointText at 45 deg, axis 37.5	matches Illustrator's own shear, source untouched	largest difference from the native result 9.77e-04 pt; source geometry unchanged	PASS
+release	art types	compound at -20 deg, axis 90	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	compound at 45 deg, axis 37.5	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	clipGroup at -20 deg, axis 90	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	clipGroup at 45 deg, axis 37.5	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	plainRect at 0 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	plainRect at 0.000001 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	plainRect at 0.001 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	plainRect at 88 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	plainRect at 88.9 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	plainRect at 89 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	plainRect at -89 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS
+release	art types	plainRect at -0.001 deg, axis 0	matches Illustrator's own shear, source untouched	largest difference from the native result 0.00e+00 pt; source geometry unchanged	PASS

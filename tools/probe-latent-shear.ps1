@@ -115,5 +115,5 @@ Note ''
 Note 'Final dictionary state:'
 Note (Send-AiMessage appearance).TrimEnd()
 
-[System.IO.File]::WriteAllLines($LogPath, $log)
+Save-ProbeTranscript -Path $LogPath -Lines $log
 Write-Output "`nWritten to $LogPath"

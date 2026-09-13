@@ -55,7 +55,7 @@ Select some artwork and choose *Effect > Distort & Transform > Shear…*.
 
 ## Where it shears about, and how it stacks
 
-The artwork is sheared about the center of its **geometric** bounds — the Bézier outline, with strokes, effects, and the glyphs of area text left out. That is the same reference point *Object > Transform > Shear* uses, and it is measured rather than assumed: for each kind of artwork the suite can build, the effect and the native command are given the same angle and the difference between the two results is solved back into the distance between their reference points. That distance is zero for paths, compound paths, plain, nested, clipped and transformed groups, point and area text, symbol instances, and embedded rasters.
+The artwork is sheared about the center of its **geometric** bounds — the Bézier outline, with strokes, effects, and the glyphs of area text left out. That is the same reference point *Object > Transform > Shear* uses, and it is measured rather than assumed: for each kind of artwork the suite can build, the effect and the native command are given the same angle and the difference between the two results is solved back into the distance between their reference points. That distance is zero for paths, compound paths, plain, nested, clipped, and transformed groups, point and area text, symbol instances, and embedded rasters.
 
 Two of those are worth saying out loud, because Illustrator is not consistent about them:
 

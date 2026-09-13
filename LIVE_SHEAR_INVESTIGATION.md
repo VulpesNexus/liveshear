@@ -203,7 +203,9 @@ Milestones, using the scale the brief asked for:
 | EFFECT APPLIES | yes — geometry matches the native command to six decimal places |
 | APPEARANCE EDITABLE | yes — parameters editable in place, two instances independent, reorderable |
 | SAVE/REOPEN VERIFIED | yes — including a round trip through a machine without the plugin |
-| REGRESSION VERIFIED | yes — 24 of 24 behavior checks and 4 of 4 dialog checks pass |
+| REGRESSION VERIFIED | yes — the behavior suite below passed 24 of 24 and the dialog 4 of 4, against the build current when this section was written |
+
+Those two counts are from this investigation, not from the release. The suite that decides whether the plugin ships is a different and much larger one, it is generated rather than transcribed, and its tally is in [docs/RELEASE_TEST_MATRIX.md](docs/RELEASE_TEST_MATRIX.md). Read that one for what is true of the binary being released; read this section for how the prototype was proven at the time.
 
 ### Behavior suite
 

@@ -1,0 +1,36 @@
+Live Shear -- ordinary things a person does
+Run at 2026-09-13 15:36:27
+
+--- selecting three objects and applying the effect once ---
+[PASS] all three objects get the effect
+       3 of 3 objects carry a Shear after one apply
+       before: three=460.000000000,540.000000000,560.000000000,480.000000000 ; two=260.000000000,620.000000000,360.000000000,560.000000000 ; one=60.000000000,700.000000000,160.000000000,640.000000000
+       after:  three=442.679491924,540.000000000,577.320508076,480.000000000 ; two=242.679491924,620.000000000,377.320508076,560.000000000 ; one=42.679491924,700.000000000,177.320508076,640.000000000
+[PASS] each object is sheared about its own center, not the selection's
+       the first object is 134.641 pt wide; shearing it about its own center gives 134.641 pt. A live effect is applied to each object separately, so a multiple selection is not the same as Illustrator's own command, which shears the whole selection about one center.
+
+--- text set along a path ---
+       kind=TextType.PATHTEXT 80.000000000,700.000000000,400.000000000,600.000000000;67.583984375,719.760742188,400.000000000,594.068847656
+[PASS] text on a path shears without disturbing its spine
+       the path the text runs along is unchanged after shearing; the result is 35.292480469,719.760742188,371.132486541,594.068847656
+
+--- saved as a graphic style and used on something else ---
+       graphic styles: cannot create: No such element
+       the second object, with the style applied: no such style
+[UNTESTED] a graphic style carries the effect to another object
+       Illustrator has no scripting call that creates a graphic style, so this could not be set up. It would have to be done by hand in the Graphic Styles panel.
+
+--- applied to one object inside a group ---
+[PASS] shearing one child of a group leaves its siblings alone
+       the sibling is untouched; the sheared child is now 100.000000000,600.000000000,260.000000000,500.000000000
+
+--- duplicated in place, and copied into another document ---
+[PASS] a duplicate carries the effect and renders the same
+       the original is 68.097434100,600.000000000,331.902565900,480.000000000; the duplicate is 68.097434100,600.000000000,331.902565900,480.000000000
+       dialog driver: driven
+[PASS] editing the duplicate through the dialog leaves the original alone
+       the original is unchanged; the duplicate is now 94.750680188,600.000000000,305.249319812,480.000000000
+[PASS] pasting into another document carries the effect with it
+       the pasted object still carries a Shear in its appearance, and is 263.805132 pt wide against 263.805132 pt in the document it came from
+
+7 passed, 0 failed

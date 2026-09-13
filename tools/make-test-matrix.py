@@ -20,7 +20,7 @@ SOURCES = [
     ("artwork-anchor.tsv", "Reference point, by kind of artwork", "The same question as the row above, asked of artwork that has no path anchors to fit a line through. Two shears of one angle about different reference points differ by a translation and nothing else, so subtracting the two bounding boxes recovers how far apart the reference points were -- and says so in points, rather than reporting that two numbers were not equal."),
     ("release-verdicts.tsv", "Artwork types", "Each fixture built twice: one copy carrying the live effect, the other sheared by *Object > Transform > Shear* with the same angles. The two must render to the same visible bounds, and the live copy's own path anchors must be unchanged."),
     ("appearance.tsv", "Appearance composition", "Stack order, two instances, reordering, and deletion, with the native command as the oracle at every step."),
-    ("persistence.tsv", "Save and reopen", "Write the document, close it, open it again, edit the effect, save and open once more."),
+    ("persistence.tsv", "Save and reopen", "Write the document, close it, open it again, edit the effect, and save and open once more."),
     ("fills.tsv", "Gradients and patterns", "Rendered to PNG and compared pixel by pixel against the native command, because bounds cannot see whether a fill inside the shape sheared with it."),
     ("export.tsv", "Export", "Export, then open the exported file back in Illustrator and measure what is in it."),
     ("limits.tsv", "Parameter safety", "Values written straight into the parameter dictionary, past anything the dialog would allow, each redraw under a watchdog."),
@@ -54,7 +54,22 @@ def read(path):
 
 
 def escape(text):
-    return text.replace("|", r"\|").strip()
+    return prettify(text.replace("|", r"\|").strip())
+
+
+
+def prettify(text):
+    """ASCII stand-ins to the real glyphs.
+
+    The probes write their result strings in PowerShell and ExtendScript
+    sources, which have to stay pure ASCII -- both are read in the system
+    codepage, and a stray byte there is a mangled file. The Markdown generated
+    from those strings is prose, though, and prose here uses the real
+    characters. So the conversion happens on the way out.
+    """
+    return (text.replace(' -- ', ' — ')
+                .replace('->', '→')
+                .replace('...', '…'))
 
 
 def main(evidence_dir, out_path):
@@ -69,7 +84,7 @@ def main(evidence_dir, out_path):
             missing.append(filename)
             continue
 
-        lines = [f"## {title}", "", blurb, "",
+        lines = [f"## {title}", "", prettify(blurb), "",
                  "| # | Group | Case | Expected | Observed | Status |",
                  "| --- | --- | --- | --- | --- | --- |"]
         for index, row in enumerate(rows, 1):

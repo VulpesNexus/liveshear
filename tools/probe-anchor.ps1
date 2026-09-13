@@ -51,5 +51,5 @@ foreach ($axis in @(0, 90)) {
 }
 
 Invoke-AiScript 'LS.clear(); "cleared";' | Out-Null
-[System.IO.File]::WriteAllLines($OutPath, $records)
+Save-ProbeTranscript -Path $OutPath -Lines $records
 Write-Output "`nWritten to $OutPath"

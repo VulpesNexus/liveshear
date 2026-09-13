@@ -444,5 +444,5 @@ Invoke-AiScript 'while (app.documents.length > 0) { app.documents[0].close(SaveO
 
 Note ''
 Note ("{0} passed, {1} failed" -f $script:passed, $script:failed)
-[System.IO.File]::WriteAllLines($LogPath, $log)
+Save-ProbeTranscript -Path $LogPath -Lines $log
 Write-Output "`nWritten to $LogPath"

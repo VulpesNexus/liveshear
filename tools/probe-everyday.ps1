@@ -128,13 +128,21 @@ Js 'app.redraw();' | Out-Null
 Js 'LS.shear(25, 0);' | Out-Null
 Js 'app.redraw();' | Out-Null
 $styledBounds = Js 'LS.vb(LS.named("styled"));'
+# Illustrator's scripting interface can read the graphic styles a document
+# has and apply one, but it cannot make one: graphicStyles has no add(). So
+# this case reports what it could not do rather than pretending, and the
+# applying half below is skipped rather than failed.
 $styleMade = Js @'
 (function () {
   var d = LS.doc();
   LS.selectOnly(LS.named('styled'));
   var before = d.graphicStyles.length;
-  d.graphicStyles.add('Sheared 25');
-  return before + ' -> ' + d.graphicStyles.length;
+  try {
+    d.graphicStyles.add('Sheared 25');
+    return before + ' -> ' + d.graphicStyles.length;
+  } catch (e) {
+    return 'cannot create: ' + e.message;
+  }
 })();
 '@
 Note ("       graphic styles: {0}" -f $styleMade)
@@ -160,8 +168,18 @@ $borrowed = $applyStyle -split ','
 $ok = $borrowed.Count -eq 4
 $borrowedWidth = if ($ok) { [double]$borrowed[2] - [double]$borrowed[0] } else { 0 }
 $expectedStyle = 200.0 + 120.0 * [Math]::Tan(25 * [Math]::PI / 180)
-Check 'a graphic style carries the effect to another object' ($ok -and [Math]::Abs($borrowedWidth - $expectedStyle) -lt 0.01) `
-    ("the borrowed object is {0} pt wide, against {1} pt for the same shear" -f (Num $borrowedWidth), (Num $expectedStyle))
+if (-not $ok) {
+    # Illustrator's scripting interface can read a document's graphic styles
+    # and apply one, but it cannot create one: graphicStyles has no add().
+    # Saying so is the honest answer; a fixture that cannot be built is not a
+    # defect in the thing it was meant to test.
+    Check 'a graphic style carries the effect to another object' $false `
+        'Illustrator has no scripting call that creates a graphic style, so this could not be set up. It would have to be done by hand in the Graphic Styles panel.' 'UNTESTED'
+}
+else {
+    Check 'a graphic style carries the effect to another object' ([Math]::Abs($borrowedWidth - $expectedStyle) -lt 0.01) `
+        ("the borrowed object is {0} pt wide, against {1} pt for the same shear" -f (Num $borrowedWidth), (Num $expectedStyle))
+}
 
 # --------------------------------------------- inside a group, and twice over
 Note ''
@@ -210,38 +228,56 @@ $duplicate = Js @'
 Check 'a duplicate carries the effect and renders the same' ($duplicate -eq $originalBounds) `
     ("the original is {0}; the duplicate is {1}" -f $originalBounds, $duplicate)
 
-# Editing one must not disturb the other.
+# Editing one must not disturb the other -- and this has to go through the
+# dialog rather than the script bridge.
+#
+# An object and its duplicate share an art style until something forks it. The
+# bridge's "set param" writes the parameter dictionary in place, so editing
+# either one through it moves both; the dialog goes through
+# EditEffectParameters and UpdateParameters, which forks the style properly.
+# Testing this through the bridge reported a defect that does not exist for
+# anyone using Illustrator, which is why it is driven the way a person would.
 Js 'LS.selectOnly(LS.named("copy"));' | Out-Null
 Js 'app.redraw();' | Out-Null
-Js 'LS.send("set param", "0|shearAngle|real|5");' | Out-Null
+$drive = Invoke-ShearDialog -Tenths 50 -Button ok
 Js 'app.redraw();' | Out-Null
 $originalStill = Js 'LS.vb(LS.named("original"));'
-Check 'editing the duplicate leaves the original alone' ($originalStill -eq $originalBounds) `
-    ("the original is {0} after the duplicate was changed to 5 degrees" -f $(if ($originalStill -eq $originalBounds) { 'unchanged' } else { "CHANGED to $originalStill" }))
+$copyNow = Js 'LS.vb(LS.named("copy"));'
+Note ("       dialog driver: {0}" -f $drive.Driver)
+Check 'editing the duplicate through the dialog leaves the original alone' `
+    (($originalStill -eq $originalBounds) -and ($copyNow -ne $originalBounds)) `
+    ("the original is {0}; the duplicate is now {1}" -f `
+        $(if ($originalStill -eq $originalBounds) { 'unchanged' } else { "CHANGED to $originalStill" }), $copyNow)
 
-$pasted = Js @'
-(function () {
-  var d = app.activeDocument;
-  d.selection = null;
-  LS.named('original').selected = true;
-  app.copy();
-  var other = app.documents.add(DocumentColorSpace.RGB, 800, 800);
-  app.paste();
-  app.redraw();
-  var item = other.pageItems[0];
-  var appearance = LS.send('appearance');
-  var bounds = LS.vb(item);
-  other.close(SaveOptions.DONOTSAVECHANGES);
-  return bounds + '|' + (appearance.indexOf('VulpesNexus Shear') >= 0 ? 'effect present' : 'EFFECT LOST');
-})();
-'@
-$parts = $pasted -split '\|'
-Check 'pasting into another document carries the effect with it' ($parts[1] -eq 'effect present') `
-    ("the pasted object reports: {0}; its bounds there are {1}" -f $parts[1], $parts[0])
+# Each step its own call. Copying and then creating a document in one script
+# leaves nothing on the clipboard to paste -- the same class of problem as
+# selecting and acting in one call, and it made this look as though the effect
+# were lost in transit when it travels perfectly well.
+$sourceWidth = Js '(function () { var b = LS.vb(LS.named("original")).split(","); return (parseFloat(b[2]) - parseFloat(b[0])).toFixed(6); })();'
+# Selecting and copying have to be separate calls as well. Done together, the
+# copy takes whatever was selected before -- here the duplicate at five
+# degrees rather than the original at twenty-eight, which made the pasted
+# object look like it had lost its effect when it had merely copied a
+# different object.
+Js 'var d = app.activeDocument; d.selection = null; LS.named("original").selected = true;' | Out-Null
+Js 'app.redraw();' | Out-Null
+Js 'app.copy();' | Out-Null
+Js 'app.documents.add(DocumentColorSpace.RGB, 800, 800);' | Out-Null
+Js 'app.paste(); app.redraw();' | Out-Null
+Js 'app.activeDocument.selection = null; app.activeDocument.pageItems[0].selected = true;' | Out-Null
+Js 'app.redraw();' | Out-Null
+$pastedAppearance = Js 'LS.send("appearance");'
+$pastedWidth = Js '(function () { var b = LS.vb(app.activeDocument.pageItems[0]).split(","); return (parseFloat(b[2]) - parseFloat(b[0])).toFixed(6); })();'
+Js 'app.activeDocument.close(SaveOptions.DONOTSAVECHANGES);' | Out-Null
+$carried = $pastedAppearance -match 'VulpesNexus Shear'
+$sameWidth = [Math]::Abs([double]$pastedWidth - [double]$sourceWidth) -lt 0.01
+Check 'pasting into another document carries the effect with it' ($carried -and $sameWidth) `
+    ("the pasted object {0} a Shear in its appearance, and is {1} pt wide against {2} pt in the document it came from" -f `
+        $(if ($carried) { 'still carries' } else { 'has LOST' }), $pastedWidth, $sourceWidth)
 
 Note ''
 Note ("{0} passed, {1} failed" -f $script:pass, $script:fail)
 Js 'LS.clear();' | Out-Null
 Save-ProbeResults -Path ($OutPath -replace '\.txt$', '.tsv')
-[System.IO.File]::WriteAllLines($OutPath, $log)
+Save-ProbeTranscript -Path $OutPath -Lines $log
 Write-Output "Written to $OutPath"

@@ -22,7 +22,10 @@ $repo = Split-Path -Parent $PSScriptRoot
 $source = Join-Path $PSScriptRoot 'mathtest\mathtest.cpp'
 $stub = Join-Path $PSScriptRoot 'mathtest\stub'
 $plugin = Join-Path $repo 'plugin\Source'
-$work = Join-Path ([IO.Path]::GetTempPath()) 'liveshear-mathtest'
+# A fresh directory each run. Sharing one meant the linker sometimes could not
+# replace mathtest.exe -- a file still held open by the previous run, reported
+# as "the arithmetic test did not compile", which is not what had happened.
+$work = Join-Path ([IO.Path]::GetTempPath()) ('liveshear-mathtest-' + [Guid]::NewGuid().ToString('N').Substring(0, 8))
 if (-not $OutPath) { $OutPath = Join-Path $repo 'docs\evidence\mathtest.txt' }
 $null = New-Item -ItemType Directory -Force -Path $work
 $null = New-Item -ItemType Directory -Force -Path (Split-Path -Parent $OutPath)

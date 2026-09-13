@@ -96,7 +96,9 @@ Check 'editing the angle changes the artwork' ($edited -ne $sheared) "$sheared t
 
 $steps = Undo-Until $sheared
 Note ("    a parameter edit made through the script bridge cost {0} undo steps" -f $steps)
-Check 'undo after a bridge parameter edit leaves the document coherent' ([int] (Js 'app.activeDocument.pageItems.length;') -ge 1) 'the document lost its artwork'
+$itemsLeft = [int] (Js 'app.activeDocument.pageItems.length;')
+Check 'undo after a bridge parameter edit leaves the document coherent' ($itemsLeft -ge 1) `
+    ("the document still holds {0} object(s) after undoing" -f $itemsLeft)
 
 # ---- a whole dialog session -------------------------------------------
 # The dialog previews by rewriting the parameters and asking Illustrator to
@@ -181,14 +183,18 @@ $one = Bounds
 Check 'deleting one of two effects changes the artwork' ($one -ne $two) ("two effects {0}, one effect {1}" -f $two, $one)
 $steps = Undo-Until $two
 Note ("    deleting an effect through the script bridge cost {0} undo steps" -f $steps)
-Check 'undo after a bridge deletion leaves the document coherent' ([int] (Js 'app.activeDocument.pageItems.length;') -ge 1) 'the document lost its artwork'
+$itemsLeft = [int] (Js 'app.activeDocument.pageItems.length;')
+Check 'undo after a bridge deletion leaves the document coherent' ($itemsLeft -ge 1) `
+    ("the document still holds {0} object(s) after undoing" -f $itemsLeft)
 
 Js "LS.send('move effect', '0,1');" | Out-Null
 Js 'app.redraw();' | Out-Null
 $swapped = Bounds
 $steps = Undo-Until $two
 Note ("    reordering through the script bridge cost {0} undo steps" -f $steps)
-Check 'undo after a bridge reorder leaves the document coherent' ([int] (Js 'app.activeDocument.pageItems.length;') -ge 1) ("the document lost its artwork; swapped bounds were {0}" -f $swapped)
+$itemsLeft = [int] (Js 'app.activeDocument.pageItems.length;')
+Check 'undo after a bridge reorder leaves the document coherent' ($itemsLeft -ge 1) `
+    ("the document still holds {0} object(s) after undoing; the swapped bounds were {1}" -f $itemsLeft, $swapped)
 
 # ---- the source survives all of it --------------------------------------
 $anchorsNow = Js 'LS.anchorsOf(LS.target);'
@@ -199,5 +205,5 @@ Js 'LS.clear();' | Out-Null
 Note ''
 Note ("{0} passed, {1} failed" -f $script:pass, $script:fail)
 Save-ProbeResults -Path ($OutPath -replace '\.txt$', '.tsv')
-[System.IO.File]::WriteAllLines($OutPath, $log)
+Save-ProbeTranscript -Path $OutPath -Lines $log
 Write-Output "Written to $OutPath"

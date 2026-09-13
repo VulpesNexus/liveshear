@@ -77,7 +77,7 @@ if ($commit) {
 Note ''
 
 foreach ($configuration in @('Release', 'Debug')) {
-    $output = & $msbuild (Join-Path $repo 'plugin\LiveShear.vcxproj') "/p:Configuration=$configuration" /p:Platform=x64 /v:minimal /nologo "/p:AISDKRoot=$SdkRoot" /t:Rebuild 2>&1
+    $output = & $msbuild (Join-Path $repo 'plugin\LiveShear.vcxproj') "/p:Configuration=$configuration" /p:Platform=x64 /v:minimal /nologo /nodeReuse:false "/p:AISDKRoot=$SdkRoot" /t:Rebuild 2>&1
     $warnings = @($output | Where-Object { $_ -match ': warning ' })
     $errors = @($output | Where-Object { $_ -match ': error ' })
     Check ("{0} builds with no warnings and no errors" -f $configuration) (($warnings.Count -eq 0) -and ($errors.Count -eq 0)) ("{0} warnings, {1} errors" -f $warnings.Count, $errors.Count)
@@ -90,7 +90,7 @@ $binary = Join-Path $repo 'build\Release\LiveShear.aip'
 Check 'the Release build produced a plugin' (Test-Path $binary) 'build\Release\LiveShear.aip'
 if (-not (Test-Path $binary)) {
     Save-ProbeResults -Path ($OutPath -replace '\.txt$', '.tsv')
-    [System.IO.File]::WriteAllLines($OutPath, $log)
+    Save-ProbeTranscript -Path $OutPath -Lines $log
     throw 'No Release binary to inspect.'
 }
 
@@ -170,5 +170,5 @@ if (Test-Path $dumpbin) {
 Note ''
 Note ("{0} passed, {1} failed" -f $script:pass, $script:fail)
 Save-ProbeResults -Path ($OutPath -replace '\.txt$', '.tsv')
-[System.IO.File]::WriteAllLines($OutPath, $log)
+Save-ProbeTranscript -Path $OutPath -Lines $log
 Write-Output "Written to $OutPath"

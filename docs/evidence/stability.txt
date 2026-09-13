@@ -1,5 +1,5 @@
 Live Shear -- stability
-Run at 2026-09-13 13:31:42
+Run at 2026-09-13 15:24:40
 
 --- a zero shear is exactly nothing ---
 identity at axis 0, 25 redraws                           PASS
@@ -20,15 +20,15 @@ trip over COM costs around a tenth of a second, which is more than the
 effect does and would bury it; timing the loop in one call removes it.
 
 fixture                 redraws  with the effect   per evaluation
-plainRect               3119 ms          4686 ms         46,86 ms
-bezier                  3111 ms          4731 ms         47,31 ms
-multilineText           3118 ms          4688 ms         46,88 ms
-manyChildren            3114 ms          4727 ms         47,27 ms
-compound                3115 ms          4669 ms         46,69 ms
+plainRect               3108 ms          4862 ms         48,62 ms
+bezier                  3109 ms          4922 ms         49,22 ms
+multilineText           3138 ms          5368 ms         53,68 ms
+manyChildren            3113 ms          4752 ms         47,52 ms
+compound                3113 ms          4948 ms         49,48 ms
 
 --- a document with 200 independent Shear effects ---
-build 13046 ms   redraw 86 ms   save 572 ms   reopen 699 ms   200 paths   249576 bytes
-memory after building 2855 MB, after reopening 3013 MB
+build 13177 ms   redraw 90 ms   save 550 ms   reopen 755 ms   200 paths   249662 bytes
+memory after building 2667 MB, after reopening 2664 MB
 all 200 objects survived the round trip                  PASS
 
 11 passed, 0 failed

@@ -1,5 +1,5 @@
 Live Shear -- artwork Illustrator generates from a path
-Run at 2026-09-13 13:53:31
+Run at 2026-09-13 15:30:55
 Scaled vertically to 25 percent, by Adobe's own Transform effect and by the destructive command
 
 fixture               Adobe differs   what that means
@@ -9,6 +9,15 @@ calligraphicBrush           0,220 %   Adobe's own effect does not match its own 
 strokedText                 0,000 %   the two routes agree, so this artwork is not regenerated
 strokedRect                 0,000 %   the two routes agree, so this artwork is not regenerated
 plainRect                   0,000 %   the two routes agree, so this artwork is not regenerated
+
+--- a horizontal shear cannot change a vertical extent ---
+fixture                effect moved   native moved   what that means
+patternBrush                      0        2.19538   the effect kept the shear exact; the destructive command regenerated the artwork around the sheared outline
+artBrush                          0       1.045654   the effect kept the shear exact; the destructive command regenerated the artwork around the sheared outline
+calligraphicBrush                 0       0.024626   the effect kept the shear exact; the destructive command regenerated the artwork around the sheared outline
+strokedText                       0       0.402832   the effect kept the shear exact; the destructive command regenerated the artwork around the sheared outline
+strokedRect                       0              0   neither route regenerates anything here
+plainRect                         0              0   neither route regenerates anything here
 
 A live effect is handed generated artwork, not the rule that generated it, so it can only transform what it is given.
 Where Adobe's own effect differs from Adobe's own command, this one differs in the same way and for the same reason.

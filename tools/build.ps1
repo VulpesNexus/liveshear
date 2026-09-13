@@ -36,7 +36,7 @@ foreach ($install in (& $vswhere -products * -requires Microsoft.Component.MSBui
 }
 if (-not $msbuild) { throw 'MSBuild.exe not found.' }
 
-$arguments = @($project, "/p:Configuration=$Configuration", '/p:Platform=x64', '/v:minimal', '/nologo')
+$arguments = @($project, "/p:Configuration=$Configuration", '/p:Platform=x64', '/v:minimal', '/nologo', '/nodeReuse:false')
 if ($SdkRoot) { $arguments += "/p:AISDKRoot=$SdkRoot" }
 
 & $msbuild @arguments

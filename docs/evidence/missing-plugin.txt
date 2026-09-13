@@ -1,18 +1,14 @@
-Live Shear -- what a machine without the plug-in sees
-Run at 2026-09-13 00:34:29
+Live Shear -- what a machine without the plugin sees
+Run at 2026-09-13 16:01:46
 
-=== Phase 1: authored with the plug-in installed ===
+=== Phase 1: authored with the plugin installed ===
 TextFrame; name=text; visibleWidth=268.105; geometricWidth=237.981; contents=Handgloves
 PathItem; name=rect; visibleWidth=269.282; geometricWidth=200; anchorsX=100/100/300/300
 
-appearance as the plug-in reports it:
-Selected objects: 3
+appearance as the plugin reports it:
+Selected objects: 2
 
-[0] Group "Layer 1"
-  visible bounds: l=65.358984 t=500.000000 r=353.042969 b=227.956055
-  <no art style>
-
-[1] TextFrame "text"
+[0] TextFrame "text"
   visible bounds: l=84.937988 t=280.131836 r=353.042969 b=227.956055
   pre-effects: 0
   paint fields: 2
@@ -25,7 +21,7 @@ Selected objects: 3
       # 1 entries
       shearAngle (Real) = 30.000000
 
-[2] Path "rect"
+[1] Path "rect"
   visible bounds: l=65.358984 t=500.000000 r=334.641016 b=380.000000
   pre-effects: 0
   paint fields: 2
@@ -38,32 +34,39 @@ Selected objects: 3
       # 1 entries
       shearAngle (Real) = 30.000000
 
-saved to %TEMP%\liveshear-probe\shear-with-plugin.ai (239 267 bytes)
+saved to <temp>\liveshear-probe\shear-with-plugin.ai (239 363 bytes)
 
-=== Phase 2: the same file opened with the plug-in removed ===
-plug-in reachable: False
+=== Phase 2: the same file opened with the plugin removed ===
+plugin reachable: False
 document opens: True 
+[PASS] the plugin really is gone
+       the script bridge answers: False
+[PASS] the document opens without the plugin
 what the document looks like now:
 TextFrame; name=text; visibleWidth=268.104; geometricWidth=237.981; contents=Handgloves
 PathItem; name=rect; visibleWidth=269.282; geometricWidth=200; anchorsX=100/100/300/300
+[PASS] the artwork still draws sheared
+       drawn widths with the plugin: text=268.105, rect=269.282; without it: text=268.104, rect=269.282
+[PASS] the source geometry is neither expanded nor flattened
+       geometric widths with the plugin: text=237.981, rect=200; without it: text=237.981, rect=200
+[PASS] text is still live text
+       no TextFrame in the reopened document
 
 after retyping the text (if the effect were still running, the sheared result would grow):
 TextFrame; name=text; visibleWidth=268.104; geometricWidth=440.827; contents=Handgloves and more
 PathItem; name=rect; visibleWidth=269.282; geometricWidth=200; anchorsX=100/100/300/300
 
-re-saved without the plug-in to %TEMP%\liveshear-probe\shear-resaved-without-plugin.ai (240 252 bytes)
+re-saved without the plugin to <temp>\liveshear-probe\shear-resaved-without-plugin.ai (240 499 bytes)
+[PASS] the document can be re-saved without the plugin
+       240 499 bytes
 
-=== Phase 3: the plug-in reinstalled ===
-the original file, reopened with the plug-in back:
+=== Phase 3: the plugin reinstalled ===
+the original file, reopened with the plugin back:
 TextFrame; name=text; visibleWidth=268.105; geometricWidth=237.981; contents=Handgloves
 PathItem; name=rect; visibleWidth=269.282; geometricWidth=200; anchorsX=100/100/300/300
-Selected objects: 3
+Selected objects: 2
 
-[0] Group "Layer 1"
-  visible bounds: l=65.358984 t=500.000000 r=353.042969 b=227.956055
-  <no art style>
-
-[1] TextFrame "text"
+[0] TextFrame "text"
   visible bounds: l=84.937988 t=280.131836 r=353.042969 b=227.956055
   pre-effects: 0
   paint fields: 2
@@ -76,7 +79,7 @@ Selected objects: 3
       # 1 entries
       shearAngle (Real) = 30.000000
 
-[2] Path "rect"
+[1] Path "rect"
   visible bounds: l=65.358984 t=500.000000 r=334.641016 b=380.000000
   pre-effects: 0
   paint fields: 2
@@ -88,17 +91,15 @@ Selected objects: 3
     [0] "VulpesNexus Shear" v1.0
       # 1 entries
       shearAngle (Real) = 30.000000
+[PASS] the original file still holds the effect and its parameters
+       the effect is in the reopened file, with shearAngle still 30
 
-the file that was re-saved while the plug-in was missing:
+the file that was re-saved while the plugin was missing:
 TextFrame; name=text; visibleWidth=470.951; geometricWidth=440.827; contents=Handgloves and more
 PathItem; name=rect; visibleWidth=269.282; geometricWidth=200; anchorsX=100/100/300/300
-Selected objects: 3
+Selected objects: 2
 
-[0] Group "Layer 1"
-  visible bounds: l=65.358984 t=500.000000 r=555.888672 b=227.956055
-  <no art style>
-
-[1] TextFrame "text"
+[0] TextFrame "text"
   visible bounds: l=84.937988 t=280.131836 r=555.888672 b=227.956055
   pre-effects: 0
   paint fields: 2
@@ -111,7 +112,7 @@ Selected objects: 3
       # 1 entries
       shearAngle (Real) = 30.000000
 
-[2] Path "rect"
+[1] Path "rect"
   visible bounds: l=65.358984 t=500.000000 r=334.641016 b=380.000000
   pre-effects: 0
   paint fields: 2
@@ -123,41 +124,7 @@ Selected objects: 3
     [0] "VulpesNexus Shear" v1.0
       # 1 entries
       shearAngle (Real) = 30.000000
+[PASS] a file re-saved without the plugin loses nothing
+       the effect survived the round trip through a machine without the plugin, with shearAngle still 30
 
-=== The warning Illustrator shows on opening ===
-
-Observed by the user on screen during phase 2 (the probe drives Illustrator over
-COM and so never sees modal dialogs):
-
-    The document "shear-with-plugin.ai" contains elements that are managed by
-    plug-ins that are not currently available. You can delete or expand these
-    elements but you cannot manipulate them in other ways. The missing plug-ins
-    are listed below.
-
-    Shear (LiveShear.aip)
-
-Illustrator names the effect by its registered title and the plug-in by its file
-name, which is the same treatment any third-party live effect gets.
-
-=== Reading of the three phases ===
-
-- The document opens. Nothing is lost, refused, or repaired.
-- The artwork still renders sheared: the rectangle's visible width stays
-  269.282 pt while its own anchor points stay at x = 100/100/300/300. The source
-  geometry was never touched, and the styled result Illustrator cached with the
-  file is what gets drawn.
-- Text is still live text and can still be retyped, but the effect no longer
-  runs: after retyping, the text's geometric width grew from 237.981 to 440.827
-  while the drawn width stayed at 268.104. The rendering is frozen at whatever
-  the effect last produced. That is exactly the state the warning describes --
-  the element can be deleted or expanded, not manipulated.
-- Saving from that state preserves the effect and its parameters in full.
-  Reopening the re-saved file with the plug-in back shows the Shear effect with
-  shearAngle 30 still on both objects, and the artwork re-renders correctly for
-  the edited text (visible width 470.951). A round trip through a machine
-  without the plug-in costs nothing.
-
-The one practical hazard is that stale rendering: someone without the plug-in
-who edits the underlying artwork and then exports will get the old shape. That
-is Illustrator's standard behaviour for any missing effect, not something
-specific to this plug-in.
+8 passed, 0 failed

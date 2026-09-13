@@ -30,7 +30,10 @@ param(
     [string[]] $Fixture = @('patternBrush', 'artBrush', 'calligraphicBrush', 'strokedText', 'strokedRect', 'plainRect'),
     # A hard vertical squash: whatever the two routes disagree about, this
     # makes it large enough to see.
-    [double] $ScaleV = 25
+    [double] $ScaleV = 25,
+    # For the vertical-extent check below, which needs a shear rather than a
+    # scale.
+    [double] $Angle = 30
 )
 
 $ErrorActionPreference = 'Stop'
@@ -45,6 +48,7 @@ $null = New-Item -ItemType Directory -Force -Path $images
 $log = New-Object Collections.Generic.List[string]
 function Note([string] $line) { $log.Add($line); Write-Output $line }
 function Js([string] $code) { (Invoke-AiScript $code).Trim() }
+function Num([double] $v) { $v.ToString('0.######', [Globalization.CultureInfo]::InvariantCulture) }
 
 Add-Type -AssemblyName System.Drawing
 
@@ -114,10 +118,57 @@ foreach ($name in $Fixture) {
         -Status 'MEASURED'
 }
 
+# --------------------------------------------------------------------------
+# Which of the two routes is the one that changed the geometry?
+#
+# A shear along the horizontal axis maps (x, y) to (x + (y - c) tan t, y). The
+# y is untouched, so the vertical extent of the artwork cannot change. Anything
+# that does change it did not come from the shear.
+#
+# That makes a clean test for whether a route regenerates artwork, and it needs
+# no oracle at all beyond arithmetic: shear horizontally, and see whether the
+# top and bottom moved.
+Note ''
+Note '--- a horizontal shear cannot change a vertical extent ---'
+Note ("{0,-20} {1,14} {2,14}   {3}" -f 'fixture', 'effect moved', 'native moved', 'what that means')
+
+foreach ($name in $Fixture) {
+    Js "LS.clear(); LS.target = LS.fixtures['$name'](); LS.target.name = 'subject'; LS.selectOnly(LS.target); app.redraw();" | Out-Null
+    $plain = (Js 'LS.vb(LS.named("subject"));') -split ','
+    Js ("LS.shear({0}, 0);" -f (Format-AiNumber $Angle)) | Out-Null
+    Js 'app.redraw();' | Out-Null
+    $live = (Js 'LS.vb(LS.named("subject"));') -split ','
+
+    Js "LS.clear(); LS.target = LS.fixtures['$name'](); LS.target.name = 'subject'; LS.selectOnly(LS.target); app.redraw();" | Out-Null
+    $moved = 'did not move'
+    for ($attempt = 0; $attempt -lt 3 -and $moved -eq 'did not move'; $attempt++) {
+        $moved = Js ("LS.nativeShearChecked('subject', {0}, 0);" -f (Format-AiNumber $Angle))
+    }
+    Js 'app.redraw();' | Out-Null
+    $native = (Js 'LS.vb(LS.named("subject"));') -split ','
+
+    if ($plain.Count -ne 4 -or $live.Count -ne 4 -or $native.Count -ne 4 -or $moved -eq 'did not move') {
+        Note ("{0,-20} {1,14} {2,14}   {3}" -f $name, '-', '-', 'not comparable')
+        continue
+    }
+    $liveDrift = [Math]::Max([Math]::Abs([double]$live[1] - [double]$plain[1]), [Math]::Abs([double]$live[3] - [double]$plain[3]))
+    $nativeDrift = [Math]::Max([Math]::Abs([double]$native[1] - [double]$plain[1]), [Math]::Abs([double]$native[3] - [double]$plain[3]))
+
+    $meaning = if ($liveDrift -lt 1e-6 -and $nativeDrift -lt 1e-6) { 'neither route regenerates anything here' }
+               elseif ($liveDrift -lt 1e-6) { 'the effect kept the shear exact; the destructive command regenerated the artwork around the sheared outline' }
+               else { 'the effect changed a vertical extent a horizontal shear cannot change' }
+
+    Note ("{0,-20} {1,14} {2,14}   {3}" -f $name, (Num $liveDrift), (Num $nativeDrift), $meaning)
+    Add-ProbeResult -Group 'generated artwork' -Case ("{0}: does a horizontal shear change the vertical extent?" -f $name) `
+        -Expected 'a shear along x leaves y alone, so any vertical movement came from somewhere else' `
+        -Observed ("the effect moved the top or bottom by {0} pt, the destructive command by {1} pt; {2}" -f (Num $liveDrift), (Num $nativeDrift), $meaning) `
+        -Status $(if ($liveDrift -lt 1e-6) { 'PASS' } else { 'FAIL' })
+}
+
 Note ''
 Note 'A live effect is handed generated artwork, not the rule that generated it, so it can only transform what it is given.'
 Note 'Where Adobe''s own effect differs from Adobe''s own command, this one differs in the same way and for the same reason.'
 Js 'LS.clear();' | Out-Null
 Save-ProbeResults -Path ($OutPath -replace '\.txt$', '.tsv')
-[System.IO.File]::WriteAllLines($OutPath, $log)
+Save-ProbeTranscript -Path $OutPath -Lines $log
 Write-Output "Written to $OutPath"

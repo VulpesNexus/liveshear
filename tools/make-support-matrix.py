@@ -81,6 +81,21 @@ def read(path):
     return [dict(zip(header, r.split("\t"))) for r in rows[1:] if r.strip()]
 
 
+
+def prettify(text):
+    """ASCII stand-ins to the real glyphs.
+
+    The probes write their result strings in PowerShell and ExtendScript
+    sources, which have to stay pure ASCII -- both are read in the system
+    codepage, and a stray byte there is a mangled file. The Markdown generated
+    from those strings is prose, though, and prose here uses the real
+    characters. So the conversion happens on the way out.
+    """
+    return (text.replace(' -- ', ' — ')
+                .replace('->', '→')
+                .replace('...', '…'))
+
+
 def main(evidence_dir, out_path):
     evidence = Path(evidence_dir)
     verdicts = read(evidence / "release-verdicts.tsv")
@@ -119,11 +134,11 @@ def main(evidence_dir, out_path):
                 status = "VERIFIED"
                 note = description
         counts[status] += 1
-        lines.append(f"| {category} | `{fixture}` | {len(rows)} | {status} | {note} |")
+        lines.append(f"| {category} | `{fixture}` | {len(rows)} | {status} | {prettify(note)} |")
 
     for category, description, note in UNTESTED:
         counts["UNTESTED"] += 1
-        lines.append(f"| {category} | — | 0 | UNTESTED | {note} |")
+        lines.append(f"| {category} | — | 0 | UNTESTED | {prettify(note)} |")
 
     summary = ", ".join(f"{n} {s.lower()}" for s, n in sorted(counts.items()))
     lines.insert(4, f"**{summary}.**")

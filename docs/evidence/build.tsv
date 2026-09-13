@@ -13,7 +13,7 @@ build	release build	the plugin metadata resource is present	the artifact is fit 
 build	release build	the effect name that documents store is unchanged	the artifact is fit to ship	VulpesNexus Shear	PASS
 build	release build	the menu entry reads as a plain Adobe command	the artifact is fit to ship	Effect > Distort & Transform > Shear...	PASS
 build	release build	no debug trace is on by default	the artifact is fit to ship	tracing is behind the LIVESHEAR_LOG environment variable	PASS
-build	release build	the source this was built from is identified	the artifact is fit to ship	commit d74bd69e377c76bd43e40ca13ccf9cf602e541ca	PASS
-build	release build	the working tree was clean when it was built	the artifact is fit to ship	29 uncommitted change(s)	FAIL
+build	release build	the source this was built from is identified	the artifact is fit to ship	commit 8e98f934d0d11bcdec193200292a9a097e416ec3	PASS
+build	release build	the working tree was clean when it was built	the artifact is fit to ship	54 uncommitted change(s)	FAIL
 build	release build	nothing is linked but Windows and the C runtime	the artifact is fit to ship	no SDK, developer, or test-harness DLL is named	PASS
 build	release build	the C runtime it needs is one Illustrator already needs	the artifact is fit to ship	Illustrator.exe names the same MSVCP140.dll, VCRUNTIME140.dll, VCRUNTIME140_1.dll, so no redistributable has to be installed for the plugin	PASS

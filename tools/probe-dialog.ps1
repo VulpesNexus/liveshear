@@ -87,6 +87,12 @@ public static class Dlg {
     public static extern bool GetClientRect(IntPtr h, out RECT r);
     [DllImport("user32.dll")]
     public static extern bool PrintWindow(IntPtr h, IntPtr dc, uint flags);
+    // Posting a key message never touches the keyboard state, so the dialog's
+    // GetKeyState(VK_SHIFT) reads whatever is ambient -- including a Shift the
+    // person at the machine is holding. keybd_event does change it, so the
+    // driver can put Shift down and up for real.
+    [DllImport("user32.dll")]
+    public static extern void keybd_event(byte vk, byte scan, uint flags, UIntPtr extra);
     [StructLayout(LayoutKind.Sequential)]
     public struct RECT { public int Left, Top, Right, Bottom; }
 
@@ -219,6 +225,16 @@ public static class Dlg {
         $lines.Add("typed '$TypeInto' into the numeric field")
     }
 
+    if ($ArrowUps -gt 0) {
+        # The dialog nudges by one degree, or by ten with Shift held, and it
+        # asks GetKeyState which key is down. A posted message carries no
+        # keyboard state at all, so without this the step depends on whether
+        # anybody happens to be leaning on Shift -- which is exactly what
+        # happened: three arrows moved the angle by thirty degrees instead of
+        # three, and nothing in the plugin was wrong.
+        [Dlg]::keybd_event(0x10, 0, 2, [UIntPtr]::Zero)   # VK_SHIFT up, for real
+        Start-Sleep -Milliseconds 120
+    }
     for ($i = 0; $i -lt $ArrowUps; $i++) {
         [Dlg]::PostMessage($edit, $WM_KEYDOWN, [IntPtr] $VK_UP, [IntPtr] 0) | Out-Null
         Start-Sleep -Milliseconds 200
@@ -387,7 +403,15 @@ $transcript = Invoke-Dialog -Button 'ok' -TypeInto '18.25 deg'
 Note 'driver transcript (typed with trailing text):'
 foreach ($t in $transcript) { Note ("       " + $t) }
 Invoke-AiScript 'app.redraw();' | Out-Null
-Check 'a value typed with trailing text still reads as a number' (Near (StoredAngle) 18.25 0.05) ("shearAngle after typing '18.25 deg': " + (StoredAngle))
+# 18.3 rather than 18.25, and deliberately. The sliders carry tenths of a
+# degree and the fields show one decimal, so a tenth is the resolution this
+# dialog can express; rounding once on the way in is what makes the number
+# shown, the slider position, and the value stored the same number. Asserting
+# 18.25 here would be asserting the bug this replaced -- three different
+# roundings of one typed value. The documented behavior is in
+# KNOWN_LIMITATIONS.md, and a script writing the dictionary directly still gets
+# full precision.
+Check 'a value typed with trailing text reads as a number, at the dialog''s resolution' (Near (StoredAngle) 18.3 0.001) ("typing '18.25 deg' committed " + (StoredAngle) + " degrees: the trailing text is ignored and the value is rounded once, to the tenth of a degree the sliders and fields work in")
 
 New-Case 5
 $transcript = Invoke-Dialog -Button 'ok' -TypeInto '95'
@@ -448,5 +472,5 @@ if ($TracePath -and (Test-Path $TracePath)) {
 Note ''
 Note ("{0} passed, {1} failed" -f $script:passed, $script:failed)
 Save-ProbeResults -Path ($LogPath -replace '\.txt$', '.tsv')
-[System.IO.File]::WriteAllLines($LogPath, $log)
+Save-ProbeTranscript -Path $LogPath -Lines $log
 Write-Output "`nWritten to $LogPath"

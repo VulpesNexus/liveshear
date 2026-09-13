@@ -29,7 +29,7 @@ Behavior that is simply how the effect works — how it composes with other effe
 
 ## The dialog works to a tenth of a degree
 
-**Product limitation.** The sliders carry tenths of a degree and the fields show one decimal, so that is the resolution the dialog offers: type 18.25 and it becomes 18.3, which is what the field then shows and what gets stored. A script writing the parameter dictionary directly is not limited this way — the effect honours whatever angle it is given, to full precision. **Affected:** anyone wanting a hundredth of a degree from the dialog. **Workaround:** set it from a script. **Planned:** possibly, if anyone wants it; 0.1° on a 100 pt object is 0.17 pt.
+**Product limitation.** The sliders carry tenths of a degree and the fields show one decimal, so that is the resolution the dialog offers: type 18.25 and it becomes 18.3, which is what the field then shows and what gets stored. A script writing the parameter dictionary directly is not limited this way — the effect honors whatever angle it is given, to full precision. **Affected:** anyone wanting a hundredth of a degree from the dialog. **Workaround:** set it from a script. **Planned:** possibly, if anyone wants it; 0.1° on a 100 pt object is 0.17 pt.
 
 ## The reference point is always the center
 
@@ -51,7 +51,7 @@ This is not particular to this effect. Adobe's own *Transform* effect does not m
 
 **Untested.** It is measured at 96 dots per inch, where it is 448 by 199 pixels with nothing clipped and every control reachable, and a picture of it is in [docs/evidence/dialog.png](docs/evidence/dialog.png). No display that would scale it was available, and *the release notes do not claim scaling works*.
 
-What can be said without a monitor is arithmetic, and it is checked rather than asserted: every control's box comes from one table, multiplied through one function, and the test walks that table at 100%, 125%, 150%, 200% and 250% checking that nothing leaves the window, nothing lands on top of anything else, every control a person can tab to stays at least sixteen pixels across, and the tab order still reads left to right and top to bottom. That covers the layout. It does not cover font substitution or the trackbar's own idea of its minimum height, which is why this says untested rather than verified. **Affected:** anyone running Windows above 100% scaling. **Workaround:** none needed if it works; the failure mode would be cosmetic rather than a control you cannot reach.
+What can be said without a monitor is arithmetic, and it is checked rather than asserted: every control's box comes from one table, multiplied through one function, and the test walks that table at 100%, 125%, 150%, 200%, and 250% checking that nothing leaves the window, nothing lands on top of anything else, every control a person can tab to stays at least sixteen pixels across, and the tab order still reads left to right and top to bottom. That covers the layout. It does not cover font substitution or the trackbar's own idea of its minimum height, which is why this says untested rather than verified. **Affected:** anyone running Windows above 100% scaling. **Workaround:** none needed if it works; the failure mode would be cosmetic rather than a control you cannot reach.
 
 ## GPU and CPU preview were not compared
 

@@ -1,7 +1,0 @@
-probe	group	case	expected	observed	status
-fills	fills	strokedText renders as the native command does	the rendered pixels agree, so the fill sheared with the object	patterns on 0,000990295107942167, patterns off 0,000990295107942167, closest patterns on	PASS
-fills	fills	calligraphicBrush renders as the native command does	the rendered pixels agree, so the fill sheared with the object	patterns on 0,00172682709447415, patterns off 0,00172682709447415, closest patterns on	PASS
-fills	fills	artBrush renders as the native command does	the rendered pixels agree, so the fill sheared with the object	patterns on 0,00190012873836403, patterns off 0,00190012873836403, closest patterns on	PASS
-fills	fills	patternBrush renders as the native command does	the rendered pixels agree, so the fill sheared with the object	patterns on 0,0185308972073678, patterns off 0,0185308972073678, closest patterns on	FAIL
-fills	fills	strokedRect renders as the native command does	the rendered pixels agree, so the fill sheared with the object	patterns on 0, patterns off 0, closest patterns on	PASS
-fills	fills	pointText renders as the native command does	the rendered pixels agree, so the fill sheared with the object	patterns on 1,85680332739156E-05, patterns off 1,85680332739156E-05, closest patterns on	PASS

@@ -48,6 +48,7 @@ REGENERATED = {
     "calligraphicBrush": "a calligraphic brush",
     "artBrush": "an art brush",
     "patternBrush": "a pattern brush",
+    "strokedText": "a stroke on live text",
 }
 
 HEADER = "probe\tgroup\tcase\texpected\tobserved\tstatus"
@@ -62,13 +63,21 @@ def main(path, out=None):
     rows = Path(path).read_text(encoding="utf-8").splitlines()
     header = rows[0].split("\t")
     verdicts = [HEADER]
-    passed = failed = inconclusive = expected_count = 0
+    passed = failed = inconclusive = expected_count = malformed = 0
 
     print(f"{'fixture':<20}{'shear':>9}{'axis':>7}  {'max dev':>12}  source  verdict")
     for row in rows[1:]:
         if not row.strip():
             continue
         cells = dict(zip(header, row.split("\t")))
+        # A row that is not a row. One malformed line used to end the whole run
+        # with a KeyError, which meant a single broken fixture cost the entire
+        # matrix; saying so and carrying on is the right shape for a tool whose
+        # job is to report what happened.
+        if not {"fixture", "shear", "axis"}.issubset(cells):
+            print("  skipped a malformed line: {!r}".format(row[:70]))
+            malformed += 1
+            continue
         name = cells["fixture"]
         shear = cells["shear"]
         axis = cells["axis"]
@@ -81,7 +90,16 @@ def main(path, out=None):
             failed += 1
             continue
 
-        if cells.get("oracle", "moved").strip() == "did not move":
+        # At zero degrees both routes are the identity, so artwork that did not
+        # move is the right answer rather than a failed oracle. Comparing the
+        # two is still worth doing -- it is the case that catches an effect
+        # which does something when asked for nothing.
+        try:
+            asked_for_nothing = float(shear) == 0.0
+        except ValueError:
+            asked_for_nothing = False
+
+        if not asked_for_nothing and cells.get("oracle", "moved").strip() == "did not move":
             note = ("Illustrator's own shear reported success but left the oracle "
                     "untouched after three attempts; nothing to compare against")
             print(f"{name:<20}{shear:>9}{axis:>7}  {'-':>12}  {'-':<6}  INCONCLUSIVE")
@@ -120,7 +138,7 @@ def main(path, out=None):
                 f"differs from the destructive command by {deviation:.2e} pt, and must: "
                 f"{REGENERATED[name]} is laid along the path again when the path is "
                 f"transformed destructively, while a live effect is handed the art the "
-                f"brush already made. Adobe's own Transform effect differs from Adobe's "
+                f"generator already produced. Adobe's own Transform effect differs from Adobe's "
                 f"own command here too (docs/evidence/generated-art.txt). Source geometry "
                 f"{'unchanged' if source_ok else 'CHANGED'}")
         else:
@@ -128,9 +146,12 @@ def main(path, out=None):
                         f"source geometry {'unchanged' if source_ok else 'CHANGED'}")
         verdicts.append(f"release\tart types\t{case}\t{EXPECTED}\t{observed}\t{verdict}")
 
-    print(f"\n{passed} passed, {failed} failed, {expected_count} expected-to-differ, "
-          f"{inconclusive} inconclusive, "
-          f"{passed + failed + expected_count + inconclusive} cases")
+    total = passed + failed + expected_count + inconclusive
+    tally = (f"\n{passed} passed, {failed} failed, {expected_count} expected-to-differ, "
+             f"{inconclusive} inconclusive, ")
+    if malformed:
+        tally += f"{malformed} malformed line(s) skipped, "
+    print(tally + f"{total} cases")
     if out:
         Path(out).write_text("\n".join(verdicts) + "\n", encoding="utf-8")
         print(f"verdicts written to {out}")

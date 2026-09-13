@@ -69,5 +69,5 @@ Stop-Ai | Out-Null
 & $install | Out-Null
 Start-Ai | Out-Null
 
-[System.IO.File]::WriteAllLines($LogPath, $log)
+Save-ProbeTranscript -Path $LogPath -Lines $log
 Write-Output "Written to $LogPath"

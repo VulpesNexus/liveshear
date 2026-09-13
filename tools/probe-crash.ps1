@@ -95,5 +95,5 @@ foreach ($v in $Variant) {
     Note ''
 }
 
-[System.IO.File]::WriteAllLines($LogPath, $log)
+Save-ProbeTranscript -Path $LogPath -Lines $log
 Write-Output "Written to $LogPath"

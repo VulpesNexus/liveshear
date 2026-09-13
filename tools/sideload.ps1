@@ -32,7 +32,7 @@
 
 .EXAMPLE
     .\tools\sideload.ps1 -Show
-    .\tools\sideload.ps1 -Path C:\Users\me\Illustrator Plug-ins
+    .\tools\sideload.ps1 -Path "$env:LOCALAPPDATA\LiveShear\Plug-ins"
     .\tools\sideload.ps1 -Restore
 #>
 [CmdletBinding(DefaultParameterSetName = 'Show')]

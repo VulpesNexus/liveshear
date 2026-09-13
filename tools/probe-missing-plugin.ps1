@@ -246,7 +246,9 @@ Note $recovered
 Invoke-AiScript 'app.executeMenuCommand("selectall");' | Out-Null
 $recoveredStyle = (Send-AiMessage appearance).TrimEnd()
 Note $recoveredStyle
-Check 'the original file still holds the effect and its parameters' (($recoveredStyle -match 'VulpesNexus Shear') -and ($recoveredStyle -match 'shearAngle \(Real\) = 30')) 'the effect or its angle did not survive'
+$recoveredOk = ($recoveredStyle -match 'VulpesNexus Shear') -and ($recoveredStyle -match 'shearAngle \(Real\) = 30')
+Check 'the original file still holds the effect and its parameters' $recoveredOk `
+    $(if ($recoveredOk) { 'the effect is in the reopened file, with shearAngle still 30' } else { 'the effect or its angle did not survive' })
 
 Note ''
 Note 'the file that was re-saved while the plugin was missing:'
@@ -257,12 +259,14 @@ Note $resurvey
 Invoke-AiScript 'app.executeMenuCommand("selectall");' | Out-Null
 $resavedStyle = (Send-AiMessage appearance).TrimEnd()
 Note $resavedStyle
-Check 'a file re-saved without the plugin loses nothing' (($resavedStyle -match 'VulpesNexus Shear') -and ($resavedStyle -match 'shearAngle \(Real\) = 30')) 'the effect or its angle did not survive the round trip through a machine without the plugin'
+$resavedOk = ($resavedStyle -match 'VulpesNexus Shear') -and ($resavedStyle -match 'shearAngle \(Real\) = 30')
+Check 'a file re-saved without the plugin loses nothing' $resavedOk `
+    $(if ($resavedOk) { 'the effect survived the round trip through a machine without the plugin, with shearAngle still 30' } else { 'the effect or its angle did not survive the round trip through a machine without the plugin' })
 
 Invoke-AiScript 'while (app.documents.length > 0) { app.documents[0].close(SaveOptions.DONOTSAVECHANGES); }' | Out-Null
 
 Note ''
 Note ("{0} passed, {1} failed" -f $script:pass, $script:fail)
 Save-ProbeResults -Path ($LogPath -replace '\.txt$', '.tsv')
-[System.IO.File]::WriteAllLines($LogPath, $log)
+Save-ProbeTranscript -Path $LogPath -Lines $log
 Write-Output "`nWritten to $LogPath"

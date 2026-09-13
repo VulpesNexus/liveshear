@@ -98,11 +98,17 @@ foreach ($spec in $Case) {
         Write-Output ("{0,-20} shear {1,-10} axis {2,-6} measured" -f $name, $shear, $axis)
     }
     catch {
-        $records.Add(("{0}`t{1}`t{2}`tERROR`t`t`t`t`t{3}`t" -f $name, $shear, $axis, $_.Exception.Message))
+        # Flattened: an ExtendScript error message carries a newline, and a
+        # record written with one in it becomes two lines in a tab-separated
+        # file. The stray second line then has one field, and the solver that
+        # reads the file falls over on a missing column -- which is how one
+        # broken fixture took the whole matrix with it.
+        $reason = ($_.Exception.Message -replace "[`t`r`n]+", ' ').Trim()
+        $records.Add(("{0}`t{1}`t{2}`tERROR`t`t`t`t`t{3}`t" -f $name, $shear, $axis, $reason))
         Write-Output ("{0,-20} shear {1,-10} axis {2,-6} ERROR: {3}" -f $name, $shear, $axis, $_.Exception.Message)
     }
 }
 
 Invoke-AiScript 'LS.clear(); "cleared";' | Out-Null
-[System.IO.File]::WriteAllLines($OutPath, $records)
+Save-ProbeTranscript -Path $OutPath -Lines $records
 Write-Output "`nWritten to $OutPath"

@@ -183,5 +183,5 @@ foreach ($arm in @('A absent', 'B unused', 'C exercised')) {
 Stop-Ai | Out-Null
 Start-Ai | Out-Null
 Save-ProbeResults -Path ($LogPath -replace '\.txt$', '.tsv')
-[System.IO.File]::WriteAllLines($LogPath, $log)
+Save-ProbeTranscript -Path $LogPath -Lines $log
 Write-Output "`nWritten to $LogPath"

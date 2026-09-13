@@ -620,14 +620,22 @@ var LS = (function () {
         lib.selection = null;
         src.selected = true;
         app.copy();
-        src.remove();
-        lib.close(SaveOptions.DONOTSAVECHANGES);
 
+        // Paste before closing the library, not after. Closing the document
+        // the clipboard came from discards it -- Illustrator would normally
+        // ask whether to keep it, and under DONTDISPLAYALERTS that question is
+        // answered for us. The paste then produces no selection at all and the
+        // next line fails on an undefined object.
         app.activeDocument = d;
         app.paste();
-        var pasted = d.selection[0];
-        pasted.remove();
+        var pasted = (d.selection && d.selection.length) ? d.selection[0] : null;
+        if (pasted) { pasted.remove(); }
         d.selection = null;
+
+        app.activeDocument = lib;
+        src.remove();
+        lib.close(SaveOptions.DONOTSAVECHANGES);
+        app.activeDocument = d;
 
         for (i = 0; i < d.swatches.length; i++) {
             if (d.swatches[i].name === api.PATTERN_NAME) { return d.swatches[i].color; }

@@ -104,6 +104,16 @@ Two more are run separately, because each has to take the plugin out and put it 
 
 Arm A of the crash experiment runs inside the missing-plugin probe on purpose: that probe already arranges for the plugin to be absent, and arranging it twice would mean doing the same work again. Installed through the Additional Plug-ins Folder, taking it out is deleting a file you own, so neither of these needs administrator rights any more.
 
+The missing-plugin probe needs a helper alongside it, because opening a document whose effects are missing raises Illustrator's own modal warning and a modal blocks the scripting call that raised it:
+
+```powershell
+$job = Start-Job -FilePath .\tools\dismiss-warnings.ps1 -ArgumentList 12
+.\tools\probe-missing-plugin.ps1
+Receive-Job $job -Wait
+```
+
+`DONTDISPLAYALERTS` does not cover that one — it suppresses alerts a script causes, and this is raised while a document opens.
+
 And one that is only worth running when the host has just died:
 
 ```powershell
@@ -129,6 +139,8 @@ The plugin answers `app.sendScriptMessage("LiveShear", selector, arguments)` wit
 It is in the shipped binary on purpose, so that the binary which passes the tests is the binary that ships — a test suite that runs against a different build than the one users get is testing the wrong thing. Two questions follow from shipping it, and both have been answered rather than assumed:
 
 **Does it grant anything?** No. Everything it reaches is reachable through Illustrator's own scripting and action interfaces, which any script already has. `native shear` plays Illustrator's own shear action; `apply effect` applies an effect by name; the rest read state or edit this plugin's own parameters. There is no file, network, or process access in any of it.
+
+**One trap, if you use it for testing.** `set param` writes the effect's parameter dictionary in place. An object and its duplicate *share* an art style until something forks it, so editing either one through the bridge moves both. Editing through the dialog does not: that goes through `EditEffectParameters` and `UpdateParameters`, which forks the style properly. A test that used the bridge to check two duplicates were independent reported a defect that does not exist for anyone using Illustrator — which is why *tools/ai.ps1* has `Invoke-ShearDialog`, and why the case is driven that way instead.
 
 **Can a malformed message hurt the host?** Every argument is parsed defensively. Numbers go through `atof`, which yields zero rather than throwing on nonsense; missing fields take documented defaults; and every index that reaches a host API is range-checked first against the actual number of post-effects — including the destination index of `move effect`, which was not, and which would otherwise have handed `InsertNthPostEffect` whatever a caller sent. A selector that is not recognized returns a message and does nothing.
 

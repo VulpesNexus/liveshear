@@ -78,5 +78,5 @@ app.activeDocument.pathItems.getByName("fixture-rect").selected = true;
 }
 
 Invoke-AiScript 'while (app.documents.length > 0) { app.documents[0].close(SaveOptions.DONOTSAVECHANGES); }' | Out-Null
-[System.IO.File]::WriteAllLines($OutPath, $records)
+Save-ProbeTranscript -Path $OutPath -Lines $records
 Write-Output "`nWritten to $OutPath"

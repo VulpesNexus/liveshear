@@ -196,5 +196,5 @@ Note ''
 Note ("{0} passed, {1} failed" -f $script:pass, $script:fail)
 Js 'LS.clear();' | Out-Null
 Save-ProbeResults -Path ($OutPath -replace '\.txt$', '.tsv')
-[System.IO.File]::WriteAllLines($OutPath, $log)
+Save-ProbeTranscript -Path $OutPath -Lines $log
 Write-Output "Written to $OutPath"

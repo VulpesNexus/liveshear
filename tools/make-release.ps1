@@ -49,7 +49,14 @@ if (-not $version) { throw 'The binary has no file version.' }
 # --- no developer paths ---------------------------------------------------
 $bytes = [IO.File]::ReadAllBytes($binary)
 $ascii = [Text.Encoding]::ASCII.GetString($bytes)
-$leaks = [regex]::Matches($ascii, '[A-Za-z]:\\(Users|Documents and Settings)[ -~]{0,120}')
+# Derived from where this actually is rather than from a list of folder names
+# somebody once had. A hard-coded folder name here named the developer's own
+# directory in a file meant to keep the developer out of the binary.
+$patterns = @('[A-Za-z]:\\Users[ -~]{0,120}', '[A-Za-z]:\\Documents and Settings[ -~]{0,120}')
+foreach ($secret in @($repo, $env:USERPROFILE, $env:USERNAME, (Split-Path -Parent $repo))) {
+    if ($secret) { $patterns += [regex]::Escape($secret) + '[ -~]{0,120}' }
+}
+$leaks = [regex]::Matches($ascii, ($patterns -join '|'))
 if ($leaks.Count -gt 0) {
     $leaks | Select-Object -First 5 | ForEach-Object { Write-Output ("  leak: " + $_.Value) }
     throw 'The binary contains an absolute path from the build machine.'
