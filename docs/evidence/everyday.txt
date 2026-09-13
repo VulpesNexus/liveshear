@@ -1,5 +1,5 @@
 Live Shear -- ordinary things a person does
-Run at 2026-09-13 15:36:27
+Run at 2026-09-13 16:44:17
 
 --- selecting three objects and applying the effect once ---
 [PASS] all three objects get the effect
@@ -12,7 +12,7 @@ Run at 2026-09-13 15:36:27
 --- text set along a path ---
        kind=TextType.PATHTEXT 80.000000000,700.000000000,400.000000000,600.000000000;67.583984375,719.760742188,400.000000000,594.068847656
 [PASS] text on a path shears without disturbing its spine
-       the path the text runs along is unchanged after shearing; the result is 35.292480469,719.760742188,371.132486541,594.068847656
+       the path the text runs along is unchanged after shearing; the result is 67.583984375,719.760742188,400.000000000,594.068847656
 
 --- saved as a graphic style and used on something else ---
        graphic styles: cannot create: No such element

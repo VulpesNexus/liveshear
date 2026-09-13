@@ -18,7 +18,7 @@ Once installed, the effect appears at *Effect > Distort & Transform > Shear…*,
 
 Quit Illustrator first. It reads its plugin folders only at startup.
 
-There are two places to put *LiveShear.aip*, and **only one of them at a time** — Illustrator loads both folders, and two copies means the effect is registered twice and two *Shear…* entries appear in the *Effect* menu.
+There are two places to put *LiveShear.aip*, and **only one of them at a time**. Illustrator reads both folders, and it does not cope well with finding the plugin in both: under the same file name it says so and then ignores the whole additional folder, including anything else in it; under different file names it loads both copies and registers the effect twice, so the *Effect* menu gets two *Shear…* entries with no way to tell them apart.
 
 ### If you can install software on this machine
 

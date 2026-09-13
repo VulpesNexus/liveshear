@@ -1,10 +1,10 @@
 Live Shear -- the built artifact
-Run at 2026-09-13 16:10:20
+Run at 2026-09-13 16:12:30
 Windows 10.0.26200.0
 
 Toolchain: MSVC 14.44.35207
 SDK:       Adobe Illustrator 2026 SDK
-Commit:    14eda17fb2f2c2c91eed227cd4101edf8a8077bf (working tree not clean)
+Commit:    6fb42945a0ca6f19d4b30845ab571ccc1bd193ea
 
 [PASS] Release builds with no warnings and no errors
        0 warnings, 0 errors
@@ -19,7 +19,7 @@ Product:        Shear for Illustrator
 Description:    Non-destructive Shear effect for Adobe Illustrator
 Copyright:      Copyright (C) 2026 VulpesNexus. Licensed under the GNU GPL version 3 or later.
 Size:           166 400 bytes
-SHA-256:        E8CD15B45D355A888F4A1FA4757E8EF7D2EA8745AEED38D1208CDC24911C8B12
+SHA-256:        0F8AEAB1A33CD1124207BE650A5C1E2E773BFB0A46D9D6FFA53C10BC011B75AA
 
 [PASS] the binary does not claim Adobe as its publisher
        CompanyName is VulpesNexus
@@ -44,9 +44,9 @@ SHA-256:        E8CD15B45D355A888F4A1FA4757E8EF7D2EA8745AEED38D1208CDC24911C8B12
 [PASS] no debug trace is on by default
        tracing is behind the LIVESHEAR_LOG environment variable
 [PASS] the source this was built from is identified
-       commit 14eda17fb2f2c2c91eed227cd4101edf8a8077bf
-[FAIL] the working tree was clean when it was built
-       2 uncommitted change(s)
+       commit 6fb42945a0ca6f19d4b30845ab571ccc1bd193ea
+[PASS] the working tree was clean when it was built
+       0 uncommitted change(s)
 
 Depends on: COMCTL32.dll, USER32.dll, GDI32.dll, KERNEL32.dll, MSVCP140.dll, VCRUNTIME140.dll, VCRUNTIME140_1.dll, api-ms-win-crt-runtime-l1-1-0.dll, api-ms-win-crt-string-l1-1-0.dll, api-ms-win-crt-convert-l1-1-0.dll, api-ms-win-crt-heap-l1-1-0.dll, api-ms-win-crt-math-l1-1-0.dll, api-ms-win-crt-locale-l1-1-0.dll, api-ms-win-crt-stdio-l1-1-0.dll, api-ms-win-crt-filesystem-l1-1-0.dll, api-ms-win-crt-environment-l1-1-0.dll, api-ms-win-crt-time-l1-1-0.dll
 [PASS] nothing is linked but Windows and the C runtime
@@ -54,4 +54,4 @@ Depends on: COMCTL32.dll, USER32.dll, GDI32.dll, KERNEL32.dll, MSVCP140.dll, VCR
 [PASS] the C runtime it needs is one Illustrator already needs
        Illustrator.exe names the same MSVCP140.dll, VCRUNTIME140.dll, VCRUNTIME140_1.dll, so no redistributable has to be installed for the plugin
 
-17 passed, 1 failed
+18 passed, 0 failed

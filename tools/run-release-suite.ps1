@@ -66,7 +66,7 @@ $script:hostRestarts = 0
 # once against a fresh Illustrator, and the restart is counted and reported
 # rather than hidden.
 function Restart-IfHostDied([string] $message) {
-    if ($message -notmatch 'RPC server is unavailable|remote procedure call failed|0x800706BA|0x800706BE|0x800706BF|RPC_E_|not reachable over COM|Illustrator did not quit') { return $false }
+    if ($message -notmatch 'RPC server is unavailable|remote procedure call failed|0x800706BA|0x800706BE|0x800706BF|RPC_E_|not reachable over COM|Illustrator did not quit|never became ready to run a script') { return $false }
     # Not conditional on the process having gone. A process that is still
     # listed but no longer answering COM is the same problem from here, and
     # waiting for it to disappear on its own loses the rest of the run.
@@ -101,7 +101,16 @@ function Reset-Host {
     try { Stop-Ai | Out-Null } catch { }
     $lingering = Get-Process Illustrator -ErrorAction SilentlyContinue
     if ($lingering) { $lingering | Stop-Process -Force -ErrorAction SilentlyContinue; Start-Sleep -Seconds 3 }
-    Start-Ai | Out-Null
+    try { Start-Ai | Out-Null }
+    catch {
+        # Illustrator can come up listed, holding two gigabytes, and never
+        # answer a script at all. Waiting longer does not help; ending it and
+        # starting again does.
+        Write-Output 'Illustrator came up but would not run a script. Ending it and starting again.'
+        Get-Process Illustrator -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+        Start-Sleep -Seconds 5
+        Start-Ai | Out-Null
+    }
     Install-AiHarness | Out-Null
     # A just-started Illustrator will answer a script before it will make a
     # document -- app.documents.add() comes back as error 8702, "there is no
@@ -195,6 +204,7 @@ Run 'arithmetic'  { & (Join-Path $PSScriptRoot 'run-mathtest.ps1') }
 Run 'anchor'      { & (Join-Path $PSScriptRoot 'probe-anchor.ps1') } -NeedsHost
 Run 'anchor verdicts' { python (Join-Path $PSScriptRoot 'solve-anchor.py') (Join-Path $evidence 'anchor.tsv') }
 Run 'anchor by artwork' { & (Join-Path $PSScriptRoot 'probe-artwork-anchor.ps1') } -NeedsHost
+Run 'bounds flags' { & (Join-Path $PSScriptRoot 'probe-bounds-flags.ps1') } -NeedsHost
 Run 'release matrix' { & (Join-Path $PSScriptRoot 'probe-release.ps1') } -NeedsHost
 Run 'matrix verdicts' { python (Join-Path $PSScriptRoot 'solve-release.py') (Join-Path $evidence 'release-matrix.tsv') }
 Run 'appearance'  { & (Join-Path $PSScriptRoot 'probe-appearance.ps1') } -NeedsHost

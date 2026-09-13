@@ -1,5 +1,5 @@
 Live Shear -- export fidelity
-Run at 2026-09-13 15:15:21
+Run at 2026-09-13 16:37:40
 
 plainRect      pdf     44664 bytes  bounds True  raster False items PathItem                     PASS
 plainRect      svg       448 bytes  bounds True  raster False items PathItem                     PASS

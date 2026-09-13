@@ -1,5 +1,5 @@
 Live Shear -- artwork Illustrator generates from a path
-Run at 2026-09-13 15:30:55
+Run at 2026-09-13 16:43:37
 Scaled vertically to 25 percent, by Adobe's own Transform effect and by the destructive command
 
 fixture               Adobe differs   what that means

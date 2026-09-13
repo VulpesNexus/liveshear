@@ -3,7 +3,7 @@
     Builds the Release plugin and assembles the distribution archive.
 
 .DESCRIPTION
-    Produces dist\Shear-<version>.zip containing the plugin, the README, the
+    Produces dist\LiveShear-<version>.zip containing the plugin, the README, the
     licence text, the release notes, and the list of known limitations, and
     leaves the symbol file beside it in dist\symbols rather than inside the
     archive.
@@ -59,8 +59,15 @@ $ascii = [Text.Encoding]::ASCII.GetString($bytes)
 # somebody once had. A hard-coded folder name here named the developer's own
 # directory in a file meant to keep the developer out of the binary.
 $patterns = @('[A-Za-z]:\\Users[ -~]{0,120}', '[A-Za-z]:\\Documents and Settings[ -~]{0,120}')
-foreach ($secret in @($repo, $env:USERPROFILE, $env:USERNAME, (Split-Path -Parent $repo))) {
+foreach ($secret in @($repo, $env:USERPROFILE, (Split-Path -Parent $repo))) {
     if ($secret) { $patterns += [regex]::Escape($secret) + '[ -~]{0,120}' }
+}
+# The account name, but only as a whole word. Without the boundaries a short
+# account name turns up inside ordinary English: one here is a prefix of
+# "through", and it matched the plugin's own trace line "art passed through
+# unchanged", refusing to pack a binary that was perfectly clean.
+if ($env:USERNAME -and $env:USERNAME.Length -gt 2) {
+    $patterns += '(?<![A-Za-z0-9])' + [regex]::Escape($env:USERNAME) + '(?![A-Za-z0-9])'
 }
 $leaks = [regex]::Matches($ascii, ($patterns -join '|'))
 if ($leaks.Count -gt 0) {
@@ -70,7 +77,9 @@ if ($leaks.Count -gt 0) {
 Write-Output 'No build-machine paths in the binary.'
 
 # --- assemble -------------------------------------------------------------
-$stage = Join-Path $dist ("Shear-" + $version)
+# Named to match the repository and the plugin file rather than the
+# product name, so an archive on disk is obviously this thing.
+$stage = Join-Path $dist ("LiveShear-" + $version)
 if (Test-Path $stage) { [IO.Directory]::Delete($stage, $true) }
 $null = New-Item -ItemType Directory -Force -Path $stage
 $null = New-Item -ItemType Directory -Force -Path (Join-Path $dist 'symbols')
@@ -82,7 +91,7 @@ foreach ($doc in @('README.md', 'LICENSE', 'KNOWN_LIMITATIONS.md', 'RELEASE_NOTE
     else { Write-Output ("  missing, not packed: {0}" -f $doc) }
 }
 
-$archive = Join-Path $dist ("Shear-" + $version + ".zip")
+$archive = Join-Path $dist ("LiveShear-" + $version + ".zip")
 if (Test-Path $archive) { [IO.File]::Delete($archive) }
 Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $archive
 if (Test-Path $symbols) { Copy-Item $symbols (Join-Path $dist ("symbols\LiveShear-" + $version + ".pdb")) -Force }

@@ -2,7 +2,7 @@
 
 Generated from the evidence files by *tools/make-test-matrix.py*. Every row is one check that was actually run; nothing here is transcribed by hand. The first three sections need no Illustrator — the built artifact, the scripts that judge, and the arithmetic. Everything after them was measured against a running one.
 
-**261 passed, 1 failed, 12 expected, 2 inconclusive, 13 measured, 7 not discriminating, 2 untested — 298 checks.**
+**268 passed, 12 expected, 2 inconclusive, 13 measured, 7 not discriminating, 2 untested — 304 checks.**
 
 Not present in this run: *crash-ab.tsv*.
 
@@ -26,8 +26,8 @@ Both configurations rebuilt from clean, and the Release binary inspected: warnin
 | 12 | release build | the effect name that documents store is unchanged | the artifact is fit to ship | VulpesNexus Shear | PASS |
 | 13 | release build | the menu entry reads as a plain Adobe command | the artifact is fit to ship | Effect > Distort & Transform > Shear… | PASS |
 | 14 | release build | no debug trace is on by default | the artifact is fit to ship | tracing is behind the LIVESHEAR_LOG environment variable | PASS |
-| 15 | release build | the source this was built from is identified | the artifact is fit to ship | commit 8e98f934d0d11bcdec193200292a9a097e416ec3 | PASS |
-| 16 | release build | the working tree was clean when it was built | the artifact is fit to ship | 54 uncommitted change(s) | **FAIL** |
+| 15 | release build | the source this was built from is identified | the artifact is fit to ship | commit 6fb42945a0ca6f19d4b30845ab571ccc1bd193ea | PASS |
+| 16 | release build | the working tree was clean when it was built | the artifact is fit to ship | 0 uncommitted change(s) | PASS |
 | 17 | release build | nothing is linked but Windows and the C runtime | the artifact is fit to ship | no SDK, developer, or test-harness DLL is named | PASS |
 | 18 | release build | the C runtime it needs is one Illustrator already needs | the artifact is fit to ship | Illustrator.exe names the same MSVCP140.dll, VCRUNTIME140.dll, VCRUNTIME140_1.dll, so no redistributable has to be installed for the plugin | PASS |
 
@@ -132,6 +132,21 @@ The same question as the row above, asked of artwork that has no path anchors to
 | 52 | reference point by artwork | reflectedRect, axis 90 | the effect and the native command anchor in the same place | the two agree to 0 pt | PASS |
 
 Source: [docs/evidence/artwork-anchor.tsv](evidence/artwork-anchor.tsv)
+
+## Which flags ask for which box
+
+The SDK header is wrong twice about these, and the effect believed it for a sprint. This is the table the host actually returns, against fixtures chosen so each flag has something to do, with Illustrator's own geometricBounds beside it as the answer to match.
+
+| # | Group | Case | Expected | Observed | Status |
+| --- | --- | --- | --- | --- | --- |
+| 1 | bounds flags | spike: visible\|noStroke\|noExtended returns Illustrator's geometricBounds | the flags the effect uses ask for the box the native shear anchors on | the flags return 100.000000000,604.000000000,400.000000000,590.000000000, which is what the DOM calls geometricBounds | PASS |
+| 2 | bounds flags | areaText: visible\|noStroke\|noExtended returns Illustrator's geometricBounds | the flags the effect uses ask for the box the native shear anchors on | the flags return 100.000000000,620.000000000,360.000000000,460.000000000, which is what the DOM calls geometricBounds | PASS |
+| 3 | bounds flags | clipGroup: visible\|noStroke\|noExtended returns Illustrator's geometricBounds | the flags the effect uses ask for the box the native shear anchors on | the flags return 100.000000000,620.000000000,400.000000000,420.000000000, which is what the DOM calls geometricBounds | PASS |
+| 4 | bounds flags | strokedRect: visible\|noStroke\|noExtended returns Illustrator's geometricBounds | the flags the effect uses ask for the box the native shear anchors on | the flags return 100.000000000,600.000000000,300.000000000,480.000000000, which is what the DOM calls geometricBounds | PASS |
+| 5 | bounds flags | plainRect: visible\|noStroke\|noExtended returns Illustrator's geometricBounds | the flags the effect uses ask for the box the native shear anchors on | the flags return 100.000000000,600.000000000,300.000000000,480.000000000, which is what the DOM calls geometricBounds | PASS |
+| 6 | bounds flags | kControlBounds cannot be combined with the flags that exclude things | the SDK header implies it can; the host says otherwise | every control\|noStroke and control\|noExtended request returned kBadParameterErr (1346458189), on 5 of 5 fixtures | PASS |
+
+Source: [docs/evidence/bounds-flags.tsv](evidence/bounds-flags.tsv)
 
 ## Artwork types
 
@@ -283,23 +298,23 @@ Values written straight into the parameter dictionary, past anything the dialog 
 
 | # | Group | Case | Expected | Observed | Status |
 | --- | --- | --- | --- | --- | --- |
-| 1 | stored parameter | shearAngle written as 0 | clamped to 0 degrees, no hang | 100.000000,600.000000,300.000000,480.000000 in 1,47 s | PASS |
-| 2 | stored parameter | shearAngle written as 30 | clamped to 30 degrees, no hang | 65.358984,600.000000,334.641016,480.000000 in 3,02 s | PASS |
-| 3 | stored parameter | shearAngle written as 89 | clamped to 89 degrees, no hang | -3337.397698,600.000000,3737.397698,480.000000 in 1,48 s | PASS |
-| 4 | stored parameter | shearAngle written as -89 | clamped to -89 degrees, no hang | -3337.397698,600.000000,3737.397698,480.000000 in 3,46 s | PASS |
-| 5 | stored parameter | shearAngle written as 89.000001 | clamped to 89 degrees, no hang | -3337.397698,600.000000,3737.397698,480.000000 in 3,50 s | PASS |
-| 6 | stored parameter | shearAngle written as 89.9 | clamped to 89 degrees, no hang | -3337.397698,600.000000,3737.397698,480.000000 in 3,46 s | PASS |
-| 7 | stored parameter | shearAngle written as 90 | clamped to 89 degrees, no hang | -3337.397698,600.000000,3737.397698,480.000000 in 3,68 s | PASS |
-| 8 | stored parameter | shearAngle written as -90 | clamped to -89 degrees, no hang | -3337.397698,600.000000,3737.397698,480.000000 in 3,49 s | PASS |
-| 9 | stored parameter | shearAngle written as 180 | clamped to 89 degrees, no hang | -3337.397698,600.000000,3737.397698,480.000000 in 3,67 s | PASS |
+| 1 | stored parameter | shearAngle written as 0 | clamped to 0 degrees, no hang | 100.000000,600.000000,300.000000,480.000000 in 1,55 s | PASS |
+| 2 | stored parameter | shearAngle written as 30 | clamped to 30 degrees, no hang | 65.358984,600.000000,334.641016,480.000000 in 1,70 s | PASS |
+| 3 | stored parameter | shearAngle written as 89 | clamped to 89 degrees, no hang | -3337.397698,600.000000,3737.397698,480.000000 in 3,24 s | PASS |
+| 4 | stored parameter | shearAngle written as -89 | clamped to -89 degrees, no hang | -3337.397698,600.000000,3737.397698,480.000000 in 3,50 s | PASS |
+| 5 | stored parameter | shearAngle written as 89.000001 | clamped to 89 degrees, no hang | -3337.397698,600.000000,3737.397698,480.000000 in 3,44 s | PASS |
+| 6 | stored parameter | shearAngle written as 89.9 | clamped to 89 degrees, no hang | -3337.397698,600.000000,3737.397698,480.000000 in 3,56 s | PASS |
+| 7 | stored parameter | shearAngle written as 90 | clamped to 89 degrees, no hang | -3337.397698,600.000000,3737.397698,480.000000 in 3,48 s | PASS |
+| 8 | stored parameter | shearAngle written as -90 | clamped to -89 degrees, no hang | -3337.397698,600.000000,3737.397698,480.000000 in 3,50 s | PASS |
+| 9 | stored parameter | shearAngle written as 180 | clamped to 89 degrees, no hang | -3337.397698,600.000000,3737.397698,480.000000 in 3,60 s | PASS |
 | 10 | stored parameter | shearAngle written as -180 | clamped to -89 degrees, no hang | -3337.397698,600.000000,3737.397698,480.000000 in 3,61 s | PASS |
-| 11 | stored parameter | shearAngle written as 1e9 | clamped to 89 degrees, no hang | -3337.397698,600.000000,3737.397698,480.000000 in 3,51 s | PASS |
-| 12 | stored parameter | shearAngle written as nan | clamped to 0 degrees, no hang | 100.000000,600.000000,300.000000,480.000000 in 3,49 s | PASS |
-| 13 | stored parameter | shearAngle written as inf | clamped to 89 degrees, no hang | -3337.397698,600.000000,3737.397698,480.000000 in 3,75 s | PASS |
-| 14 | stored parameter | shearAngle written as -inf | clamped to -89 degrees, no hang | -3337.397698,600.000000,3737.397698,480.000000 in 3,34 s | PASS |
-| 15 | stored parameter | shearAngle written as 0.000001 | clamped to 0 degrees, no hang | 99.999999,600.000000,300.000001,480.000000 in 4,01 s | PASS |
-| 16 | stored parameter | shearAngle written as 0.001 | clamped to 0,001 degrees, no hang | 99.998953,600.000000,300.001047,480.000000 in 3,65 s | PASS |
-| 17 | stored parameter | a document storing 90 degrees opens and renders the same | opens promptly, clamped, unchanged bounds | opened in 0,71 s, dictionary holds 90.000000, bounds -3337.397697846,600.000000000,3737.397697846,480.000000000 | PASS |
+| 11 | stored parameter | shearAngle written as 1e9 | clamped to 89 degrees, no hang | -3337.397698,600.000000,3737.397698,480.000000 in 3,60 s | PASS |
+| 12 | stored parameter | shearAngle written as nan | clamped to 0 degrees, no hang | 100.000000,600.000000,300.000000,480.000000 in 3,40 s | PASS |
+| 13 | stored parameter | shearAngle written as inf | clamped to 89 degrees, no hang | -3337.397698,600.000000,3737.397698,480.000000 in 3,68 s | PASS |
+| 14 | stored parameter | shearAngle written as -inf | clamped to -89 degrees, no hang | -3337.397698,600.000000,3737.397698,480.000000 in 3,58 s | PASS |
+| 15 | stored parameter | shearAngle written as 0.000001 | clamped to 0 degrees, no hang | 99.999999,600.000000,300.000001,480.000000 in 3,52 s | PASS |
+| 16 | stored parameter | shearAngle written as 0.001 | clamped to 0,001 degrees, no hang | 99.998953,600.000000,300.001047,480.000000 in 3,66 s | PASS |
+| 17 | stored parameter | a document storing 90 degrees opens and renders the same | opens promptly, clamped, unchanged bounds | opened in 0,91 s, dictionary holds 90.000000, bounds -3337.397697846,600.000000000,3737.397697846,480.000000000 | PASS |
 
 Source: [docs/evidence/limits.tsv](evidence/limits.tsv)
 
@@ -309,15 +324,15 @@ Parameter blocks this version did not write: keys missing, keys of the wrong typ
 
 | # | Group | Case | Expected | Observed | Status |
 | --- | --- | --- | --- | --- | --- |
-| 1 | serialization | no schema key at all means schema 1 | a dictionary this version did not write is read safely and written back without loss | the first version wrote no schema key, and its documents must keep rendering; rendered 269.282 pt wide in 1,49 s, expected 269.282 pt | PASS |
-| 2 | serialization | a schema number from a later version still renders | a dictionary this version did not write is read safely and written back without loss | an unknown schema is not a reason to refuse to draw; the two angles mean what they have always meant; rendered 269.282 pt wide in 2,81 s, expected 269.282 pt | PASS |
-| 3 | serialization | a nonsense schema number still renders | a dictionary this version did not write is read safely and written back without loss | nothing about the number changes what the angles mean here; rendered 269.282 pt wide in 1,56 s, expected 269.282 pt | PASS |
-| 4 | serialization | no shear angle means no shear | a dictionary this version did not write is read safely and written back without loss | the default is zero, and zero is the identity; rendered 200 pt wide in 3,69 s, expected 200 pt | PASS |
-| 5 | serialization | no axis angle means the horizontal axis | a dictionary this version did not write is read safely and written back without loss | the default axis is zero, which is the shear the fixture already has; rendered 269.282 pt wide in 3,63 s, expected 269.282 pt | PASS |
-| 6 | serialization | a shear angle stored as text is refused | a dictionary this version did not write is read safely and written back without loss | reading a real out of a string entry fails, and a failed read leaves the default; rendered 200 pt wide in 3,75 s, expected 200 pt | PASS |
-| 7 | serialization | an axis angle stored as text is refused | a dictionary this version did not write is read safely and written back without loss | same, and the default axis is zero; rendered 269.282 pt wide in 3,48 s, expected 269.282 pt | PASS |
+| 1 | serialization | no schema key at all means schema 1 | a dictionary this version did not write is read safely and written back without loss | the first version wrote no schema key, and its documents must keep rendering; rendered 269.282 pt wide in 0,82 s, expected 269.282 pt | PASS |
+| 2 | serialization | a schema number from a later version still renders | a dictionary this version did not write is read safely and written back without loss | an unknown schema is not a reason to refuse to draw; the two angles mean what they have always meant; rendered 269.282 pt wide in 2,57 s, expected 269.282 pt | PASS |
+| 3 | serialization | a nonsense schema number still renders | a dictionary this version did not write is read safely and written back without loss | nothing about the number changes what the angles mean here; rendered 269.282 pt wide in 3,46 s, expected 269.282 pt | PASS |
+| 4 | serialization | no shear angle means no shear | a dictionary this version did not write is read safely and written back without loss | the default is zero, and zero is the identity; rendered 200 pt wide in 3,43 s, expected 200 pt | PASS |
+| 5 | serialization | no axis angle means the horizontal axis | a dictionary this version did not write is read safely and written back without loss | the default axis is zero, which is the shear the fixture already has; rendered 269.282 pt wide in 3,53 s, expected 269.282 pt | PASS |
+| 6 | serialization | a shear angle stored as text is refused | a dictionary this version did not write is read safely and written back without loss | reading a real out of a string entry fails, and a failed read leaves the default; rendered 200 pt wide in 3,59 s, expected 200 pt | PASS |
+| 7 | serialization | an axis angle stored as text is refused | a dictionary this version did not write is read safely and written back without loss | same, and the default axis is zero; rendered 269.282 pt wide in 3,41 s, expected 269.282 pt | PASS |
 | 8 | serialization | a shear angle stored as a flag is refused | a dictionary this version did not write is read safely and written back without loss | the type is wrong, so the default stands; rendered 200 pt wide in 3,41 s, expected 200 pt | PASS |
-| 9 | serialization | an empty parameter block is the identity | a dictionary this version did not write is read safely and written back without loss | every key absent is every default, and the defaults are zero; rendered 200 pt wide in 3,54 s, expected 200 pt | PASS |
+| 9 | serialization | an empty parameter block is the identity | a dictionary this version did not write is read safely and written back without loss | every key absent is every default, and the defaults are zero; rendered 200 pt wide in 3,80 s, expected 200 pt | PASS |
 | 10 | serialization | a later version's extra keys survive the dialog writing the block back | a dictionary this version did not write is read safely and written back without loss | referencePoint kept, somethingElse kept after the plugin itself rewrote the block through the dialog | PASS |
 | 11 | serialization | the block records which version last wrote it | a dictionary this version did not write is read safely and written back without loss | shearSchema is 1 after this version wrote it, which is this version's number: the block says what it means rather than what it used to mean | PASS |
 
@@ -335,7 +350,7 @@ Two objects carrying different Shear parameters, blended. Illustrator calls the 
 | 4 | blend | 0 to 179 the short way: Illustrator calls the interpolation handler | the interpolation handler runs and takes the short way round modulo 180 | the handler ran 1 time(s) while the blend was built; 4 objects after expanding | PASS |
 | 5 | blend | 0 to 179 the short way: every step takes the short way round | the interpolation handler runs and takes the short way round modulo 180 | t=0.5 → axis 179.5; the two ends are 1 degrees apart going the short way, and every step is inside that. A naive midpoint would have given 89.5. | PASS |
 | 6 | blend | 0 to 179 the short way: the shear angle is a straight line between the two | the interpolation handler runs and takes the short way round modulo 180 | all 1 steps are exactly on the line from 20 to 20 | PASS |
-| 7 | blend | 1 to 179 across zero: Illustrator calls the interpolation handler | the interpolation handler runs and takes the short way round modulo 180 | the handler ran 1 time(s) while the blend was built; 4 objects after expanding | PASS |
+| 7 | blend | 1 to 179 across zero: Illustrator calls the interpolation handler | the interpolation handler runs and takes the short way round modulo 180 | the handler ran 1 time(s) while the blend was built; 1 objects after expanding | PASS |
 | 8 | blend | 1 to 179 across zero: every step takes the short way round | the interpolation handler runs and takes the short way round modulo 180 | t=0.5 → axis 180; the two ends are 2 degrees apart going the short way, and every step is inside that. A naive midpoint would have given 90. | PASS |
 | 9 | blend | 1 to 179 across zero: the shear angle is a straight line between the two | the interpolation handler runs and takes the short way round modulo 180 | all 1 steps are exactly on the line from 20 to 20 | PASS |
 | 10 | blend | 89 to -89 across ninety: Illustrator calls the interpolation handler | the interpolation handler runs and takes the short way round modulo 180 | the handler ran 1 time(s) while the blend was built; 4 objects after expanding | PASS |
@@ -373,7 +388,7 @@ Things a person does in the first five minutes that no other probe covers, becau
 | --- | --- | --- | --- | --- | --- |
 | 1 | everyday use | all three objects get the effect | behaves the way someone would expect | 3 of 3 objects carry a Shear after one apply | PASS |
 | 2 | everyday use | each object is sheared about its own center, not the selection's | behaves the way someone would expect | the first object is 134.641 pt wide; shearing it about its own center gives 134.641 pt. A live effect is applied to each object separately, so a multiple selection is not the same as Illustrator's own command, which shears the whole selection about one center. | PASS |
-| 3 | everyday use | text on a path shears without disturbing its spine | behaves the way someone would expect | the path the text runs along is unchanged after shearing; the result is 35.292480469,719.760742188,371.132486541,594.068847656 | PASS |
+| 3 | everyday use | text on a path shears without disturbing its spine | behaves the way someone would expect | the path the text runs along is unchanged after shearing; the result is 67.583984375,719.760742188,400.000000000,594.068847656 | PASS |
 | 4 | everyday use | a graphic style carries the effect to another object | behaves the way someone would expect | Illustrator has no scripting call that creates a graphic style, so this could not be set up. It would have to be done by hand in the Graphic Styles panel. | UNTESTED |
 | 5 | everyday use | shearing one child of a group leaves its siblings alone | behaves the way someone would expect | the sibling is untouched; the sheared child is now 100.000000000,600.000000000,260.000000000,500.000000000 | PASS |
 | 6 | everyday use | a duplicate carries the effect and renders the same | behaves the way someone would expect | the original is 68.097434100,600.000000000,331.902565900,480.000000000; the duplicate is 68.097434100,600.000000000,331.902565900,480.000000000 | PASS |
@@ -452,11 +467,11 @@ Identity, cumulative drift, source invariance, evaluation cost, and a document f
 | 8 | drift | 100 parameter edits then back to 30 degrees | no change from the untouched artwork | deviation 0 | PASS |
 | 9 | drift | and back to zero, against artwork never sheared | no change from the untouched artwork | deviation 0 | PASS |
 | 10 | source | source anchors identical to a fresh fixture | no change from the untouched artwork | the source moved | PASS |
-| 11 | performance | plainRect: 100 evaluations with the effect | fast enough that dragging the slider does not lag | 4862 ms in total, 48,62 ms each; the same loop with nothing to recompute took 3108 ms | MEASURED |
-| 12 | performance | bezier: 100 evaluations with the effect | fast enough that dragging the slider does not lag | 4922 ms in total, 49,22 ms each; the same loop with nothing to recompute took 3109 ms | MEASURED |
-| 13 | performance | multilineText: 100 evaluations with the effect | fast enough that dragging the slider does not lag | 5368 ms in total, 53,68 ms each; the same loop with nothing to recompute took 3138 ms | MEASURED |
-| 14 | performance | manyChildren: 100 evaluations with the effect | fast enough that dragging the slider does not lag | 4752 ms in total, 47,52 ms each; the same loop with nothing to recompute took 3113 ms | MEASURED |
-| 15 | performance | compound: 100 evaluations with the effect | fast enough that dragging the slider does not lag | 4948 ms in total, 49,48 ms each; the same loop with nothing to recompute took 3113 ms | MEASURED |
+| 11 | performance | plainRect: 100 evaluations with the effect | fast enough that dragging the slider does not lag | 9412 ms in total, 94,12 ms each; the same loop with nothing to recompute took 3103 ms | MEASURED |
+| 12 | performance | bezier: 100 evaluations with the effect | fast enough that dragging the slider does not lag | 10556 ms in total, 105,56 ms each; the same loop with nothing to recompute took 3122 ms | MEASURED |
+| 13 | performance | multilineText: 100 evaluations with the effect | fast enough that dragging the slider does not lag | 10408 ms in total, 104,08 ms each; the same loop with nothing to recompute took 3100 ms | MEASURED |
+| 14 | performance | manyChildren: 100 evaluations with the effect | fast enough that dragging the slider does not lag | 9240 ms in total, 92,40 ms each; the same loop with nothing to recompute took 3117 ms | MEASURED |
+| 15 | performance | compound: 100 evaluations with the effect | fast enough that dragging the slider does not lag | 8281 ms in total, 82,81 ms each; the same loop with nothing to recompute took 3113 ms | MEASURED |
 | 16 | performance | all 200 objects survived the round trip | no change from the untouched artwork | found 200 | PASS |
 
 Source: [docs/evidence/stability.tsv](evidence/stability.tsv)
@@ -467,7 +482,7 @@ The document window captured as a bitmap under each preview path and compared pi
 
 | # | Group | Case | Expected | Observed | Status |
 | --- | --- | --- | --- | --- | --- |
-| 1 | preview mode | the window capture sees the canvas | moving the artwork changes the captured picture | 0,692 % of sampled pixels changed | PASS |
+| 1 | preview mode | the window capture sees the canvas | moving the artwork changes the captured picture | 0,492 % of sampled pixels changed | PASS |
 | 2 | preview mode | GPU and CPU preview draw the same sheared artwork | no more than a couple of percent of pixels differ, from antialiasing | the mode never changed; the window title stayed Untitled-1* @ 11,33 % (CMYK/Preview) | UNTESTED |
 
 Source: [docs/evidence/gpu.tsv](evidence/gpu.tsv)
@@ -483,7 +498,7 @@ The document authored with the effect, then opened on a machine where the plugin
 | 3 | without the plugin | the artwork still draws sheared | the document opens and nothing is lost | drawn widths with the plugin: text=268.105, rect=269.282; without it: text=268.104, rect=269.282 | PASS |
 | 4 | without the plugin | the source geometry is neither expanded nor flattened | the document opens and nothing is lost | geometric widths with the plugin: text=237.981, rect=200; without it: text=237.981, rect=200 | PASS |
 | 5 | without the plugin | text is still live text | the document opens and nothing is lost | no TextFrame in the reopened document | PASS |
-| 6 | without the plugin | the document can be re-saved without the plugin | the document opens and nothing is lost | 240 499 bytes | PASS |
+| 6 | without the plugin | the document can be re-saved without the plugin | the document opens and nothing is lost | 240 619 bytes | PASS |
 | 7 | without the plugin | the original file still holds the effect and its parameters | the document opens and nothing is lost | the effect is in the reopened file, with shearAngle still 30 | PASS |
 | 8 | without the plugin | a file re-saved without the plugin loses nothing | the document opens and nothing is lost | the effect survived the round trip through a machine without the plugin, with shearAngle still 30 | PASS |
 
@@ -495,9 +510,9 @@ Illustrator quit the ordinary way from each state this plugin can leave it in, c
 
 | # | Group | Case | Expected | Observed | Status |
 | --- | --- | --- | --- | --- | --- |
-| 1 | shutdown | no documents open | quits promptly, nothing left running, nothing in the event log | quit in 2,1 s; still running False; event log: nothing | PASS |
-| 2 | shutdown | one document with a Shear effect | quits promptly, nothing left running, nothing in the event log | quit in 1,7 s; still running False; event log: nothing | PASS |
-| 3 | shutdown | three documents, two with effects | quits promptly, nothing left running, nothing in the event log | quit in 3,9 s; still running False; event log: nothing | PASS |
-| 4 | shutdown | after the dialog has been opened | quits promptly, nothing left running, nothing in the event log | quit in 1,9 s; still running False; event log: nothing | PASS |
+| 1 | shutdown | no documents open | quits promptly, nothing left running, nothing in the event log | quit in 3,5 s; still running False; event log: nothing | PASS |
+| 2 | shutdown | one document with a Shear effect | quits promptly, nothing left running, nothing in the event log | quit in 3,3 s; still running False; event log: nothing | PASS |
+| 3 | shutdown | three documents, two with effects | quits promptly, nothing left running, nothing in the event log | quit in 9,0 s; still running False; event log: nothing | PASS |
+| 4 | shutdown | after the dialog has been opened | quits promptly, nothing left running, nothing in the event log | quit in 5,8 s; still running False; event log: nothing | PASS |
 
 Source: [docs/evidence/shutdown.tsv](evidence/shutdown.tsv)

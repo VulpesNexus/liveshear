@@ -1,0 +1,74 @@
+Live Shear -- what each combination of the bounds flags returns
+Run at 2026-09-13 16:54:06
+
+Error 1346458189 is kBadParameterErr: the call failed and returned nothing.
+The flags the effect uses are visible|noStroke|noExtended, which is the row
+that matches what Illustrator itself calls geometricBounds.
+
+--- spike ---
+  Illustrator's geometricBounds: 100.000000000,604.000000000,400.000000000,590.000000000
+  Illustrator's visibleBounds:   90.000000000,622.005597576,1000.353154490,579.522450366
+  index	flags	err	left	top	right	bottom
+  0	visible	0	90.000000	622.005598	1000.353154	579.522450
+  0	visible|noStroke	0	100.000000	604.000000	400.000000	590.000000
+  0	visible|noExtended	0	90.000000	622.005598	1000.353154	579.522450
+  0	visible|noStroke|noExtended	0	100.000000	604.000000	400.000000	590.000000
+  0	control	0	90.000000	622.005598	1000.353154	579.522450
+  0	control|noStroke	1346458189
+  0	control|noExtended	1346458189
+  0	control|noStroke|noExtended	1346458189
+
+--- areaText ---
+  Illustrator's geometricBounds: 100.000000000,620.000000000,360.000000000,460.000000000
+  Illustrator's visibleBounds:   100.000000000,623.047851562,360.000000000,460.000000000
+  index	flags	err	left	top	right	bottom
+  0	visible	0	100.000000	623.047852	360.000000	460.000000
+  0	visible|noStroke	0	100.000000	620.000000	360.000000	460.000000
+  0	visible|noExtended	0	100.000000	620.000000	360.000000	460.000000
+  0	visible|noStroke|noExtended	0	100.000000	620.000000	360.000000	460.000000
+  0	control	0	94.000000	629.047852	361.000000	459.000000
+  0	control|noStroke	1346458189
+  0	control|noExtended	1346458189
+  0	control|noStroke|noExtended	1346458189
+
+--- clipGroup ---
+  Illustrator's geometricBounds: 100.000000000,620.000000000,400.000000000,420.000000000
+  Illustrator's visibleBounds:   100.000000000,620.000000000,400.000000000,420.000000000
+  index	flags	err	left	top	right	bottom
+  0	visible	0	100.000000	620.000000	400.000000	420.000000
+  0	visible|noStroke	0	100.000000	620.000000	400.000000	420.000000
+  0	visible|noExtended	0	100.000000	620.000000	400.000000	420.000000
+  0	visible|noStroke|noExtended	0	100.000000	620.000000	400.000000	420.000000
+  0	control	0	100.000000	620.000000	400.000000	420.000000
+  0	control|noStroke	1346458189
+  0	control|noExtended	1346458189
+  0	control|noStroke|noExtended	1346458189
+
+--- strokedRect ---
+  Illustrator's geometricBounds: 100.000000000,600.000000000,300.000000000,480.000000000
+  Illustrator's visibleBounds:   80.000000000,620.000000000,320.000000000,460.000000000
+  index	flags	err	left	top	right	bottom
+  0	visible	0	80.000000	620.000000	320.000000	460.000000
+  0	visible|noStroke	0	100.000000	600.000000	300.000000	480.000000
+  0	visible|noExtended	0	80.000000	620.000000	320.000000	460.000000
+  0	visible|noStroke|noExtended	0	100.000000	600.000000	300.000000	480.000000
+  0	control	0	80.000000	620.000000	320.000000	460.000000
+  0	control|noStroke	1346458189
+  0	control|noExtended	1346458189
+  0	control|noStroke|noExtended	1346458189
+
+--- plainRect ---
+  Illustrator's geometricBounds: 100.000000000,600.000000000,300.000000000,480.000000000
+  Illustrator's visibleBounds:   100.000000000,600.000000000,300.000000000,480.000000000
+  index	flags	err	left	top	right	bottom
+  0	visible	0	100.000000	600.000000	300.000000	480.000000
+  0	visible|noStroke	0	100.000000	600.000000	300.000000	480.000000
+  0	visible|noExtended	0	100.000000	600.000000	300.000000	480.000000
+  0	visible|noStroke|noExtended	0	100.000000	600.000000	300.000000	480.000000
+  0	control	0	100.000000	600.000000	300.000000	480.000000
+  0	control|noStroke	1346458189
+  0	control|noExtended	1346458189
+  0	control|noStroke|noExtended	1346458189
+
+5 of 5 fixtures: visible|noStroke|noExtended equals Illustrator's own geometricBounds
+5 of 5 fixtures: combining kControlBounds with an exclusion flag returned kBadParameterErr
