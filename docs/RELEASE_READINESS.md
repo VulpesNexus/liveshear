@@ -215,6 +215,12 @@ Nothing here is a correctness, persistence, serialization, or documentation bloc
 
 Raw output from every probe is in [evidence/](evidence/). [RELEASE_TEST_MATRIX.md](RELEASE_TEST_MATRIX.md) is generated from it by *tools/make-test-matrix.py*, and [SUPPORT_MATRIX.md](SUPPORT_MATRIX.md) by *tools/make-support-matrix.py*. Nothing in either is transcribed by hand.
 
+### Which evidence describes the binary being shipped
+
+Every file under *evidence/* except two was written after the build recorded in [evidence/build.txt](evidence/build.txt), against the binary that hash names. The exceptions are **native-shear.tsv** and **sequence-crash.tsv**, which come from probes deliberately run outside the suite and were last written against an earlier build. Nothing in this release touches what they measure — it added an About dialog and two read-only bridge selectors, neither of which is reachable from the effect's geometry or from the crash comparison — but the matrix does not distinguish the two cases, so it is said here instead.
+
+That distinction is worth making because it has already caught something. In the run for this release the persistence probe printed its heading, died on an RPC failure when Illustrator dropped the connection, and left its previous results in place; the suite's summary showed nothing wrong, and the matrix would have quoted rows measured against a different binary as though they described this one. Comparing each evidence file's timestamp against the build record is what found it. That check belongs in the release sequence, not in a person's memory.
+
 Both generators, and the two solvers that turn measurements into verdicts, are themselves tested against rows whose right answer is known by construction — **15 checks** — because a bug in a solver would turn a real failure into a green matrix, which is the one kind of bug that running more tests cannot catch. That test earned its place this sprint: the release probe was skipping the oracle entirely for any angle below a hundredth of a degree, on a premise that turned out to be false, and comparing a sheared result against artwork nothing had been done to.
 
 Every path in the evidence is written through a redaction step, so nothing in it names the machine it was measured on.

@@ -1,5 +1,5 @@
 Live Shear -- does the dialog follow Illustrator's interface brightness?
-Run at 2026-09-13 19:59:02
+Run at 2026-09-13 21:58:48
 
 The machine was set to uiBrightness 0.5; it is put back at the end.
 

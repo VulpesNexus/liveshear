@@ -1,23 +1,23 @@
 Live Shear -- a parameter dictionary this version did not write
-Run at 2026-09-13 19:51:20
+Run at 2026-09-13 21:43:24
 Watchdog: 45 seconds per redraw
 
 [PASS] no schema key at all means schema 1
-       the first version wrote no schema key, and its documents must keep rendering; rendered 269.282 pt wide in 3,31 s, expected 269.282 pt
+       the first version wrote no schema key, and its documents must keep rendering; rendered 269.282 pt wide in 3,01 s, expected 269.282 pt
 [PASS] a schema number from a later version still renders
-       an unknown schema is not a reason to refuse to draw; the two angles mean what they have always meant; rendered 269.282 pt wide in 2,17 s, expected 269.282 pt
+       an unknown schema is not a reason to refuse to draw; the two angles mean what they have always meant; rendered 269.282 pt wide in 1,80 s, expected 269.282 pt
 [PASS] a nonsense schema number still renders
-       nothing about the number changes what the angles mean here; rendered 269.282 pt wide in 3,18 s, expected 269.282 pt
+       nothing about the number changes what the angles mean here; rendered 269.282 pt wide in 3,35 s, expected 269.282 pt
 [PASS] no shear angle means no shear
-       the default is zero, and zero is the identity; rendered 200 pt wide in 2,74 s, expected 200 pt
+       the default is zero, and zero is the identity; rendered 200 pt wide in 3,36 s, expected 200 pt
 [PASS] no axis angle means the horizontal axis
-       the default axis is zero, which is the shear the fixture already has; rendered 269.282 pt wide in 3,29 s, expected 269.282 pt
+       the default axis is zero, which is the shear the fixture already has; rendered 269.282 pt wide in 3,38 s, expected 269.282 pt
 [PASS] a shear angle stored as text is refused
-       reading a real out of a string entry fails, and a failed read leaves the default; rendered 200 pt wide in 3,25 s, expected 200 pt
+       reading a real out of a string entry fails, and a failed read leaves the default; rendered 200 pt wide in 3,30 s, expected 200 pt
 [PASS] an axis angle stored as text is refused
-       same, and the default axis is zero; rendered 269.282 pt wide in 3,44 s, expected 269.282 pt
+       same, and the default axis is zero; rendered 269.282 pt wide in 3,38 s, expected 269.282 pt
 [PASS] a shear angle stored as a flag is refused
-       the type is wrong, so the default stands; rendered 200 pt wide in 3,41 s, expected 200 pt
+       the type is wrong, so the default stands; rendered 200 pt wide in 3,40 s, expected 200 pt
 [PASS] an empty parameter block is the identity
        every key absent is every default, and the defaults are zero; rendered 200 pt wide in 3,42 s, expected 200 pt
 

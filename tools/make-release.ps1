@@ -76,6 +76,34 @@ if ($leaks.Count -gt 0) {
 }
 Write-Output 'No build-machine paths in the binary.'
 
+# --- the evidence describes this binary -----------------------------------
+#
+# A probe that dies partway leaves its previous results on disk, and the
+# generated matrix then quotes rows measured against a different binary as
+# though they described this one. That happened: the persistence probe printed
+# its heading, lost its COM connection, and left an older file behind, and the
+# suite's summary column showed nothing wrong.
+#
+# So every evidence file has to be newer than the build record, which is
+# written by probe-build.ps1 at the start of the sequence. The named exceptions
+# are the probes deliberately run outside the suite; listing them here means a
+# NEW stale file fails this check rather than joining them silently.
+$buildRecord = Join-Path $repo 'docs\evidence\build.txt'
+if (Test-Path $buildRecord) {
+    $builtAt = (Get-Item $buildRecord).LastWriteTimeUtc
+    $runSeparately = @('native-shear.tsv', 'sequence-crash.tsv', 'crash-ab.tsv')
+    $stale = @(Get-ChildItem (Join-Path $repo 'docs\evidence') -Filter *.tsv |
+               Where-Object { $_.LastWriteTimeUtc -lt $builtAt -and
+                              $runSeparately -notcontains $_.Name })
+    if ($stale.Count -gt 0) {
+        $stale | ForEach-Object { Write-Output ("  stale: {0}" -f $_.Name) }
+        throw ("{0} evidence file(s) predate the build in docs\evidence\build.txt, so the matrix " +
+               "would describe a binary this archive does not contain. Re-run those probes, or add " +
+               "them to `$runSeparately in this script if they are meant to be run outside the suite." -f $stale.Count)
+    }
+    Write-Output ("Evidence checked: every probe result postdates the build, bar {0} run outside the suite." -f $runSeparately.Count)
+}
+
 # --- assemble -------------------------------------------------------------
 # Named to match the repository and the plugin file rather than the
 # product name, so an archive on disk is obviously this thing.
