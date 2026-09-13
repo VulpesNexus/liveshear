@@ -85,7 +85,12 @@ $null = New-Item -ItemType Directory -Force -Path $stage
 $null = New-Item -ItemType Directory -Force -Path (Join-Path $dist 'symbols')
 
 Copy-Item $binary (Join-Path $stage 'LiveShear.aip')
-foreach ($doc in @('README.md', 'LICENSE', 'KNOWN_LIMITATIONS.md', 'RELEASE_NOTES.md')) {
+# LICENSE-EXCEPTION travels with the binary, not just with the source: it is
+# the permission that makes this .aip distributable at all, because seven of
+# its object files are compiled from Adobe's sample framework. An archive that
+# cited it without carrying it would be citing a file its recipient does not
+# have.
+foreach ($doc in @('README.md', 'LICENSE', 'LICENSE-EXCEPTION', 'KNOWN_LIMITATIONS.md', 'RELEASE_NOTES.md')) {
     $source = Join-Path $repo $doc
     if (Test-Path $source) { Copy-Item $source (Join-Path $stage $doc) }
     else { Write-Output ("  missing, not packed: {0}" -f $doc) }

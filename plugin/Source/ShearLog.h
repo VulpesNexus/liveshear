@@ -1,3 +1,16 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Vixen420
+//
+// Shear for Illustrator is free software: you may redistribute it and/or
+// modify it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or (at your
+// option) any later version. It comes with ABSOLUTELY NO WARRANTY. See the
+// file LICENSE, or <https://www.gnu.org/licenses/>, for the full text.
+//
+// Additional permission under GPL-3.0 section 7: this file may be combined with
+// the Adobe Illustrator SDK, whose sample framework sources are compiled into
+// every plugin built from it. See LICENSE-EXCEPTION.
+
 //  ShearLog.h -- a diagnostic trace for the investigation.
 //
 //  A live effect runs deep inside Illustrator's rendering pipeline, where there

@@ -1,3 +1,16 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Vixen420
+//
+// Shear for Illustrator is free software: you may redistribute it and/or
+// modify it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or (at your
+// option) any later version. It comes with ABSOLUTELY NO WARRANTY. See the
+// file LICENSE, or <https://www.gnu.org/licenses/>, for the full text.
+//
+// Additional permission under GPL-3.0 section 7: this file may be combined with
+// the Adobe Illustrator SDK, whose sample framework sources are compiled into
+// every plugin built from it. See LICENSE-EXCEPTION.
+
 //  LiveShearID.h -- names, keys, and version numbers of the Shear plugin.
 //
 //  The identifiers below fall into two kinds. The persistent ones -- the
@@ -16,7 +29,10 @@
     third-party binary. */
 #define kShearProductName           "Shear for Illustrator"
 #define kShearCompanyName           "VulpesNexus"
-#define kShearCopyright             "Copyright (C) 2026 VulpesNexus. Licensed under the GNU GPL version 3 or later."
+// Named the way the other plugin repositories name it, and saying which
+// license the binary is actually distributable under: a bare GPL would not
+// cover the Adobe framework sources compiled into it. See LICENSE-EXCEPTION.
+#define kShearCopyright             "Copyright (C) 2026 Vixen420. GPL-3.0-or-later, with an Adobe Illustrator SDK linking exception."
 #define kShearDescription           "Non-destructive Shear effect for Adobe Illustrator"
 #define kShearHomePage              "https://github.com/VulpesNexus"
 
