@@ -14,7 +14,7 @@ build	release build	the effect name that documents store is unchanged	the artifa
 build	release build	the menu entry reads as a plain Adobe command	the artifact is fit to ship	Effect > Shear...	PASS
 build	release build	the effect claims no submenu of its own	the artifact is fit to ship	no effect category is compiled in	PASS
 build	release build	no debug trace is on by default	the artifact is fit to ship	tracing is behind the LIVESHEAR_LOG environment variable	PASS
-build	release build	the source this was built from is identified	the artifact is fit to ship	commit 21a99301095340fe36c94dae0c95f2cb8f671fc1	PASS
+build	release build	the source this was built from is identified	the artifact is fit to ship	commit 2fde2f416d12172e4ebbf8c24eefd1c5143f71bb	PASS
 build	release build	the working tree was clean when it was built	the artifact is fit to ship	0 uncommitted change(s)	PASS
 build	release build	nothing is linked but Windows and the C runtime	the artifact is fit to ship	no SDK, developer, or test-harness DLL is named	PASS
 build	release build	the C runtime it needs is one Illustrator already needs	the artifact is fit to ship	Illustrator.exe names the same MSVCP140.dll, VCRUNTIME140.dll, VCRUNTIME140_1.dll, so no redistributable has to be installed for the plugin	PASS

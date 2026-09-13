@@ -20,7 +20,7 @@ Section T says what would have to change for those qualifications to come off.
 
 | | |
 | --- | --- |
-| Plugin version | 0.1.0-rc.2 |
+| Plugin version | 0.1.0-rc.6 |
 | Binary | *LiveShear.aip*; size and SHA-256 in [evidence/build.txt](evidence/build.txt) |
 | Commit | recorded in the same file, with whether the working tree was clean |
 | Illustrator | 2026, version 30.7.0, 64-bit — **this binary has been loaded and driven by it** |
@@ -137,6 +137,8 @@ OK commits; Cancel, Escape, and the title bar's close button each restore both t
 That last check exists because **a screen capture of the dialog found a defect no numeric check would have.** The window class was registered with the narrow entry point while `DefWindowProc` resolved to the wide one, so the title "Shear" was stored as its own bytes reinterpreted as UTF-16 and displayed as 桓槌r; the degree sign, written as UTF-8 into an ANSI call, came through the machine's code page as two half-width katakana. Every string the dialog touches now goes through the wide entry points, and the *Appearance* panel's description goes through `SetUnicodeStringEntry` rather than a plain `char*`. The picture is kept at [evidence/dialog.png](evidence/dialog.png).
 
 Also fixed here: the dialog rounded one typed number three different ways. The slider rounded a half away from zero, the field's formatting rounded a half to even, and the state kept the unrounded number until something re-read the field — typing 18.25 committed 18.2 while the slider sat at 18.3. Rounding happens once now, on the way in, so the number shown, the slider position, and the value stored are the same number. The resolution that gives is a tenth of a degree, and that is stated in the limitations.
+
+**Where the window opens is now measured, and it was wrong.** The dialog opened in the top-left corner of the primary monitor on every invocation, for five releases, and the probe never noticed because it read the window's size, its caption, its labels, and everything it did, and never once a coordinate. The cause was `CW_USEDEFAULT`, which reads as "let Windows choose" and applies to overlapped windows only: for a popup, which this is, the coordinates are documented to be taken as zero. It is centered on Illustrator's window now and clamped into the work area of the monitor that lands on, and both are checked — the centers coincide exactly when Illustrator is maximized, and the clamp is driven rather than assumed by putting Illustrator in the corner at 487 × 140, where centering alone would open the dialog thirty pixels above the top of the desktop and it opens at the edge instead. The plugin's own trace records the position it chose, so the driver's measurement has a second source.
 
 **High-DPI scaling is not exercised.** The only display available reports 96 dots per inch. What can be checked without a monitor is arithmetic, and it is: every control's box comes from one table in *ShearLayout.h*, which the dialog builds from and the test reads, and the test walks it at 100%, 125%, 150%, 200%, and 250% checking that nothing leaves the window, nothing overlaps, every focusable control stays at least sixteen pixels across, and the tab order still reads left to right and top to bottom. That covers the layout and not the rendering: font substitution, and the trackbar's own idea of its minimum height, are outside it. The release notes do not claim scaling works.
 

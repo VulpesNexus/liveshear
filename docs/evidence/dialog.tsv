@@ -12,7 +12,7 @@ dialog	dialog	Enter commits, like the default button	the dialog behaves like an 
 dialog	dialog	a value typed with a decimal comma is committed	the dialog behaves like an Adobe dialog	shearAngle after typing 22,5 and pressing OK: 22.5	PASS
 dialog	dialog	a value typed with trailing text reads as a number, at the dialog's resolution	the dialog behaves like an Adobe dialog	typing '18.25 deg' committed 18.3 degrees: the trailing text is ignored and the value is rounded once, to the tenth of a degree the sliders and fields work in	PASS
 dialog	dialog	a value typed past the limit is clamped to 89	the dialog behaves like an Adobe dialog	shearAngle after typing 95: 89	PASS
-dialog	dialog	three up arrows raise the angle by three degrees	the dialog behaves like an Adobe dialog	shearAngle after three up arrows from 10: 13	PASS
+dialog	dialog	three up arrows raise the angle by three degrees	the dialog behaves like an Adobe dialog	shearAngle after three up arrows from 10: 22	FAIL
 dialog	dialog	with Preview off the artwork is not redrawn at the new angle	the dialog behaves like an Adobe dialog	the effect was last evaluated at 5 degrees while the dialog was open; it started at 5	PASS
 dialog	dialog	and OK still commits the new angle	the dialog behaves like an Adobe dialog	shearAngle after OK: 44; bounds 42.059, 600, 357.941, 480 (were 94.751, 600, 305.249, 480)	PASS
 dialog	dialog	the dialog is pushed back on screen when Illustrator sits in the corner	the dialog behaves like an Adobe dialog	centering alone would have put it 30 pixels past the edge; it opened at 19,0, entirely on the desktop	PASS

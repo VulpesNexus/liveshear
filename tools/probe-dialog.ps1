@@ -95,6 +95,25 @@ public static class Dlg {
     public static extern void keybd_event(byte vk, byte scan, uint flags, UIntPtr extra);
     [DllImport("user32.dll")]
     public static extern bool SetWindowPos(IntPtr h, IntPtr after, int x, int y, int cx, int cy, uint flags);
+    [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h);
+    [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
+    [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr h, IntPtr pid);
+    [DllImport("user32.dll")] public static extern bool AttachThreadInput(uint from, uint to, bool attach);
+    [DllImport("kernel32.dll")] public static extern uint GetCurrentThreadId();
+    [DllImport("user32.dll")] public static extern short GetAsyncKeyState(int vk);
+
+    // Windows refuses SetForegroundWindow to a process that does not already
+    // own the foreground, which a background job never does. Attaching to the
+    // foreground thread's input queue for the duration of the call is the
+    // documented way around it.
+    public static bool ForceForeground(IntPtr h) {
+        uint fg = GetWindowThreadProcessId(GetForegroundWindow(), IntPtr.Zero);
+        uint me = GetCurrentThreadId();
+        bool attached = fg != 0 && fg != me && AttachThreadInput(fg, me, true);
+        bool ok = SetForegroundWindow(h);
+        if (attached) AttachThreadInput(fg, me, false);
+        return ok;
+    }
     [DllImport("user32.dll")]
     public static extern IntPtr MonitorFromWindow(IntPtr h, uint flags);
     [DllImport("user32.dll", CharSet = CharSet.Unicode)]
@@ -273,22 +292,47 @@ public static class Dlg {
 
     if ($ArrowUps -gt 0) {
         # The dialog nudges by one degree, or by ten with Shift held, and it
-        # asks GetKeyState which key is down. A posted message carries no
-        # keyboard state at all, so without this the step depends on whether
-        # anybody happens to be leaning on Shift -- which is exactly what
-        # happened: three arrows moved the angle by thirty degrees instead of
-        # three, and nothing in the plugin was wrong.
+        # asks GetKeyState which key is down. GetKeyState answers out of the
+        # calling thread's *synchronized* key state, and only real input that
+        # that thread processes ever updates it -- a posted message is not real
+        # input. So the dialog answers out of the last hardware key its own
+        # thread saw, which can be a Shift pressed in another window minutes
+        # ago and released while this thread was not in the foreground to see
+        # the release.
+        #
+        # Not hypothetical: three arrows once moved the angle by thirty degrees,
+        # and a suite run moved it by twelve -- ten, then one, then one -- with
+        # nothing wrong in the plugin either time. Injecting a Shift-up alone
+        # does not fix it, because injected input goes to whichever thread owns
+        # the foreground, and in a suite that is rarely this one.
+        #
+        # So the dialog is pulled to the front first, and then Shift is pressed
+        # and released for real, so this thread certainly processes both and its
+        # idea of the keyboard is known rather than inherited. After that, a
+        # ten-degree step is a defect rather than an artifact.
+        $fg = [Dlg]::ForceForeground($dialog)
+        Start-Sleep -Milliseconds 250
+        [Dlg]::keybd_event(0x10, 0, 0, [UIntPtr]::Zero)   # VK_SHIFT down, for real
+        Start-Sleep -Milliseconds 80
         [Dlg]::keybd_event(0x10, 0, 2, [UIntPtr]::Zero)   # VK_SHIFT up, for real
-        Start-Sleep -Milliseconds 120
+        Start-Sleep -Milliseconds 250
+        $held = ([Dlg]::GetAsyncKeyState(0x10) -band 0x8000) -ne 0
+        $lines.Add(("brought the dialog to the front: {0}; Shift cycled down and up; physically held afterwards: {1}" -f $fg, $held))
     }
+    # Read after every arrow rather than only at the end. A wrong total says
+    # nothing about which step was wrong, and the one failure this has ever had
+    # shows up as a single ten among ones.
+    $steps = New-Object Collections.Generic.List[string]
     for ($i = 0; $i -lt $ArrowUps; $i++) {
         [Dlg]::PostMessage($edit, $WM_KEYDOWN, [IntPtr] $VK_UP, [IntPtr] 0) | Out-Null
         Start-Sleep -Milliseconds 200
-    }
-    if ($ArrowUps -gt 0) {
         $sb = New-Object Text.StringBuilder 64
         [Dlg]::SendMessageBuf($edit, 0x000D, [IntPtr] 64, $sb) | Out-Null
-        $lines.Add(("{0} up arrows; numeric field now reads '{1}'" -f $ArrowUps, $sb.ToString()))
+        $steps.Add($sb.ToString())
+    }
+    if ($ArrowUps -gt 0) {
+        $lines.Add(("{0} up arrows; the field read {1} in turn" -f $ArrowUps, ($steps -join ', ')))
+        $lines.Add(("{0} up arrows; numeric field now reads '{1}'" -f $ArrowUps, $steps[$steps.Count - 1]))
     }
 
     # What the effect was last asked to render while the dialog was still open.
@@ -505,7 +549,11 @@ $transcript = Invoke-Dialog -Button 'ok' -ArrowUps 3
 Note 'driver transcript (arrow keys):'
 foreach ($t in $transcript) { Note ("       " + $t) }
 Invoke-AiScript 'app.redraw();' | Out-Null
-Check 'three up arrows raise the angle by three degrees' (Near (StoredAngle) 13 0.05) ("shearAngle after three up arrows from 10: " + (StoredAngle))
+$arrowSteps = if (($transcript -join "`n") -match 'the field read ([^\r\n]+) in turn') { $Matches[1] } else { 'not recorded' }
+# The per-step readings are in the detail because the way this goes wrong is a
+# single ten among ones, and a bare total of 22 does not say that.
+Check 'three up arrows raise the angle by three degrees' (Near (StoredAngle) 13 0.05) `
+    ("shearAngle after three up arrows from 10: " + (StoredAngle) + "; the field read " + $arrowSteps + " in turn")
 
 # ------------------------------------------------------------- preview off
 if ($TracePath) {

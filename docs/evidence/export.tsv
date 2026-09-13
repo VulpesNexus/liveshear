@@ -3,7 +3,7 @@ export	pdf	plainRect exported to pdf	bounds match the canvas, no rasterization	b
 export	svg	plainRect exported to svg	bounds match the canvas, no rasterization	bounds match True, raster False, items PathItem, 448 bytes	PASS
 export	pdf	strokedRect exported to pdf	bounds match the canvas, no rasterization	bounds match True, raster False, items PathItem, 45632 bytes	PASS
 export	svg	strokedRect exported to svg	bounds match the canvas, no rasterization	bounds match True, raster False, items PathItem, 594 bytes	PASS
-export	pdf	pointText exported to pdf	bounds match the canvas, no rasterization	bounds match True, raster False, items TextFrame, 50800 bytes	PASS
+export	pdf	pointText exported to pdf	bounds match the canvas, no rasterization	bounds match True, raster False, items TextFrame, 50798 bytes	PASS
 export	svg	pointText exported to svg	bounds match the canvas, no rasterization	bounds match True, raster False, items TextFrame, 2588734 bytes	PASS
 export	pdf	mixedGroup exported to pdf	bounds match the canvas, no rasterization	bounds match True, raster False, items GroupItem,PathItem, 45512 bytes	PASS
 export	svg	mixedGroup exported to svg	bounds match the canvas, no rasterization	bounds match True, raster False, items GroupItem,PathItem, 603 bytes	PASS
