@@ -2,8 +2,8 @@ probe	group	case	expected	observed	status
 dialog	dialog	the dialog opened and OK committed the slider value	the dialog behaves like an Adobe dialog	shearAngle in the appearance after OK: 40	PASS
 dialog	dialog	the window title reads Shear	the dialog behaves like an Adobe dialog	the title bar holds 'Shear'	PASS
 dialog	dialog	the degree sign is a degree sign	the dialog behaves like an Adobe dialog	U+00B0 appears 2 time(s) among the dialog's labels	PASS
-dialog	dialog	the dialog opens centered on Illustrator, not in a corner	the dialog behaves like an Adobe dialog	placed at 102,86; Illustrator's window is 26,26 to 626,346; centers differ by 0,0 pixels; a top-left corner placement would be 0,0	PASS
-dialog	dialog	and entirely inside the monitor work area	the dialog behaves like an Adobe dialog	opened at 102,86, with no part of it off the desktop or under the taskbar	PASS
+dialog	dialog	the dialog opens centered on Illustrator, not in a corner	the dialog behaves like an Adobe dialog	placed at 310,294; Illustrator's window is 234,234 to 834,554; centers differ by 0,0 pixels; a top-left corner placement would be 0,0	PASS
+dialog	dialog	and entirely inside the monitor work area	the dialog behaves like an Adobe dialog	opened at 310,294, with no part of it off the desktop or under the taskbar	PASS
 dialog	dialog	dragging through several values does not compound	the dialog behaves like an Adobe dialog	width after dragging through 10, 20, 30, 40 is 300.692 pt; a single 40 degree shear gives 300.692 pt; compounding would give far more	PASS
 dialog	dialog	cancel restores the artwork and the parameter it started with	the dialog behaves like an Adobe dialog	bounds before 94.751, 600, 305.249, 480; after 94.751, 600, 305.249, 480; shearAngle after 5 (it was 5)	PASS
 dialog	dialog	escape restores the artwork and the parameter it started with	the dialog behaves like an Adobe dialog	bounds before 94.751, 600, 305.249, 480; after 94.751, 600, 305.249, 480; shearAngle after 5 (it was 5)	PASS

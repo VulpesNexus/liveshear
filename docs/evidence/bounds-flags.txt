@@ -1,5 +1,5 @@
 Live Shear -- what each combination of the bounds flags returns
-Run at 2026-09-14 01:48:24
+Run at 2026-09-14 03:34:04
 
 Error 1346458189 is kBadParameterErr: the call failed and returned nothing.
 The flags the effect uses are visible|noStroke|noExtended, which is the row

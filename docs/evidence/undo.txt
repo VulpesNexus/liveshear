@@ -1,5 +1,5 @@
 Live Shear -- undo and redo
-Run at 2026-09-14 01:58:18
+Run at 2026-09-14 03:22:20
 
 applying the effect changes the artwork              PASS
 one undo removes a freshly applied effect            PASS

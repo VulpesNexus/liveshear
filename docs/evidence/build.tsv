@@ -4,7 +4,7 @@ build	release build	Debug builds with no warnings and no errors	the artifact is 
 build	release build	the Release build produced a plugin	the artifact is fit to ship	build\Release\LiveShear.aip	PASS
 build	release build	the binary does not claim Adobe as its publisher	the artifact is fit to ship	CompanyName is VulpesNexus	PASS
 build	release build	the binary names its own product	the artifact is fit to ship	ProductName is Shear for Illustrator	PASS
-build	release build	the binary carries a version	the artifact is fit to ship	FileVersion is 0.1.0-rc.6	PASS
+build	release build	the binary carries a version	the artifact is fit to ship	FileVersion is 0.1.0	PASS
 build	release build	Release links the retail C runtime, not the debug one	the artifact is fit to ship	links MSVCP140.dll, VCRUNTIME140.dll	PASS
 build	release build	no path from the build machine is embedded	the artifact is fit to ship	none found	PASS
 build	release build	the symbol reference is a bare file name	the artifact is fit to ship	symbol references: LiveShear.pdb	PASS
@@ -14,7 +14,7 @@ build	release build	the effect name that documents store is unchanged	the artifa
 build	release build	the menu entry reads as a plain Adobe command	the artifact is fit to ship	Effect > Shear...	PASS
 build	release build	the effect claims no submenu of its own	the artifact is fit to ship	no effect category is compiled in	PASS
 build	release build	no debug trace is on by default	the artifact is fit to ship	tracing is behind the LIVESHEAR_LOG environment variable	PASS
-build	release build	the source this was built from is identified	the artifact is fit to ship	commit 1dee3f301aabad50e63d0234e52a28ce9eabddc6	PASS
+build	release build	the source this was built from is identified	the artifact is fit to ship	commit 5dd49203ae7fc1d0e764d758040b6566c58634d3	PASS
 build	release build	the working tree was clean when it was built	the artifact is fit to ship	0 uncommitted change(s)	PASS
 build	release build	nothing is linked but Windows and the C runtime	the artifact is fit to ship	no SDK, developer, or test-harness DLL is named	PASS
 build	release build	the C runtime it needs is one Illustrator already needs	the artifact is fit to ship	Illustrator.exe names the same MSVCP140.dll, VCRUNTIME140.dll, VCRUNTIME140_1.dll, so no redistributable has to be installed for the plugin	PASS
