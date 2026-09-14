@@ -36,6 +36,8 @@ Both configurations rebuild from clean with zero warnings and zero errors. The R
 
 The build probe reports the working tree as it stood when it ran. The record cited here was taken after the final commit, on a clean tree, and the same binary was then installed and driven through the whole suite before being packed. *tools/make-release.ps1* refuses to pack a binary claiming Adobe as its publisher, or one carrying an absolute path from this machine.
 
+**The recorded commit has a new hash.** On 2026-09-15 this repository's history was rewritten to remove absolute paths from the build machine that earlier evidence files had recorded, and every commit from `1e9e530` on changed its hash. The build record names the commit as it was when the binary was built, `cb010260f2397a2dce67b040555ed1ca49025e61`; in the published history, that commit is `72da6db44a728fdf91252b336e7303a96d9becb0`. The plugin sources are identical in the two. They differ in three redacted lines and nothing else: one line each in *evidence/blend.txt* and *evidence/dialog.txt*, and one comment in *tools/make-release.ps1*.
+
 ## C. Architecture
 
 One standalone live effect, registered as a post-effect accepting any input art but plugin groups, at *Effect > Shear…*. Its `Go` handler reads two angles from the parameter dictionary, takes the center of the incoming artwork's geometric bounds as the reference point, builds one matrix, and calls `AITransformArtSuite::TransformArt` once.
