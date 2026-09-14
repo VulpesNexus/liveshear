@@ -85,16 +85,25 @@ Write-Output 'No build-machine paths in the binary.'
 # suite's summary column showed nothing wrong.
 #
 # So every evidence file has to be newer than the build record, which is
-# written by probe-build.ps1 at the start of the sequence. The named exceptions
-# are the probes deliberately run outside the suite; listing them here means a
-# NEW stale file fails this check rather than joining them silently.
+# written by probe-build.ps1 at the start of the sequence.
+#
+# A file earns an exemption by not describing this binary at all -- and by
+# nothing else. Being awkward to run, slow, or outside the suite is a reason to
+# remember to run it, not a reason for the gate to stop asking. The list was
+# once the other way round, and it quietly carried a crash comparison measured
+# against an older build through a release, plus an entry for a probe that had
+# not been run at all.
 $buildRecord = Join-Path $repo 'docs\evidence\build.txt'
 if (Test-Path $buildRecord) {
     $builtAt = (Get-Item $buildRecord).LastWriteTimeUtc
+    # native-shear.tsv records what Illustrator's own Shear command does. It is
+    # the oracle this plugin is measured against, not a measurement of it, so a
+    # rebuild cannot invalidate it; only a new Illustrator could.
+    #
     # build.tsv is the build probe's own result, written in the same instant as
     # the record it would be compared against; a strict comparison makes it look
     # older than itself.
-    $exempt = @('native-shear.tsv', 'sequence-crash.tsv', 'crash-ab.tsv', 'build.tsv')
+    $exempt = @('native-shear.tsv', 'build.tsv')
     $stale = @(Get-ChildItem (Join-Path $repo 'docs\evidence') -Filter *.tsv |
                Where-Object { $_.LastWriteTimeUtc -lt $builtAt -and
                               $exempt -notcontains $_.Name })
@@ -103,8 +112,9 @@ if (Test-Path $buildRecord) {
             Write-Output ("  stale: {0}  written {1}" -f $_.Name, $_.LastWriteTime.ToString('yyyy-MM-dd HH:mm:ss'))
         }
         $message = "{0} evidence file(s) predate the build in docs\evidence\build.txt, so the matrix would " +
-                   "describe a binary this archive does not contain. Re-run those probes, or add them to " +
-                   "the exempt list in this script if they are meant to be run outside the suite."
+                   "describe a binary this archive does not contain. Re-run those probes. Only add a file " +
+                   "to the exempt list in this script if it does not describe the plugin binary at all; " +
+                   "being slow or run by hand does not qualify."
         throw ($message -f $stale.Count)
     }
     Write-Output 'Evidence checked: every probe result postdates the build it describes.'

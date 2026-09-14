@@ -42,6 +42,7 @@
 #include "ShearAbout.h"
 #include "LiveShearID.h"
 #include "Resource.h"
+#include "DialogPlacement.h"
 
 #include <commctrl.h>
 #include <shellapi.h>
@@ -298,16 +299,7 @@ INT_PTR CALLBACK AboutProc(HWND dlg, UINT msg, WPARAM wParam, LPARAM lParam)
 
         if (st->theme.darkTitleBar) ApplyDarkTitleBar(dlg);
 
-        RECT dr;
-        GetWindowRect(dlg, &dr);
-        HWND owner = GetWindow(dlg, GW_OWNER);
-        RECT pr;
-        if (owner != nullptr && IsWindowVisible(owner)) GetWindowRect(owner, &pr);
-        else SystemParametersInfoW(SPI_GETWORKAREA, 0, &pr, 0);
-        SetWindowPos(dlg, nullptr,
-                     pr.left + ((pr.right - pr.left) - (dr.right - dr.left)) / 2,
-                     pr.top  + ((pr.bottom - pr.top) - (dr.bottom - dr.top)) / 2,
-                     0, 0, SWP_NOSIZE | SWP_NOZORDER);
+        DialogPlacement::CenterOnOwner(dlg);
 
         /* Focus OK rather than letting the dialog manager give it to the first
            tab stop, which is the title link: the box would open with a focus

@@ -124,6 +124,7 @@
     <ClInclude Include="Source\ShearDialog.h" />
     <ClInclude Include="Source\ShearTheme.h" />
     <ClInclude Include="Source\ShearAbout.h" />
+    <ClInclude Include="Source\DialogPlacement.h" />
     <ClInclude Include="Source\Introspect.h" />
     <ClInclude Include="Source\ShearLog.h" />
   </ItemGroup>

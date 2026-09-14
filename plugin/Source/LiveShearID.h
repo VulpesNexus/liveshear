@@ -76,8 +76,8 @@
     two are checked against each other below, so they cannot drift. */
 #define kShearVersionMajor          0
 #define kShearVersionMinor          1
-#define kShearVersionPatch          0
-#define kShearVersionString         "0.1.0"
+#define kShearVersionPatch          1
+#define kShearVersionString         "0.1.1"
 
 #define LS_STRINGIFY2(x)            #x
 #define LS_STRINGIFY(x)             LS_STRINGIFY2(x)
