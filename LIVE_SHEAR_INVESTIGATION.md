@@ -118,7 +118,7 @@ None of them changed the rendering by so much as a rounding error.
 
 The control for that experiment matters as much as the result: writing the documented key `moveH_Pts = 40` into the same dictionary, by the same mechanism, moved the rendered artwork 40 pt to the right while leaving the source path untouched. So the injection path demonstrably reaches Adobe's effect and makes it re-render. The candidate keys were ignored because the effect has nothing to do with them, not because the experiment could not reach it.
 
-Evidence: [docs/evidence/latent-shear-probe.txt](docs/evidence/latent-shear-probe.txt).
+Evidence: [docs/evidence/history/latent-shear-probe-2026-09-12.txt](docs/evidence/history/latent-shear-probe-2026-09-12.txt).
 
 **There is no latent shear in the native Transform effect. Outcome 1 — the "BEST" case — is not available.**
 
@@ -257,7 +257,7 @@ Those two counts are from this investigation, not from the release. The suite th
 
 ### Behavior suite
 
-From [docs/evidence/behavior.txt](docs/evidence/behavior.txt):
+From [docs/evidence/history/behavior-2026-09-13.txt](docs/evidence/history/behavior-2026-09-13.txt):
 
 - artwork renders sheared, and the **source path is byte-identical before and after** — the effect is genuinely non-destructive
 - **live text stays live text**: typename, contents, and point size all survive; retyping and changing the font size both re-run the effect
@@ -357,8 +357,24 @@ So the oracle's return value means nothing, and the harness never trusts it — 
 
 **The crash is Illustrator's, not the plugin's.** During long automated runs Illustrator died repeatedly with an access violation inside *Illustrator.exe* (exception `0xc0000005`, faulting offset `0x18162a7`, in the Windows Application event log). Since a crash in a host driven by one's own plugin is the plugin's fault until proven otherwise, it was bisected.
 
-The trigger is repeated create-document / close-document cycles under COM automation. It reproduces **with the plugin uninstalled**: three runs of forty cycles that never touch the effect and never load *LiveShear.aip* completed 9, 32, and 40 cycles before Illustrator stopped answering ([docs/evidence/crash-control.txt](docs/evidence/crash-control.txt)). With the plugin installed the same runs completed 2, 20, and 3 cycles. It has never been seen in ordinary interactive use, or in any run that reuses one document instead of churning them.
+The trigger is repeated create-document / close-document cycles under COM automation. It reproduces **with the plugin uninstalled**: three runs of forty cycles that never touch the effect and never load *LiveShear.aip* completed 9, 32, and 40 cycles before Illustrator stopped answering ([docs/evidence/history/crash-control-2026-09-13.txt](docs/evidence/history/crash-control-2026-09-13.txt)). With the plugin installed the same runs completed 2, 20, and 3 cycles. It has never been seen in ordinary interactive use, or in any run that reuses one document instead of churning them.
 
-So the plugin does not cause it. Whether the plugin being loaded makes it more likely is not settled: three runs per arm, with that much spread, is not enough to distinguish a real effect from noise, and it is recorded here as an open question rather than a finding. The probes now empty one document rather than close and reopen, which avoids the trigger entirely.
+So the plugin does not cause it. Whether the plugin being loaded makes it *more likely* was left open at that point, and three runs per arm could never have answered it. For 0.1.1 it was measured properly: three arms of six trials of up to sixty cycles each, interleaved, every trial in a fresh Illustrator — the plugin absent, the plugin loaded but never used, and the effect applied on every cycle.
+
+| arm | crashed | cycles reached | mean |
+| --- | --- | --- | --- |
+| plugin absent | 4 of 6 | 60, 3, 11, 60, 16, 13 | 27.2 |
+| loaded, never used | 4 of 6 | 3, 60, 18, 60, 20, 19 | 30.0 |
+| effect exercised | 2 of 6 | 60, 60, 60, 10, 60, 26 | 46.0 |
+
+Absent against loaded-but-unused is four of six against four of six: Fisher's exact p = 1.000 on the counts, and an exact rank test on cycles reached p = 0.494. The arm that exercised the effect crashed *less* often rather than more, which is also not significant — p = 0.567 and p = 0.275. Six trials per arm can exclude only a large difference, and it does exactly that; a small one remains possible, and a null result at this size is not a demonstration that the plugin is irrelevant. Evidence: [docs/evidence/crash-arm-a.txt](docs/evidence/crash-arm-a.txt) and [docs/evidence/crash-ab.tsv](docs/evidence/crash-ab.tsv).
+
+Every crash in all three arms faulted at the same offset, `0x18162a7` — the same offset an unrelated plugin's suite on this machine reproduced with that plugin uninstalled, which is a second project arriving at the same host defect independently.
+
+**One observation, recorded with its n because it is not a finding.** Across the eighteen trials the peak working set separated completely: every trial that survived all sixty cycles peaked between 2483 and 2713 MB, every trial that died had already reached between 3426 and 3923 MB, and nothing fell in the 713 MB between them. What makes it worth writing down is the direction. The survivors did sixty document lifecycles for about 2.6 GB, while the crashers did between three and twenty-six for a gigabyte more — one of them reaching 3694 MB in three lifecycles. That is not the shape of a gradual leak, which would put the longest runs at the top rather than the bottom; the runs appear to divide into two kinds almost immediately instead of drifting toward a threshold.
+
+Three things keep it an observation. It was noticed in the data and then tested on the trials that followed, which is better than fishing but is not a prospective test. Peak is sampled at the end of a trial, so for a crashing run it is as easily a symptom of whatever went wrong as a cause of it. And peak *working set* is not private bytes and not a sampled figure, so it is not comparable to memory numbers gathered any other way. It is here to be checked by an experiment designed for it, not to be relied on.
+
+The probes now empty one document rather than close and reopen, which avoids the trigger entirely.
 
 **Illustrator has no ready-made "what should this effect apply to" selection.** Worth writing down because it cost two rounds of wrong results and any future effect will hit it. `AIMatchingArtSuite::GetSelectedArt` returns a flattened hierarchy: select one group and it hands back the layer's own container group, the group, and every path inside it. Applying an effect to all of that puts it on the children instead of on the group the user selected. Of the ready-made alternatives, `kArtSelectedTopLevelGroups` matches nothing on its own and exactly one object when combined with `kArtSelected`, however many are selected; `kArtSelectedLeaves` behaves the same way; `kArtTargeted` is right when it is populated but goes empty after some scripted edits. The plugin therefore filters the selection itself: drop the layer container, which is the only object with no parent, then keep an object only if none of its ancestors is also selected. The `selection` probe prints what each specification returns, so the reasoning can be re-checked against a future version.

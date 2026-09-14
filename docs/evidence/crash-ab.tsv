@@ -1,0 +1,4 @@
+probe	group	case	expected	observed	status
+crash	document churn	arm A absent	no worse than the arm without the plugin	6 trials, 2 completed all 60 cycles, mean 27.2 cycles, peak 3754 MB	MEASURED
+crash	document churn	arm B unused	no worse than the arm without the plugin	6 trials, 2 completed all 60 cycles, mean 30.0 cycles, peak 3923 MB	MEASURED
+crash	document churn	arm C exercised	no worse than the arm without the plugin	6 trials, 4 completed all 60 cycles, mean 46.0 cycles, peak 3694 MB	MEASURED

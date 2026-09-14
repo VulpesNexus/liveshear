@@ -1,0 +1,31 @@
+Live Shear -- does the plugin change the document-churn crash?
+Run at 2026-09-14 19:44:50
+6 trials per arm, up to 60 create/close cycles each
+
+Arm A read from <repo>\docs\evidence\crash-arm-a.txt:
+  Arm A, plugin absent. Run at 2026-09-14 18:31:18
+  A absent          trial 1:  60 of 60 cycles, peak 2571 MB
+  A absent          trial 2:   3 of 60 cycles, peak 3426 MB, 2 Illustrator processes
+  A absent          trial 3:  11 of 60 cycles, peak 3655 MB, 2 Illustrator processes
+  A absent          trial 4:  60 of 60 cycles, peak 2713 MB
+  A absent          trial 5:  16 of 60 cycles, peak 3754 MB, 2 Illustrator processes
+  A absent          trial 6:  13 of 60 cycles, peak 3535 MB, 2 Illustrator processes
+Arms B and C: plugin installed, trials interleaved.
+  B unused          trial 1:   3 of 60 cycles, peak 3694 MB, plugin loaded True. module Illustrator.exe exception 0xc0000005 offset 0x00000000018162a7
+  C exercised       trial 1:  60 of 60 cycles, peak 2581 MB, plugin loaded True. 
+  B unused          trial 2:  60 of 60 cycles, peak 2573 MB, plugin loaded True. 
+  C exercised       trial 2:  60 of 60 cycles, peak 2701 MB, plugin loaded True. 
+  B unused          trial 3:  18 of 60 cycles, peak 3627 MB, plugin loaded True. module Illustrator.exe exception 0xc0000005 offset 0x00000000018162a7
+  C exercised       trial 3:  60 of 60 cycles, peak 2483 MB, plugin loaded True. 
+  B unused          trial 4:  60 of 60 cycles, peak 2574 MB, plugin loaded True. 
+  C exercised       trial 4:  10 of 60 cycles, peak 3555 MB, plugin loaded True. module Illustrator.exe exception 0xc0000005 offset 0x00000000018162a7
+  B unused          trial 5:  20 of 60 cycles, peak 3923 MB, plugin loaded True. module Illustrator.exe exception 0xc0000005 offset 0x00000000018162a7
+  C exercised       trial 5:  60 of 60 cycles, peak 2680 MB, plugin loaded True. 
+  B unused          trial 6:  19 of 60 cycles, peak 3764 MB, plugin loaded True. module Illustrator.exe exception 0xc0000005 offset 0x00000000018162a7
+  C exercised       trial 6:  26 of 60 cycles, peak 3694 MB, plugin loaded True. module Illustrator.exe exception 0xc0000005 offset 0x00000000018162a7
+
+Summary
+arm             trials  complete  mean cycles   peak MB
+A absent             6         2         27.2      3754
+B unused             6         2         30.0      3923
+C exercised          6         4         46.0      3694

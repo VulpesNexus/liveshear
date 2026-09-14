@@ -1,0 +1,7 @@
+Arm A, plugin absent. Run at 2026-09-14 18:31:18
+A absent          trial 1:  60 of 60 cycles, peak 2571 MB
+A absent          trial 2:   3 of 60 cycles, peak 3426 MB, 2 Illustrator processes
+A absent          trial 3:  11 of 60 cycles, peak 3655 MB, 2 Illustrator processes
+A absent          trial 4:  60 of 60 cycles, peak 2713 MB
+A absent          trial 5:  16 of 60 cycles, peak 3754 MB, 2 Illustrator processes
+A absent          trial 6:  13 of 60 cycles, peak 3535 MB, 2 Illustrator processes

@@ -1,12 +1,12 @@
 Live Shear -- application shutdown
-Run at 2026-09-14 03:27:16
+Run at 2026-09-14 17:08:15
 
 no documents open                                PASS
-    quit in 1,5 s
+    quit in 1,6 s
 one document with a Shear effect                 PASS
-    quit in 2,3 s
+    quit in 2,2 s
 three documents, two with effects                PASS
-    quit in 4,3 s
+    quit in 4,1 s
     driver: opened the dialog and canceled it
 after the dialog has been opened                 PASS
     quit in 3,0 s

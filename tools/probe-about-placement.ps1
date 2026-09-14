@@ -143,9 +143,9 @@ $cases.Add((New-Case 'Illustrator mostly off the top edge' 'against an edge' $pr
 $cases.Add((New-Case 'Illustrator mostly off the bottom edge, over the taskbar' 'against an edge' $primary `
     ([int]($pw.Left + 200)) ([int]($pw.Bottom - 100))))
 
-# The case the Shear dialog's own probe drives: the host's centre closer to the
-# desktop edge than half a dialog, so centring alone cannot stay on screen.
-$cases.Add((New-Case "Illustrator's centre 60 px from the left edge" 'against an edge' $primary `
+# The case the Shear dialog's own probe drives: the host's center closer to the
+# desktop edge than half a dialog, so centering alone cannot stay on screen.
+$cases.Add((New-Case "Illustrator's center 60 px from the left edge" 'against an edge' $primary `
     ([int]($pw.Left + 60 - $ownerW / 2)) ([int]($pw.Top + 200))))
 
 foreach ($screen in [System.Windows.Forms.Screen]::AllScreens) {
@@ -225,7 +225,7 @@ foreach ($case in $cases) {
         -Status $(if ($inside) { 'PASS' } else { 'FAIL' })
 
     if ($null -ne $case.Screen) {
-        # Where the code before 0.1.1 would have put it: centred on the owner,
+        # Where the code before 0.1.1 would have put it: centered on the owner,
         # with nothing keeping it on the desktop.
         # Truncated, not rounded, because that is what the C++ does: [int] in
         # PowerShell rounds to even, so an odd difference came out one pixel
@@ -240,28 +240,28 @@ foreach ($case in $cases) {
         $moved = ($oldX -ne $r.DlgL) -or ($oldY -ne $r.DlgT)
         Add-ProbeResult -Group 'the placement before 0.1.1' -Case $case.Name `
             -Expected 'recorded to show which cases discriminate; not a threshold' `
-            -Observed ("centring alone gives {0},{1}, which is {2} the work area{3}" -f `
+            -Observed ("centering alone gives {0},{1}, which is {2} the work area{3}" -f `
                        $oldX, $oldY, $(if ($oldInside) { 'inside' } else { 'OUTSIDE' }), `
                        $(if ($moved) { '; the clamp moved the window' } else { '; the clamp changed nothing' })) `
             -Status 'MEASURED'
 
-        # When nothing needed clamping, the window must be centred exactly.
+        # When nothing needed clamping, the window must be centered exactly.
         if ($oldInside) {
             $dxOff = [Math]::Abs((($r.DlgL + $r.DlgR) / 2) - (($r.OwnL + $r.OwnR) / 2))
             $dyOff = [Math]::Abs((($r.DlgT + $r.DlgB) / 2) - (($r.OwnT + $r.OwnB) / 2))
-            $centred = ($dxOff -le 1) -and ($dyOff -le 1)
-            if (-not $centred) { $failures++ }
+            $centered = ($dxOff -le 1) -and ($dyOff -le 1)
+            if (-not $centered) { $failures++ }
             # Formatted through the invariant culture: -f formats in the
             # machine's own, and on this one a half-pixel offset prints as
             # "0,5", so "off by {0},{1}" came out as "off by 0,5,0,5".
-            # A centre can land on a half pixel whenever the window's width or
+            # A center can land on a half pixel whenever the window's width or
             # height is odd, which the dialog's 513 x 497 both are.
             $offset = [string]::Format([System.Globalization.CultureInfo]::InvariantCulture,
                                        'off by {0} px across and {1} px down', $dxOff, $dyOff)
-            Add-ProbeResult -Group 'centred on the host' -Case $case.Name `
-                -Expected 'with no clamping needed, the dialog centre sits on the host centre' `
+            Add-ProbeResult -Group 'centered on the host' -Case $case.Name `
+                -Expected 'with no clamping needed, the dialog center sits on the host center' `
                 -Observed $offset `
-                -Status $(if ($centred) { 'PASS' } else { 'FAIL' })
+                -Status $(if ($centered) { 'PASS' } else { 'FAIL' })
         }
     }
 }

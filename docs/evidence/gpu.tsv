@@ -1,3 +1,3 @@
 probe	group	case	expected	observed	status
-gpu	preview mode	the window capture sees the canvas	moving the artwork changes the captured picture	0,733 % of sampled pixels changed	PASS
-gpu	preview mode	GPU and CPU preview draw the same sheared artwork	no more than a couple of percent of pixels differ, from antialiasing	the mode never changed; the window title stayed Untitled-1* @ 11,33 % (CMYK/Preview)	UNTESTED
+gpu	preview mode	the window capture sees the canvas	moving the artwork changes the captured picture	1,905 % of sampled pixels changed	PASS
+gpu	preview mode	GPU and CPU preview draw the same sheared artwork	no more than a couple of percent of pixels differ, from antialiasing	the mode never changed; the window title stayed Untitled-1* @ 99,33 % (CMYK/Preview)	UNTESTED

@@ -202,34 +202,69 @@ Note ''
 # Arm A of the crash experiment: the plugin is uninstalled right now, which is
 # the state that arm needs, and arranging it again later would mean asking for
 # administrator rights twice more.
-if ($CrashTrials -gt 0) {
-    Note ("=== Crash experiment, arm A: {0} trials of up to {1} document cycles, plugin absent ===" -f $CrashTrials, $CrashCycles)
-    $armA = New-Object Collections.Generic.List[string]
-    $armA.Add(("Arm A, plugin absent. Run at {0}" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss')))
-    $build = 'var d = app.documents.add(DocumentColorSpace.RGB, 600, 600); d.rulerOrigin=[0,0]; var r = d.pathItems.rectangle(500,100,200,120); r.filled = true; r.stroked = false; app.executeMenuCommand("deselectall"); r.selected = true; "built";'
-    for ($t = 1; $t -le $CrashTrials; $t++) {
-        Stop-Ai | Out-Null
-        if (Get-Process Illustrator -ErrorAction SilentlyContinue) { Stop-Process -Name Illustrator -Force; Start-Sleep -Seconds 2 }
-        Start-Ai | Out-Null
-        Invoke-AiScript 'app.userInteractionLevel = UserInteractionLevel.DONTDISPLAYALERTS; while (app.documents.length > 0) { app.documents[0].close(SaveOptions.DONOTSAVECHANGES); } "ready";' | Out-Null
-        $done = $CrashCycles
-        for ($i = 0; $i -lt $CrashCycles; $i++) {
-            try {
-                Invoke-AiScript $build | Out-Null
-                Invoke-AiScript 'app.activeDocument.close(SaveOptions.DONOTSAVECHANGES); "closed";' | Out-Null
+$armAComplete = $false
+try {
+    if ($CrashTrials -gt 0) {
+        Note ("=== Crash experiment, arm A: {0} trials of up to {1} document cycles, plugin absent ===" -f $CrashTrials, $CrashCycles)
+        $armA = New-Object Collections.Generic.List[string]
+        $armA.Add(("Arm A, plugin absent. Run at {0}" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss')))
+        $build = 'var d = app.documents.add(DocumentColorSpace.RGB, 600, 600); d.rulerOrigin=[0,0]; var r = d.pathItems.rectangle(500,100,200,120); r.filled = true; r.stroked = false; app.executeMenuCommand("deselectall"); r.selected = true; "built";'
+        for ($t = 1; $t -le $CrashTrials; $t++) {
+            Stop-Ai | Out-Null
+            if (Get-Process Illustrator -ErrorAction SilentlyContinue) { Stop-Process -Name Illustrator -Force; Start-Sleep -Seconds 2 }
+            Start-Ai | Out-Null
+            Invoke-AiScript 'app.userInteractionLevel = UserInteractionLevel.DONTDISPLAYALERTS; while (app.documents.length > 0) { app.documents[0].close(SaveOptions.DONOTSAVECHANGES); } "ready";' | Out-Null
+            $done = $CrashCycles
+            for ($i = 0; $i -lt $CrashCycles; $i++) {
+                try {
+                    Invoke-AiScript $build | Out-Null
+                    Invoke-AiScript 'app.activeDocument.close(SaveOptions.DONOTSAVECHANGES); "closed";' | Out-Null
+                }
+                catch { $done = $i; break }
             }
-            catch { $done = $i; break }
+            # Get-Process hands back an array as soon as two Illustrators are alive,
+            # and an array cannot be divided, so this threw op_Division and took the
+            # whole arm down with it. Two at once is not hypothetical here: a trial
+            # that kills the host can leave the dying process behind while the next
+            # Start-Ai brings a fresh one up. Take the largest peak of whatever is
+            # running, and say so when the count is not one, because a second
+            # Illustrator is itself worth seeing in the evidence.
+            $peak = 0
+            $procs = @(Get-Process Illustrator -ErrorAction SilentlyContinue)
+            if ($procs.Count -gt 0) {
+                $peak = [int] (($procs | Measure-Object -Property PeakWorkingSet64 -Maximum).Maximum / 1MB)
+            }
+            $extra = ''
+            if ($procs.Count -ne 1) { $extra = ', {0} Illustrator processes' -f $procs.Count }
+            $line = ("A absent          trial {0}: {1,3} of {2} cycles, peak {3} MB{4}" -f $t, $done, $CrashCycles, $peak, $extra)
+            $armA.Add($line)
+            Note ("  " + $line)
         }
-        $peak = 0
-        $p = Get-Process Illustrator -ErrorAction SilentlyContinue
-        if ($p) { $peak = [int] ($p.PeakWorkingSet64 / 1MB) }
-        $line = ("A absent          trial {0}: {1,3} of {2} cycles, peak {3} MB" -f $t, $done, $CrashCycles, $peak)
-        $armA.Add($line)
-        Note ("  " + $line)
+        [System.IO.File]::WriteAllLines($CrashLogPath, $armA)
+        Note ("arm A written to {0}" -f $CrashLogPath)
+        Note ''
+        $armAComplete = $true
     }
-    [System.IO.File]::WriteAllLines($CrashLogPath, $armA)
-    Note ("arm A written to {0}" -f $CrashLogPath)
-    Note ''
+}
+finally {
+    if ($CrashTrials -gt 0 -and -not $armAComplete) {
+        # Everything above runs with the plugin out of the folder, and an
+        # exception escaping here used to skip phase 3 -- the only thing that
+        # puts it back. The run then carried on into the next probe, which
+        # measured a host that could not load the effect it was about to
+        # report on, and got as far as writing trial rows labelled "with
+        # composition" before anybody noticed. Losing an arm costs an
+        # afternoon; shipping evidence from a host without the plugin costs
+        # the release its meaning.
+        Note 'Arm A did not finish. Putting the plugin back before anything else runs.'
+        try { Stop-Ai | Out-Null } catch { }
+        & $install | Out-Null
+        Start-Ai | Out-Null
+        $where = Get-AiAdditionalPluginFolder
+        if ($where) {
+            Note ("plugin restored: {0}" -f (Test-Path (Join-Path $where "LiveShear.aip")))
+        }
+    }
 }
 
 # ------------------------------------------------- phase 3: plugin reinstalled

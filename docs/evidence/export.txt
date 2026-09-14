@@ -1,11 +1,11 @@
 Live Shear -- export fidelity
-Run at 2026-09-14 03:46:33
+Run at 2026-09-14 16:26:18
 
 plainRect      pdf     44664 bytes  bounds True  raster False items PathItem                     PASS
 plainRect      svg       448 bytes  bounds True  raster False items PathItem                     PASS
 strokedRect    pdf     45632 bytes  bounds True  raster False items PathItem                     PASS
 strokedRect    svg       594 bytes  bounds True  raster False items PathItem                     PASS
-pointText      pdf     50799 bytes  bounds True  raster False items TextFrame                    PASS
+pointText      pdf     50800 bytes  bounds True  raster False items TextFrame                    PASS
 pointText      svg   2588734 bytes  bounds True  raster False items TextFrame                    PASS
 mixedGroup     pdf     45512 bytes  bounds True  raster False items GroupItem,PathItem           PASS
 mixedGroup     svg       603 bytes  bounds True  raster False items GroupItem,PathItem           PASS

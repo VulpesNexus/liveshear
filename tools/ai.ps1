@@ -260,7 +260,26 @@ function Hide-Personal {
             @{ From = [IO.Path]::GetTempPath().TrimEnd('\');          To = '<temp>' },
             @{ From = $env:USERPROFILE;                               To = '<user>' },
             @{ From = (Split-Path -Parent $repoRoot);                 To = '<workspace>' }
-        ) | Where-Object { $_.From } | Sort-Object { -$_.From.Length }
+        )
+        # A tool that has to turn a path into a single folder name spells it
+        # with every character that is not a letter or a digit replaced by a
+        # dash, so this repository's parent becomes one long slug. That slug
+        # still names the folder, and the drive it sits on, to anybody who
+        # reads it -- but it matches none of the rules above, which look for
+        # the path as Windows spells it.
+        #
+        # It is not caught by the net at the end of this function either, and
+        # the reason is worth keeping: that net needs a drive letter, and by
+        # the time it runs the temporary directory rule has already replaced
+        # the drive letter with a placeholder. Sanitizing the front of a
+        # string disarmed the check on the rest of it, and the evidence for
+        # two probes went into the repository carrying the workspace folder's
+        # name for a whole release before anybody noticed.
+        $rules += foreach ($rule in @($rules)) {
+            $slug = $rule.From -replace '[^A-Za-z0-9]', '-'
+            if ($slug -ne $rule.From) { @{ From = $slug; To = $rule.To } }
+        }
+        $rules = $rules | Where-Object { $_.From } | Sort-Object { -$_.From.Length }
         $name = $env:USERNAME
     }
     process {

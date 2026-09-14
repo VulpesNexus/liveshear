@@ -1,5 +1,5 @@
 Live Shear -- blending two objects that carry different Shear effects
-Run at 2026-09-14 03:48:50
+Run at 2026-09-14 17:19:49
 Trace file: <temp>\claude\<workspace>\6d060ac1-74e0-42c8-867e-3dc594570345\scratchpad\shear-trace.log
 
 Tracing is live: yes
@@ -31,7 +31,7 @@ Tracing is live: yes
 --- 89 to -89 across ninety: shear 20 axis 89  ->  shear 20 axis -89 ---
        after Object > Blend > Make: 1 items
 [PASS] 89 to -89 across ninety: Illustrator calls the interpolation handler
-       the handler ran 1 time(s) while the blend was built; 4 objects after expanding
+       the handler ran 1 time(s) while the blend was built; 1 objects after expanding
 [PASS] 89 to -89 across ninety: every step takes the short way round
        t=0.5 -> axis -90; the two ends are 2 degrees apart going the short way, and every step is inside that. A naive midpoint would have given 0.
 [PASS] 89 to -89 across ninety: the shear angle is a straight line between the two

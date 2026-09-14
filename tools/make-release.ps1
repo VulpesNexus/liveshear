@@ -56,8 +56,11 @@ if (-not $version) { throw 'The binary has no file version.' }
 $bytes = [IO.File]::ReadAllBytes($binary)
 $ascii = [Text.Encoding]::ASCII.GetString($bytes)
 # Derived from where this actually is rather than from a list of folder names
-# somebody once had. A hard-coded folder name here named the developer's own
-# directory in a file meant to keep the developer out of the binary.
+# somebody once had. An earlier version hard-coded the first word of the
+# developer's own directory, in the file whose whole job is keeping the
+# developer out of the binary, so the names are taken from $repo and the
+# environment at run time and none of them is written down here. Naming a
+# folder in order to explain why you should not name it still names it.
 $patterns = @('[A-Za-z]:\\Users[ -~]{0,120}', '[A-Za-z]:\\Documents and Settings[ -~]{0,120}')
 foreach ($secret in @($repo, $env:USERPROFILE, (Split-Path -Parent $repo))) {
     if ($secret) { $patterns += [regex]::Escape($secret) + '[ -~]{0,120}' }
@@ -93,6 +96,14 @@ Write-Output 'No build-machine paths in the binary.'
 # once the other way round, and it quietly carried a crash comparison measured
 # against an older build through a release, plus an entry for a probe that had
 # not been run at all.
+#
+# The sentence above said "every evidence file" for two releases while the code
+# below filtered *.tsv, so every readable transcript and every screenshot was
+# outside the gate the whole time -- including the crash comparison that started
+# all this. That is the same defect as the exemption list, one level down: the
+# earlier fix went into the list of what is excused when the hole was in the
+# list of what is examined. A gate is worth exactly what its narrowest clause
+# says, not what its comment says, so the two now agree by construction.
 $buildRecord = Join-Path $repo 'docs\evidence\build.txt'
 if (Test-Path $buildRecord) {
     $builtAt = (Get-Item $buildRecord).LastWriteTimeUtc
@@ -102,19 +113,29 @@ if (Test-Path $buildRecord) {
     #
     # build.tsv is the build probe's own result, written in the same instant as
     # the record it would be compared against; a strict comparison makes it look
-    # older than itself.
-    $exempt = @('native-shear.tsv', 'build.tsv')
-    $stale = @(Get-ChildItem (Join-Path $repo 'docs\evidence') -Filter *.tsv |
-               Where-Object { $_.LastWriteTimeUtc -lt $builtAt -and
+    # older than itself. build.txt is that record, and comparing it against
+    # itself is not a question worth asking.
+    $exempt = @('native-shear.tsv', 'build.tsv', 'build.txt')
+    # Results, transcripts, and screenshots alike: a stale screenshot of the
+    # dialog misrepresents this build exactly as a stale row does. Not recursive
+    # on purpose -- docs\evidence\history\ holds runs that are dated in their
+    # filenames and are not claimed to describe this binary, which is a thing a
+    # reader sees in the path rather than having to find in this script.
+    $kinds = @('.tsv', '.txt', '.png')
+    $stale = @(Get-ChildItem (Join-Path $repo 'docs\evidence') -File |
+               Where-Object { $kinds -contains $_.Extension.ToLower() -and
+                              $_.LastWriteTimeUtc -lt $builtAt -and
                               $exempt -notcontains $_.Name })
     if ($stale.Count -gt 0) {
         $stale | ForEach-Object {
             Write-Output ("  stale: {0}  written {1}" -f $_.Name, $_.LastWriteTime.ToString('yyyy-MM-dd HH:mm:ss'))
         }
         $message = "{0} evidence file(s) predate the build in docs\evidence\build.txt, so the matrix would " +
-                   "describe a binary this archive does not contain. Re-run those probes. Only add a file " +
-                   "to the exempt list in this script if it does not describe the plugin binary at all; " +
-                   "being slow or run by hand does not qualify."
+                   "describe a binary this archive does not contain. Re-run those probes. If a file is an " +
+                   "older run kept for the record and nothing cites it as current, move it to " +
+                   "docs\evidence\history\ with its date in the filename instead. Only add a file to the " +
+                   "exempt list in this script if it does not describe the plugin binary at all; being " +
+                   "slow or run by hand does not qualify."
         throw ($message -f $stale.Count)
     }
     Write-Output 'Evidence checked: every probe result postdates the build it describes.'

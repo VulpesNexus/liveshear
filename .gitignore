@@ -23,3 +23,9 @@ __pycache__/
 
 # Assembled release archives; they are built, not kept.
 dist/
+
+# Crash-recovery transcript from a probe that did not run to the end. Named
+# .partial rather than .txt on purpose, so the release gate cannot mistake it
+# for evidence, and ignored here so a died-halfway run cannot leave something
+# committable behind. The real transcript is written only on completion.
+docs/evidence/*.partial

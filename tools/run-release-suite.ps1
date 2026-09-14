@@ -29,6 +29,17 @@ param(
     # Run every probe in one Illustrator session, the way the suite used to.
     # Faster, and not reproducible: see Reset-Host below.
     [switch] $SameHost,
+    # Start at this probe and run the rest, skipping everything before it.
+    #
+    # A release run is long enough that something outside it -- the machine
+    # running short of memory, the host being wanted for other work -- can end
+    # it partway, and re-running the probes that already passed costs half an
+    # hour and, worse, throws away results measured against the binary under
+    # test to replace them with identical ones.
+    #
+    # The name is the label this script prints, so it matches what the summary
+    # of the interrupted run already showed: -From schema.
+    [string] $From,
     # Leave the built artifact alone.
     #
     # probe-build.ps1 rebuilds both configurations, which replaces the very
@@ -126,7 +137,20 @@ function Reset-Host {
     }
 }
 
+# -From skips probes until the named one is reached. A skipped probe leaves its
+# evidence file exactly as it was, which is the point: those rows were measured
+# against this same binary and make-release.ps1 checks that for itself, by
+# timestamp, rather than taking this script's word for it.
+$script:skipping = [bool] $From
+
 function Run([string] $name, [scriptblock] $body, [switch] $NeedsHost) {
+    if ($script:skipping) {
+        if ($name -ne $From) {
+            Write-Output ('--- {0}: before -From {1}, left as it was ---' -f $name, $From)
+            return
+        }
+        $script:skipping = $false
+    }
     Write-Output ''
     Write-Output ('=== {0} ===' -f $name)
     $sw = [Diagnostics.Stopwatch]::StartNew()
@@ -199,7 +223,7 @@ Write-Output ('Plugin: ' + ((Send-AiMessage version) -replace "`r?`n", ' | '))
 
 Run 'solvers'     { python (Join-Path $PSScriptRoot 'test-solvers.py') (Join-Path $evidence 'solvers.tsv') }
 if (-not $SkipBuildProbe) { Run 'built artifact' { & (Join-Path $PSScriptRoot 'probe-build.ps1') } }
-else { Write-Output ''; Write-Output '=== built artifact ==='; Write-Output 'skipped, so the binary under test stays the one that was installed' }
+elseif (-not $script:skipping) { Write-Output ''; Write-Output '=== built artifact ==='; Write-Output 'skipped, so the binary under test stays the one that was installed' }
 Run 'arithmetic'  { & (Join-Path $PSScriptRoot 'run-mathtest.ps1') }
 Run 'anchor'      { & (Join-Path $PSScriptRoot 'probe-anchor.ps1') } -NeedsHost
 Run 'anchor verdicts' { python (Join-Path $PSScriptRoot 'solve-anchor.py') (Join-Path $evidence 'anchor.tsv') }
@@ -241,8 +265,23 @@ Run 'registry'    {
 }
 
 Write-Output ''
+# A -From that matches no probe would skip every one of them and still finish
+# looking like a clean run, with an empty summary that nothing reads closely.
+# Say so instead, loudly enough to stop the release.
+if ($script:skipping) {
+    throw ("-From '{0}' matches no probe in this suite, so nothing ran. The names are the labels this script prints: " -f $From) +
+          'solvers, built artifact, arithmetic, anchor, anchor verdicts, anchor by artwork, bounds flags, release matrix, ' +
+          'matrix verdicts, appearance, persistence, export, fills, limits, schema, blend, generated art, everyday use, ' +
+          'dialog, menu, undo, preview mode, stability, theme, shutdown, test matrix, support matrix, registry.'
+}
+
 Write-Output '=== summary ==='
 $summary | ForEach-Object { Write-Output $_ }
+if ($From) {
+    Write-Output ''
+    Write-Output ("Resumed at '{0}'. Probes before it kept the results they already had; make-release.ps1 checks every" -f $From)
+    Write-Output 'evidence file against the build record by timestamp, so a stale one cannot reach the archive this way.'
+}
 if ($script:hostRestarts -gt 0) {
     Write-Output ''
     Write-Output ("Illustrator had to be restarted {0} time(s) during this run, because it stopped answering." -f $script:hostRestarts)

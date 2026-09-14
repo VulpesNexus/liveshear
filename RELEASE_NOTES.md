@@ -1,5 +1,19 @@
 # Release notes
 
+## 0.1.1
+
+**The About window stays on the desktop.** It centered on Illustrator's window and stopped there, so an Illustrator sitting against a screen edge could open it partly off the desktop or under the taskbar. The prose in that window does not scroll, so a clipped one cannot be read, only dragged back. It is now pushed inside the work area of whatever monitor it lands on — which is what the Shear dialog has done since rc.6.
+
+The reason the dialog's fix never reached the About box is that each window carried its own copy of the placement arithmetic. There is one copy now, shared by both, so there is no second one left to forget.
+
+**Where that window opens is measured, which it never was.** It needs no Illustrator: the position depends only on the host window's rectangle and the monitor that rectangle falls on, so a plain window is a complete stand-in. The cases drive it against each screen edge, off each edge, and onto a monitor whose origin is negative. Each case also records where the old arithmetic would have put the box, because a check that passes equally before and after a fix has not tested the fix: six of the ten land outside the work area.
+
+**The host crash is measured now, where it was left open.** Illustrator 30.7.0 dies under sustained scripted document churn. That it happens without this plugin installed at all was already established; whether having the plugin loaded makes it happen *more often* was not, and the three runs per arm behind that earlier wording could never have settled it. Three arms of six trials, each up to sixty create/close cycles in a fresh Illustrator — the plugin absent, loaded but never used, and applied on every cycle — crashed four, four, and two times out of six. Nothing separates the arms. Six trials per arm excludes a large difference and not a small one, which is said plainly in [docs/RELEASE_READINESS.md](docs/RELEASE_READINESS.md) rather than left for a reader to work out.
+
+**Every evidence file is now checked against the build it describes.** The release script compared only the machine-readable *.tsv* results against the build record, while the comment directly above that line claimed it checked every evidence file — so every readable transcript and every screenshot had been outside the check since it was written, including the crash comparison that prompted it. It now covers *.tsv*, *.txt*, and *.png* alike. Runs measured against earlier builds have moved to *docs/evidence/history/* with their dates in their filenames, kept for the record instead of sitting among current results looking current.
+
+Nothing about the effect changed. The geometry, the dialog, the menu item, and the parameter handling are the same code, re-measured against this binary rather than carried over from 0.1.0.
+
 ## 0.1.0
 
 The first stable release, and 0.1.0-rc.6 with the suffix taken off: the only change to the plugin is the version it reports. Nothing about the geometry, the dialog, the menu item, or the parameter handling is different from the last candidate, and the whole suite was run again against this exact binary rather than carried over from it — the counts and every individual result are in [docs/RELEASE_TEST_MATRIX.md](docs/RELEASE_TEST_MATRIX.md).

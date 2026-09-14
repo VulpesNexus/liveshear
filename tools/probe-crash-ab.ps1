@@ -46,7 +46,26 @@ if (-not $ArmAPath) { $ArmAPath = Join-Path $repo 'docs\evidence\crash-arm-a.txt
 $null = New-Item -ItemType Directory -Force -Path (Split-Path -Parent $LogPath)
 
 $log = New-Object Collections.Generic.List[string]
-function Note([string] $line) { $log.Add($line); Write-Output $line }
+
+# Every line was held in memory until the last statement of the probe, and a
+# full run is the better part of an hour. When the runner process died at trial
+# 5 of 12 on 2026-09-14 neither the transcript nor the .tsv had been written,
+# and the only surviving record of twenty minutes of measurement was whatever
+# the calling script had captured from stdout. Each line now reaches disk as it
+# is produced.
+#
+# The partial file is deliberately not named *.txt. The release gate examines
+# .tsv, .txt, and .png, and a half-finished transcript must not be able to pass
+# for a finished one. crash-ab.tsv is still written once, at the very end, so
+# its presence continues to mean exactly one thing: the probe ran to the end.
+$partial = $LogPath + '.partial'
+if (Test-Path $partial) { [System.IO.File]::Delete($partial) }
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+function Note([string] $line) {
+    $log.Add($line)
+    [System.IO.File]::AppendAllText($partial, $line + "`r`n", $utf8NoBom)
+    Write-Output $line
+}
 
 Start-ProbeResults -Probe 'crash'
 
@@ -184,4 +203,6 @@ Stop-Ai | Out-Null
 Start-Ai | Out-Null
 Save-ProbeResults -Path ($LogPath -replace '\.txt$', '.tsv')
 Save-ProbeTranscript -Path $LogPath -Lines $log
+# The real transcript is on disk now, so the crash-recovery copy is noise.
+if (Test-Path $partial) { [System.IO.File]::Delete($partial) }
 Write-Output "`nWritten to $LogPath"
