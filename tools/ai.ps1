@@ -97,16 +97,90 @@ function Wait-AiReady {
             (Get-AiApp -TimeoutSeconds 10).DoJavaScript('app.documents.length + "";') | Out-Null
             return $true
         }
-        catch { Start-Sleep -Seconds 2 }
+        catch {
+            # After a crash, Illustrator starts on a prompt offering to launch
+            # or to run diagnostics, and no script runs until it is answered.
+            # A posted click answers it without taking the mouse or the focus.
+            $running = Get-Process Illustrator -ErrorAction SilentlyContinue | Select-Object -First 1
+            if ($running) { [AiLaunch]::AnswerCrashPrompt($running.Id) | Out-Null }
+            Start-Sleep -Seconds 2
+        }
     }
     return $false
+}
+
+if (-not ('AiLaunch' -as [type])) {
+    Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+using System.Text;
+public static class AiLaunch {
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    struct STARTUPINFO { public int cb; public string lpReserved, lpDesktop, lpTitle; public int dwX, dwY, dwXSize, dwYSize, dwXCountChars, dwYCountChars, dwFillAttribute, dwFlags; public short wShowWindow, cbReserved2; public IntPtr lpReserved2, hStdInput, hStdOutput, hStdError; }
+    [StructLayout(LayoutKind.Sequential)]
+    struct PROCESS_INFORMATION { public IntPtr hProcess, hThread; public int dwProcessId, dwThreadId; }
+    delegate bool EnumProc(IntPtr hwnd, IntPtr lParam);
+    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+    static extern bool CreateProcessW(string app, string cmd, IntPtr pa, IntPtr ta, bool inherit, int flags, IntPtr env, string dir, ref STARTUPINFO si, out PROCESS_INFORMATION pi);
+    [DllImport("kernel32.dll")] static extern bool CloseHandle(IntPtr h);
+    [DllImport("user32.dll")] static extern bool EnumWindows(EnumProc cb, IntPtr lParam);
+    [DllImport("user32.dll")] static extern bool EnumChildWindows(IntPtr parent, EnumProc cb, IntPtr lParam);
+    [DllImport("user32.dll")] static extern int GetWindowThreadProcessId(IntPtr hwnd, out int pid);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int GetWindowTextW(IntPtr hwnd, StringBuilder text, int size);
+    [DllImport("user32.dll")] static extern bool PostMessageW(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam);
+
+    // STARTF_USESHOWWINDOW with SW_SHOWMINNOACTIVE. Returns the process id,
+    // or the negated Win32 error.
+    public static int Start(string exe, string dir) {
+        var si = new STARTUPINFO();
+        si.cb = Marshal.SizeOf(si);
+        si.dwFlags = 1;
+        si.wShowWindow = 7;
+        PROCESS_INFORMATION pi;
+        if (!CreateProcessW(exe, "\"" + exe + "\"", IntPtr.Zero, IntPtr.Zero, false, 0, IntPtr.Zero, dir, ref si, out pi))
+            return -Marshal.GetLastWin32Error();
+        CloseHandle(pi.hThread);
+        CloseHandle(pi.hProcess);
+        return pi.dwProcessId;
+    }
+
+    // Posts BM_CLICK to the prompt's "Launch Illustrator" button.
+    public static bool AnswerCrashPrompt(int pid) {
+        bool clicked = false;
+        EnumWindows((top, unused) => {
+            int owner;
+            GetWindowThreadProcessId(top, out owner);
+            if (owner != pid) return true;
+            EnumChildWindows(top, (child, unused2) => {
+                var text = new StringBuilder(128);
+                GetWindowTextW(child, text, text.Capacity);
+                if (text.ToString() != "&Launch Illustrator") return true;
+                PostMessageW(child, 0x00F5, IntPtr.Zero, IntPtr.Zero);
+                clicked = true;
+                return false;
+            }, IntPtr.Zero);
+            return !clicked;
+        }, IntPtr.Zero);
+        return clicked;
+    }
+}
+"@
 }
 
 function Start-Ai {
     [CmdletBinding()]
     param([string] $Exe = 'C:\Program Files\Adobe\Adobe Illustrator 2026\Support Files\Contents\Windows\Illustrator.exe')
 
-    if (-not (Get-Process Illustrator -ErrorAction SilentlyContinue)) { Start-Process $Exe }
+    # Minimized and never activated, so the restart before each probe does not
+    # take the foreground from whoever is using the machine; Start-Process
+    # activates the window even when asked for it minimized. CreateProcess
+    # from this process, not WMI, so Illustrator inherits this environment and
+    # LIVESHEAR_LOG with it. Started in Illustrator's own folder: its helper
+    # processes outlive it holding the folder they were started in.
+    if (-not (Get-Process Illustrator -ErrorAction SilentlyContinue)) {
+        $id = [AiLaunch]::Start($Exe, (Split-Path -Parent $Exe))
+        if ($id -le 0) { throw ('Illustrator could not be started: Win32 error {0}.' -f (-$id)) }
+    }
     if (-not (Wait-AiReady)) { throw 'Illustrator started but never became ready to run a script.' }
     'Illustrator running.'
 }
