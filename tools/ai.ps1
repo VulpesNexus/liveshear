@@ -129,13 +129,13 @@ public static class AiLaunch {
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int GetWindowTextW(IntPtr hwnd, StringBuilder text, int size);
     [DllImport("user32.dll")] static extern bool PostMessageW(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam);
 
-    // STARTF_USESHOWWINDOW with SW_SHOWMINNOACTIVE. Returns the process id,
+    // STARTF_USESHOWWINDOW with SW_SHOWNOACTIVATE. Returns the process id,
     // or the negated Win32 error.
     public static int Start(string exe, string dir) {
         var si = new STARTUPINFO();
         si.cb = Marshal.SizeOf(si);
         si.dwFlags = 1;
-        si.wShowWindow = 7;
+        si.wShowWindow = 4;
         PROCESS_INFORMATION pi;
         if (!CreateProcessW(exe, "\"" + exe + "\"", IntPtr.Zero, IntPtr.Zero, false, 0, IntPtr.Zero, dir, ref si, out pi))
             return -Marshal.GetLastWin32Error();
@@ -171,9 +171,12 @@ function Start-Ai {
     [CmdletBinding()]
     param([string] $Exe = 'C:\Program Files\Adobe\Adobe Illustrator 2026\Support Files\Contents\Windows\Illustrator.exe')
 
-    # Minimized and never activated, so the restart before each probe does not
+    # Shown but never activated, so the restart before each probe does not
     # take the foreground from whoever is using the machine; Start-Process
-    # activates the window even when asked for it minimized. CreateProcess
+    # activates the window. Not minimized, because every earlier release run
+    # measured a shown Illustrator: a minimized one died in the export probe
+    # five times of five, at the host's own 0x18162a7, and a shown one passed
+    # the first time, though the effect matrix died shown as well. CreateProcess
     # from this process, not WMI, so Illustrator inherits this environment and
     # LIVESHEAR_LOG with it. Started in Illustrator's own folder: its helper
     # processes outlive it holding the folder they were started in.
