@@ -45,6 +45,7 @@
 #include "LiveShearID.h"
 #include "ShearLog.h"
 #include "DialogPlacement.h"
+#include "HostLook.h"
 
 #ifdef WIN_ENV
 
@@ -459,12 +460,18 @@ namespace
         return 96;
     }
 
-    /** The standard UI typeface at nine points for this monitor's scaling. The
+    /** Illustrator's own interface typeface, Adobe Clean UX, at the size its
+        dialogs use: 13 pixels at 96 dots per inch, whose capitals are as tall
+        as the text of Adobe's own dialogs. When it cannot be read, the
+        standard UI typeface at nine points for this monitor's scaling. The
         metrics the system reports are already scaled for the system's own dots
         per inch, so only the face name is taken from them and the size is
         computed here. */
     HFONT MakeUiFont(int dpi)
     {
+        const HFONT host = hostlook::MakeFont(13, dpi);
+        if (host != nullptr) return host;
+
         NONCLIENTMETRICSW metrics;
         ZeroMemory(&metrics, sizeof(metrics));
         metrics.cbSize = sizeof(metrics);
@@ -531,10 +538,11 @@ namespace
         if (oldFont != nullptr) SelectObject(dc, oldFont);
     }
 
-    /** A push button in the host's colors: a flat face with a one-pixel
-        border, which is what Illustrator's own buttons look like at every
-        brightness. The default button is marked with the focus-ring color
-        rather than by being a different shape. */
+    /** A push button as Illustrator's own dialogs draw one: fully rounded, the
+        default button filled in the accent color with white text, the others
+        outlined in the text color. A flat face with a one-pixel border, the
+        default marked with the focus-ring color, stands in when Direct2D
+        cannot draw. */
     void DrawPushButton(DialogData* dd, const DRAWITEMSTRUCT* di)
     {
         const sheartheme::Theme& t = dd->theme;
@@ -543,6 +551,21 @@ namespace
         const bool focused = (di->itemState & ODS_FOCUS) != 0;
         const bool hot = dd->hot == static_cast<int>(di->CtlID);
         const bool isDefault = di->CtlID == IDOK;
+
+        hostlook::ButtonLook look = hostlook::LookOf(isDefault, pressed, hot, focused, t.background, t.text, t.focusRing);
+        if (disabled)
+        {
+            look.fill = t.background;
+            look.edge = t.disabledText;
+            look.ink = t.disabledText;
+            look.edgeWidth = 1;
+            look.innerRing = false;
+        }
+        if (hostlook::DrawButton(di->hDC, di->rcItem, t.background, look, Hairline(dd->dpi)))
+        {
+            DrawButtonText(di->hDC, di->hwndItem, di->rcItem, look.ink, dd->font);
+            return;
+        }
 
         COLORREF face = t.control;
         if (disabled) face = t.background;

@@ -95,7 +95,7 @@ function Build-AboutHarness {
 
         $out = & cl.exe -nologo -EHsc -W4 -std:c++17 -DUNICODE -D_UNICODE -DWIN_ENV `
                  -I $src -I $res `
-                 main.cpp (Join-Path $src 'ShearAbout.cpp') harness.res `
+                 main.cpp (Join-Path $src 'ShearAbout.cpp') (Join-Path $src 'HostLook.cpp') harness.res `
                  -Fe:AboutHarness.exe `
                  -link -SUBSYSTEM:WINDOWS user32.lib gdi32.lib comctl32.lib shell32.lib 2>&1
         if ($LASTEXITCODE -ne 0) { $out | Write-Output; throw "cl.exe failed with exit code $LASTEXITCODE." }

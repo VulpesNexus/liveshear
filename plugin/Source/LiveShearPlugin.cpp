@@ -22,6 +22,7 @@
 #include "ShearLog.h"
 #include "ShearDialog.h"
 #include "ShearAbout.h"
+#include "HostLook.h"
 #include "ShearTheme.h"
 #include "SDKDef.h"
 #include "SDKAboutPluginsHelper.h"
@@ -149,6 +150,9 @@ ASErr LiveShearPlugin::ShutdownPlugin(SPInterfaceMessage* message)
     // registered, its window procedure would point into freed memory, so it
     // goes now.
     ShutdownShearDialog();
+#ifdef WIN_ENV
+    hostlook::ReleaseFont();
+#endif
     message->d.globals = nullptr;
     return Plugin::ShutdownPlugin(message);
 }

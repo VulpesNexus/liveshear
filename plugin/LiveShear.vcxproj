@@ -102,6 +102,7 @@
     <ClCompile Include="Source\ShearDialog.cpp" />
     <ClCompile Include="Source\ShearTheme.cpp" />
     <ClCompile Include="Source\ShearAbout.cpp" />
+    <ClCompile Include="Source\HostLook.cpp" />
     <ClCompile Include="Source\Introspect.cpp" />
     <ClCompile Include="Source\ShearLog.cpp" />
     <ClCompile Include="$(AISDKApi)\illustrator\IAIUnicodeString.cpp" />
@@ -124,6 +125,7 @@
     <ClInclude Include="Source\ShearDialog.h" />
     <ClInclude Include="Source\ShearTheme.h" />
     <ClInclude Include="Source\ShearAbout.h" />
+    <ClInclude Include="Source\HostLook.h" />
     <ClInclude Include="Source\DialogPlacement.h" />
     <ClInclude Include="Source\Introspect.h" />
     <ClInclude Include="Source\ShearLog.h" />

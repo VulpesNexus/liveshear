@@ -38,6 +38,10 @@
 #include <cstdio>
 #include <cstring>
 #include "ShearAbout.h"
+#include "HostLook.h"
+#include <string>
+
+#pragma comment(lib, "advapi32.lib")
 
 namespace {
 
@@ -187,6 +191,17 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, LPWSTR cmdLine, int)
        ones Illustrator 30.7 reported at its darkest setting, hard-coded here so
        the dialog can be looked at in that theme without a copy of Illustrator
        to ask. That is the whole point of the harness. */
+    /* Illustrator's own typeface, which the plugin finds in the running
+       Illustrator; here it is read from the installed one. */
+    wchar_t exe[MAX_PATH] = { 0 };
+    DWORD exeSize = sizeof(exe);
+    if (RegGetValueW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\Illustrator.exe",
+                     nullptr, RRF_RT_REG_SZ, nullptr, exe, &exeSize) == ERROR_SUCCESS) {
+        std::wstring path = exe;
+        const size_t windows = path.rfind(L"\\Contents\\Windows\\");
+        if (windows != std::wstring::npos) hostlook::UseSupportFiles(path.substr(0, windows));
+    }
+
     ShearAboutTheme theme;
     if (cmdLine != nullptr && wcsstr(cmdLine, L"/dark") != nullptr) {
         theme.panel     = RGB(0x32, 0x32, 0x32);

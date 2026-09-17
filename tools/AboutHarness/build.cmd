@@ -26,7 +26,7 @@ rc /nologo /I "%RES%" /I "%SRC%" /fo harness.res harness.rc || exit /b 1
 
 cl /nologo /EHsc /W4 /std:c++17 /DUNICODE /D_UNICODE /DWIN_ENV ^
    /I "%SRC%" /I "%RES%" ^
-   main.cpp "%SRC%\ShearAbout.cpp" harness.res ^
+   main.cpp "%SRC%\ShearAbout.cpp" "%SRC%\HostLook.cpp" harness.res ^
    /Fe:AboutHarness.exe ^
    /link /SUBSYSTEM:WINDOWS user32.lib gdi32.lib comctl32.lib shell32.lib || exit /b 1
 

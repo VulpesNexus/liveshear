@@ -43,6 +43,7 @@
 #include "LiveShearID.h"
 #include "Resource.h"
 #include "DialogPlacement.h"
+#include "HostLook.h"
 
 #include <commctrl.h>
 #include <shellapi.h>
@@ -67,7 +68,9 @@ namespace {
  * typo. Keeping them in that form leaves the file plain ASCII, the same reason
  * the wide literals elsewhere use \x escapes.
  *
- * \fs18 is 9pt: RTF measures in half-points. */
+ * \fs18 is 9pt: RTF measures in half-points. The face and size are the
+ * template's; with Illustrator's own typeface they become Adobe Clean UX at
+ * 10pt, the nearest half-point to the 13 pixels its dialogs use. */
 const char* const kBodyRtf =
     "{\\rtf1\\ansi\\deff0{\\fonttbl{\\f0\\fnil Segoe UI;}}"
     /* \sa140 is 7pt of space after each paragraph. Without it the sections run
@@ -97,6 +100,7 @@ const char* const kBodyRtf =
     "}";
 
 struct AboutState {
+    HFONT   body;       /* Illustrator's typeface for the controls; null keeps the template's */
     HFONT   title;
     HFONT   legal;
     HBRUSH  panel;      /* upper band */
@@ -124,13 +128,19 @@ DWORD CALLBACK RtfReader(DWORD_PTR cookie, LPBYTE buffer, LONG wanted, LONG* don
 /* Derives a font from the dialog's own, so it follows whatever the user's
    shell font and DPI actually are instead of hard-coding a face and a pixel
    size. */
-HFONT DeriveFont(HWND dlg, int percentOfHeight, bool bold)
+HFONT DeriveFont(HWND dlg, int percentOfHeight, bool bold, bool hostOnly = false)
 {
     HFONT base = reinterpret_cast<HFONT>(SendMessageW(dlg, WM_GETFONT, 0, 0));
     if (base == nullptr) return nullptr;
 
     LOGFONTW lf;
     if (GetObjectW(base, sizeof(lf), &lf) == 0) return nullptr;
+
+    if (!bold) {
+        const int pixels = MulDiv((lf.lfHeight < 0) ? -lf.lfHeight : lf.lfHeight, 13 * percentOfHeight, 12 * 100);
+        HFONT host = hostlook::MakeFont(pixels, 96);
+        if (host != nullptr || hostOnly) return host;
+    }
 
     LONG h = lf.lfHeight;                     /* negative for character height */
     lf.lfHeight = (h < 0) ? -MulDiv(-h, percentOfHeight, 100)
@@ -149,7 +159,7 @@ void OpenLink(HWND parent, const wchar_t* url)
     ShellExecuteW(parent, L"open", url, nullptr, nullptr, SW_SHOWNORMAL);
 }
 
-void FillBody(HWND dlg, const ShearAboutTheme& theme)
+void FillBody(HWND dlg, const ShearAboutTheme& theme, bool hostFont)
 {
     HWND body = GetDlgItem(dlg, IDC_ABOUT_BODY);
     if (body == nullptr) return;
@@ -158,7 +168,14 @@ void FillBody(HWND dlg, const ShearAboutTheme& theme)
     SendMessageW(body, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, 0);
     SendMessageW(body, EM_EXLIMITTEXT, 0, 64 * 1024);
 
-    RtfSource src = { kBodyRtf, strlen(kBodyRtf) };
+    std::string rtf = kBodyRtf;
+    if (hostFont) {
+        const size_t face = rtf.find("Segoe UI;");
+        if (face != std::string::npos) rtf.replace(face, 8, "Adobe Clean UX");
+        const size_t size = rtf.find("\\fs18");
+        if (size != std::string::npos) rtf.replace(size, 5, "\\fs20");
+    }
+    RtfSource src = { rtf.c_str(), rtf.size() };
     EDITSTREAM es = { 0 };
     es.dwCookie    = reinterpret_cast<DWORD_PTR>(&src);
     es.pfnCallback = RtfReader;
@@ -202,19 +219,27 @@ void ApplyDarkTitleBar(HWND dlg)
     FreeLibrary(dwm);
 }
 
-/* The OK button, when the theme asks for it. Flat face, one-pixel border, and
-   the focus ring drawn in the link color -- the same shape the Shear dialog's
-   own buttons have. */
+/* The OK button, when the theme asks for it: drawn as Illustrator's own
+   dialogs draw their default button, fully rounded and filled in the accent
+   color, the same shape the Shear dialog's OK has. A flat face with a
+   one-pixel border stands in when Direct2D cannot draw. The keyboard focus
+   ring shows only once the keyboard is in use, as Windows asks. */
 void DrawOkButton(const AboutState* st, const DRAWITEMSTRUCT* di)
 {
     const bool pressed = (di->itemState & ODS_SELECTED) != 0;
-    const bool focused = (di->itemState & ODS_FOCUS) != 0;
+    const bool focused = (di->itemState & ODS_FOCUS) != 0 && (di->itemState & ODS_NOFOCUSRECT) == 0;
 
-    HBRUSH face = CreateSolidBrush(pressed ? st->theme.buttonBorder : st->theme.button);
-    if (face != nullptr) { FillRect(di->hDC, &di->rcItem, face); DeleteObject(face); }
+    const hostlook::ButtonLook look = hostlook::LookOf(true, pressed, false, focused,
+                                                       st->theme.band, st->theme.buttonText, st->theme.link);
+    const int dpi = GetDeviceCaps(di->hDC, LOGPIXELSX);
+    const bool drawn = hostlook::DrawButton(di->hDC, di->rcItem, st->theme.band, look, (dpi >= 144) ? dpi / 96 : 1);
+    if (!drawn) {
+        HBRUSH face = CreateSolidBrush(pressed ? st->theme.buttonBorder : st->theme.button);
+        if (face != nullptr) { FillRect(di->hDC, &di->rcItem, face); DeleteObject(face); }
 
-    HBRUSH edge = CreateSolidBrush(focused ? st->theme.link : st->theme.buttonBorder);
-    if (edge != nullptr) { FrameRect(di->hDC, &di->rcItem, edge); DeleteObject(edge); }
+        HBRUSH edge = CreateSolidBrush(focused ? st->theme.link : st->theme.buttonBorder);
+        if (edge != nullptr) { FrameRect(di->hDC, &di->rcItem, edge); DeleteObject(edge); }
+    }
 
     wchar_t text[32];
     text[0] = L'\0';
@@ -223,7 +248,7 @@ void DrawOkButton(const AboutState* st, const DRAWITEMSTRUCT* di)
     HFONT base = reinterpret_cast<HFONT>(SendMessageW(di->hwndItem, WM_GETFONT, 0, 0));
     HGDIOBJ old = (base != nullptr) ? SelectObject(di->hDC, base) : nullptr;
     SetBkMode(di->hDC, TRANSPARENT);
-    SetTextColor(di->hDC, st->theme.buttonText);
+    SetTextColor(di->hDC, drawn ? look.ink : st->theme.buttonText);
     RECT box = di->rcItem;
     DrawTextW(di->hDC, text, -1, &box, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
     if (old != nullptr) SelectObject(di->hDC, old);
@@ -238,6 +263,7 @@ INT_PTR CALLBACK AboutProc(HWND dlg, UINT msg, WPARAM wParam, LPARAM lParam)
         st = new AboutState();
         const ShearAboutTheme* passed = reinterpret_cast<const ShearAboutTheme*>(lParam);
         st->theme  = (passed != nullptr) ? *passed : ShearAboutTheme();
+        st->body   = DeriveFont(dlg, 100, false, true);
         st->title  = DeriveFont(dlg, 150, false);
         st->legal  = DeriveFont(dlg,  92, false);
         st->panel  = CreateSolidBrush(st->theme.panel);
@@ -250,6 +276,8 @@ INT_PTR CALLBACK AboutProc(HWND dlg, UINT msg, WPARAM wParam, LPARAM lParam)
         MapDialogRect(dlg, &split);
         st->splitY = split.top;
 
+        if (st->body)  SendDlgItemMessageW(dlg, IDOK, WM_SETFONT,
+                                           reinterpret_cast<WPARAM>(st->body), TRUE);
         if (st->title) SendDlgItemMessageW(dlg, IDC_ABOUT_TITLE, WM_SETFONT,
                                            reinterpret_cast<WPARAM>(st->title), TRUE);
         if (st->legal) SendDlgItemMessageW(dlg, IDC_ABOUT_ATTRIB, WM_SETFONT,
@@ -266,7 +294,7 @@ INT_PTR CALLBACK AboutProc(HWND dlg, UINT msg, WPARAM wParam, LPARAM lParam)
         SetDlgItemTextW(dlg, IDC_ABOUT_TITLE,
             L"<a href=\"" LS_REPO_URL L"\">" LS_WDISPLAYNAME L" " LS_WDISPLAYVERSION L"</a>");
 
-        FillBody(dlg, st->theme);
+        FillBody(dlg, st->theme, st->body != nullptr);
 
         /* The author link lives on this name rather than on the one in the
            copyright below. The notice is a legal statement and reads better
@@ -392,6 +420,7 @@ INT_PTR CALLBACK AboutProc(HWND dlg, UINT msg, WPARAM wParam, LPARAM lParam)
 
     case WM_DESTROY:
         if (st != nullptr) {
+            if (st->body)  DeleteObject(st->body);
             if (st->title) DeleteObject(st->title);
             if (st->legal) DeleteObject(st->legal);
             if (st->panel) DeleteObject(st->panel);
