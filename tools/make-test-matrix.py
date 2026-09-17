@@ -37,7 +37,7 @@ SOURCES = [
     ("stability.tsv", "Stability and performance", "Identity, cumulative drift, source invariance, evaluation cost, and a document full of independent instances."),
     ("gpu.tsv", "Preview mode", "The document window captured as a bitmap under each preview path and compared pixel by pixel."),
     ("missing-plugin.tsv", "Opened without the plugin", "The document authored with the effect, then opened on a machine where the plugin is not installed: what still draws, what stops, and whether saving from that state loses anything."),
-    ("crash-ab.tsv", "Document churn", "Illustrator dies under long runs of scripted document create/close with no third-party plugin installed at all. These rows are the three-arm comparison that says whether having this one loaded, or using it, changes that. They are labeled MEASURED rather than passed or failed, because the question is a comparison between arms and not a threshold."),
+    ("history/crash-ab-2026-09-14.tsv", "Document churn, measured against 0.1.1", "Illustrator dies under long runs of scripted document create/close with no third-party plugin installed at all. These rows are the three-arm comparison that says whether having this one loaded, or using it, changes that. They are labeled MEASURED rather than passed or failed, because the question is a comparison between arms and not a threshold. They were measured against 0.1.1 and not re-run for 0.1.2, whose only change is the dialog, which no trial opens; the file is dated in its name for that reason."),
     ("shutdown.tsv", "Application shutdown", "Illustrator quit the ordinary way from each state this plugin can leave it in, checking that it went, that it went promptly, and that the Windows event log has nothing new to say."),
 ]
 

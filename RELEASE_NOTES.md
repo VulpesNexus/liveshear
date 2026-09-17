@@ -1,6 +1,6 @@
 # Release notes
 
-## Unreleased
+## 0.1.2
 
 **The axis is chosen the way Illustrator chooses it.** The dialog has *Horizontal*, *Vertical*, and *Angle* buttons, as *Object > Transform > Shear* does. *Horizontal* and *Vertical* set the axis to 0° and 90° and lock the *Axis Angle* slider; *Angle* unlocks it. Like Illustrator's, the buttons are only names for those two angles: nothing new is stored, so documents stay readable by 0.1.1. An axis of −90° shears exactly like one of 90°, but it opens under *Angle*, as stored, so pressing *OK* on it does not quietly rewrite the number.
 
@@ -9,6 +9,8 @@ The buttons matter most for rotated artwork. The effect is applied after the obj
 **A new Shear opens with the values used last.** Choosing *Effect > Shear…* used to open at 0° every time. It now opens with the angles and axis last committed with *OK*, until Illustrator quits. Editing an existing Shear from the *Appearance* panel still opens with that effect's own values, and *Cancel* is not remembered. The *Preview* box also stays the way it was left, and is kept in Illustrator's preferences file across restarts. Illustrator's preferences file holds exactly that for its own transform dialogs (a Preview setting each, and no angles), which is why the angles last only for the session.
 
 Nothing about the geometry changed.
+
+**The crash comparison was not re-run.** It asks whether having the plugin loaded changes how often Illustrator crashes under scripted document churn, and nothing in its trials opens the dialog, which is all this release changed. Its files moved to *docs/evidence/history/* with their date in the name, and the readiness document and the test matrix say they were measured against 0.1.1. Everything else was measured again against this binary.
 
 ## 0.1.1
 

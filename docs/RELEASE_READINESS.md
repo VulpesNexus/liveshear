@@ -180,9 +180,9 @@ Found and fixed in this sprint: the script bridge bounds-checked the source inde
 
 Illustrator 30.7.0 dies with an access violation inside *Illustrator.exe* under sustained scripted document churn.
 
-**Proven: this plugin is not necessary for it.** With *LiveShear.aip* out of the plugin folder altogether, six trials of up to sixty create/close cycles each — a fresh Illustrator every trial, nothing ever touching the effect — crashed four times, at 3, 11, 13, and 16 cycles; the other two completed all sixty ([evidence/crash-arm-a.txt](evidence/crash-arm-a.txt)). The faulting offset was `0x18162a7` every time.
+**Proven: this plugin is not necessary for it.** With *LiveShear.aip* out of the plugin folder altogether, six trials of up to sixty create/close cycles each — a fresh Illustrator every trial, nothing ever touching the effect — crashed four times, at 3, 11, 13, and 16 cycles; the other two completed all sixty ([evidence/history/crash-arm-a-2026-09-14.txt](evidence/history/crash-arm-a-2026-09-14.txt), measured against 0.1.1). The faulting offset was `0x18162a7` every time.
 
-**Measured for 0.1.1, where before it was left open: having the plugin loaded does not detectably change how often it happens.** Three arms of six trials, interleaved, each trial in a fresh host — the plugin absent, the plugin loaded but never used, and the effect applied on every cycle ([evidence/crash-ab.tsv](evidence/crash-ab.tsv)).
+**Measured for 0.1.1, where before it was left open: having the plugin loaded does not detectably change how often it happens.** Three arms of six trials, interleaved, each trial in a fresh host — the plugin absent, the plugin loaded but never used, and the effect applied on every cycle ([evidence/history/crash-ab-2026-09-14.tsv](evidence/history/crash-ab-2026-09-14.tsv)).
 
 | arm | crashed | cycles reached | mean |
 | --- | --- | --- | --- |
