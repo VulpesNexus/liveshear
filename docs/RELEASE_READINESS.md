@@ -2,9 +2,9 @@
 
 ## A. Verdict
 
-**RELEASABLE, WITH DOCUMENTED LIMITATIONS.** Shipped as 0.1.2.
+**RELEASABLE, WITH DOCUMENTED LIMITATIONS.** Shipped as 0.1.3.
 
-The binary has been run in Illustrator, and every result below was measured against the artifact being packaged rather than against an earlier one, with one stated exception: the crash comparison in section Q, which was measured against 0.1.1 and not repeated for a release that changed only the dialog. Source artwork is safe in every case the suite can construct: the effect's own path anchors are compared before and after in all 61 artwork cases and never move. The reference point matches Illustrator's own shear command for every kind of artwork the suite can build, along both axes. Claims in the README, the release notes, and the limitations list were checked one at a time against the evidence behind them, and several were weakened or corrected because the evidence did not support them.
+The binary has been run in Illustrator, and every result below was measured against the artifact being packaged rather than against an earlier one, with one stated exception: the crash comparison in section Q, which was measured against 0.1.1 and not repeated for the two releases since, which changed only the dialog and the About window. Source artwork is safe in every case the suite can construct: the effect's own path anchors are compared before and after in all 61 artwork cases and never move. The reference point matches Illustrator's own shear command for every kind of artwork the suite can build, along both axes. Claims in the README, the release notes, and the limitations list were checked one at a time against the evidence behind them, and several were weakened or corrected because the evidence did not support them.
 
 What keeps this from being an unqualified release is a short list of bounded, named limitations, none of which risks a document, and none of which the release candidates closed:
 
@@ -20,7 +20,7 @@ Section T says what would have to change for those qualifications to come off.
 
 | | |
 | --- | --- |
-| Plugin version | 0.1.2 |
+| Plugin version | 0.1.3 |
 | Binary | *LiveShear.aip*; size and SHA-256 in [evidence/build.txt](evidence/build.txt) |
 | Commit | recorded in the same file, with whether the working tree was clean |
 | Illustrator | 2026, version 30.7.0, 64-bit — **this binary has been loaded and driven by it** |
@@ -144,6 +144,8 @@ Why the buttons matter was measured in Illustrator during development rather tha
 
 That last check exists because **a screen capture of the dialog found a defect no numeric check would have.** The window class was registered with the narrow entry point while `DefWindowProc` resolved to the wide one, so the title "Shear" was stored as its own bytes reinterpreted as UTF-16 and displayed as 桓槌r; the degree sign, written as UTF-8 into an ANSI call, came through the machine's code page as two half-width katakana. Every string the dialog touches now goes through the wide entry points, and the *Appearance* panel's description goes through `SetUnicodeStringEntry` rather than a plain `char*`. The picture is kept at [evidence/dialog.png](evidence/dialog.png).
 
+**The dialog and the About window take Illustrator's own look**, new in 0.1.3. Text is in *Adobe Clean UX*, the typeface Illustrator carries in its own *dvaui.dll*, read at run time at the 13 pixels Illustrator's dialogs use, and push buttons are drawn the way Illustrator's are: fully rounded, the default filled in the accent color with white text, the others outlined, and a disabled one outlined in the disabled color. The code is *plugin/Source/HostLook.cpp*, shared with FreeDistort+ and Subgroup. It loads Direct2D rather than linking it, and when the typeface or Direct2D is missing, the dialog keeps *Segoe UI* and flat buttons. Nothing the dialog does changed, so its checks are the ones 0.1.2 had, and they pass on the new look; [evidence/dialog.png](evidence/dialog.png) is the dialog as Illustrator shows it now.
+
 Also fixed here: the dialog rounded one typed number three different ways. The slider rounded a half away from zero, the field's formatting rounded a half to even, and the state kept the unrounded number until something re-read the field — typing 18.25 committed 18.2 while the slider sat at 18.3. Rounding happens once now, on the way in, so the number shown, the slider position, and the value stored are the same number. The resolution that gives is a tenth of a degree, and that is stated in the limitations.
 
 **Where the window opens is now measured, and it was wrong.** The dialog opened in the top-left corner of the primary monitor on every invocation, for five releases, and the probe never noticed because it read the window's size, its caption, its labels, and everything it did, and never once a coordinate. The cause was `CW_USEDEFAULT`, which reads as "let Windows choose" and applies to overlapped windows only: for a popup, which this is, the coordinates are documented to be taken as zero. It is centered on Illustrator's window now and clamped into the work area of the monitor that lands on, and both are checked — the centers coincide exactly when Illustrator is maximized, and the clamp is driven rather than assumed by putting Illustrator in the corner at 487 × 140, where centering alone would open the dialog thirty pixels above the top of the desktop and it opens at the edge instead. The plugin's own trace records the position it chose, so the driver's measurement has a second source.
@@ -174,7 +176,7 @@ Also covered: text set along a path, shearing one child of a group without distu
 
 ## P. Memory, resources, and what the code review found
 
-The effect acquires no suites of its own beyond the import table the SDK manages, creates no temporary art, and holds no handle past the callback that gave it. The dialog registers one window class lazily and unregisters it at shutdown, creates one font, and deletes it after its modal loop rather than during `WM_DESTROY`, when the controls still hold it, and hands the application's own quit message back instead of swallowing it. Illustrator quits cleanly in 1.4 to 3.5 seconds from each of four states the plugin can leave it in, with nothing new in the Windows event log.
+The effect acquires no suites of its own beyond the import table the SDK manages, creates no temporary art, and holds no handle past the callback that gave it. The dialog registers one window class lazily and unregisters it at shutdown, creates one font, and deletes it after its modal loop rather than during `WM_DESTROY`, when the controls still hold it, and hands the application's own quit message back instead of swallowing it. Illustrator's typeface, which that font is made from when it can be read, is added to the process once and removed when the plugin shuts down. Illustrator quits cleanly in 1.4 to 3.5 seconds from each of four states the plugin can leave it in, with nothing new in the Windows event log.
 
 Fixed across the two hardening sprints, each described where it lives: the reference point came from the wrong box; the parameter clamp lived in the dialog and so did not apply to a value from a saved document; `DeleteObject` on the dialog's font ran while the child controls still held it; the modal loop consumed `WM_QUIT`; the window class was never unregistered; six `reinterpret_cast<HMENU>(int)` conversions were narrowing in reverse on 64-bit; the arrow keys never reached the numeric fields because `IsDialogMessage` consumed them; the dialog mangled its own text; a preview that would change nothing still asked Illustrator to re-render; the binary claimed Adobe as its publisher; and the linker stamped the build machine's symbol path into the shipped binary.
 

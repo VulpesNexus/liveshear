@@ -15,7 +15,7 @@ This adds it. The artwork underneath is never touched — text stays live text, 
 **Do not double-click *LiveShear.aip*.** It is a plugin, not a document; double-clicking it makes Illustrator try to *open* it as artwork and answer that the file format is unknown. Nothing is wrong with the file when that happens.
 
 1. Quit Illustrator. It reads its plugin folders only at startup, and holds the *.aip* open while it runs.
-2. Download *LiveShear-0.1.2.zip* from the [latest release](../../releases/latest) and put *LiveShear.aip* in `%LOCALAPPDATA%\Adobe Illustrator Plug-ins\30`, creating that folder if it is not there. The *30* is Illustrator 2026's version number, and next year's Illustrator gets its own folder beside it.
+2. Download *LiveShear-0.1.3.zip* from the [latest release](../../releases/latest) and put *LiveShear.aip* in `%LOCALAPPDATA%\Adobe Illustrator Plug-ins\30`, creating that folder if it is not there. The *30* is Illustrator 2026's version number, and next year's Illustrator gets its own folder beside it.
 3. Start Illustrator, open *Edit > Preferences > Plug-ins & Scratch Disks*, tick **Additional Plug-ins Folder**, choose that folder, and restart.
 
 No administrator rights are needed for any of it, and `.\tools\sideload.ps1 -Path <folder>` sets the same preference from a script.

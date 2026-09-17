@@ -1,5 +1,13 @@
 # Release notes
 
+## 0.1.3
+
+**The dialog and the About window look like Illustrator's.** Their text is in *Adobe Clean UX*, the typeface Illustrator's own dialogs use, read from Illustrator itself at run time rather than installed, and their buttons are drawn the way Illustrator draws them: fully rounded, with the default one filled in the accent color. When that typeface or Direct2D cannot be loaded, they fall back to *Segoe UI* and flat buttons, as before.
+
+Nothing about the geometry, the stored values, or what the dialog does changed.
+
+**The crash comparison was not re-run**, for the same reason as in 0.1.2: none of its trials opens the dialog or the About window, which are all this release changed. Its files still describe 0.1.1. Everything else was measured again against this binary.
+
 ## 0.1.2
 
 **The axis is chosen the way Illustrator chooses it.** The dialog has *Horizontal*, *Vertical*, and *Angle* buttons, as *Object > Transform > Shear* does. *Horizontal* and *Vertical* set the axis to 0° and 90° and lock the *Axis Angle* slider; *Angle* unlocks it. Like Illustrator's, the buttons are only names for those two angles: nothing new is stored, so documents stay readable by 0.1.1. An axis of −90° shears exactly like one of 90°, but it opens under *Angle*, as stored, so pressing *OK* on it does not quietly rewrite the number.
