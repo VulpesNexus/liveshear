@@ -1,5 +1,5 @@
 Live Shear -- the crash that happens at the same point twice
-Run at 2026-09-14 19:06:50
+Run at 2026-09-17 16:02:54
 3 trials per arm, alternated, each in a fresh Illustrator
 
 trial    arm    reached                      crashed  fault offset

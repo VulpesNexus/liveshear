@@ -1,5 +1,5 @@
 Live Shear -- appearance composition
-Run at 2026-09-14 16:24:34
+Run at 2026-09-17 15:35:05
 Transform effect used as the partner: reflect=b:false;scaleH_Factor=r:1.6;scaleV_Factor=r:0.7
 
 --- plainRect ---

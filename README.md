@@ -54,7 +54,7 @@ Windows only; the shear angle stops at ±89°; the reference point is always the
 
 ## Documentation
 
-Every claim above comes from a probe that drives a real Illustrator over COM; there is no mock. The current run is **343 checks, none failed**, against the exact binary in the release.
+Every claim above comes from a probe that drives a real Illustrator over COM; there is no mock. The current run is **362 checks, none failed**, against the exact binary in the release.
 
 - [docs/BEHAVIOR.md](docs/BEHAVIOR.md) — where the shear anchors, and how it stacks
 - [docs/RELEASE_TEST_MATRIX.md](docs/RELEASE_TEST_MATRIX.md) — every check and its result, generated from the raw output

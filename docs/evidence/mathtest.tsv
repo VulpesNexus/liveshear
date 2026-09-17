@@ -1,2 +1,2 @@
 probe	group	case	expected	observed	status
-mathtest	arithmetic	the affine algebra and the exact extent of a cubic Bezier, compiled against stub types and checked against brute-force sampling	every check passes	3092 checks, 0 failed	PASS
+mathtest	arithmetic	the affine algebra and the exact extent of a cubic Bezier, compiled against stub types and checked against brute-force sampling	every check passes	3459 checks, 0 failed	PASS

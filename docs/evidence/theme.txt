@@ -1,10 +1,10 @@
 Live Shear -- does the dialog follow Illustrator's interface brightness?
-Run at 2026-09-14 17:06:18
+Run at 2026-09-17 15:58:00
 
 The machine was set to uiBrightness 0.5; it is put back at the end.
 
-uiBrightness 0      dialog corner 50,50,50       average 48.5    theme: from host, dark=1 background=323232 text=cdcdcd
-uiBrightness 1      dialog corner 240,240,240    average 233.5   theme: from host, dark=0 background=f0f0f0 text=2a2a2a
+uiBrightness 0      dialog corner 50,50,50       average 49.6    theme: from host, dark=1 background=323232 text=cdcdcd
+uiBrightness 1      dialog corner 240,240,240    average 232.8   theme: from host, dark=0 background=f0f0f0 text=2a2a2a
 
 uiBrightness put back to 0.5, and Illustrator restarted so it is applied.
 

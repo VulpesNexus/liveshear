@@ -1,10 +1,10 @@
 Live Shear -- the built artifact
-Run at 2026-09-14 16:17:54
+Run at 2026-09-17 15:21:19
 Windows 10.0.26200.0
 
 Toolchain: MSVC 14.44.35207
 SDK:       Adobe Illustrator 2026 SDK
-Commit:    cb010260f2397a2dce67b040555ed1ca49025e61
+Commit:    a370ca3975bb4245536659448fdeb6cb73d1387c
 
 [PASS] Release builds with no warnings and no errors
        0 warnings, 0 errors
@@ -13,20 +13,20 @@ Commit:    cb010260f2397a2dce67b040555ed1ca49025e61
 [PASS] the Release build produced a plugin
        build\Release\LiveShear.aip
 
-File version:   0.1.1
+File version:   0.1.2
 Company:        VulpesNexus
 Product:        Shear for Illustrator
 Description:    Non-destructive Shear effect for Adobe Illustrator
 Copyright:      Copyright (C) 2026 Vixen420. GPL-3.0-or-later, with an Adobe Illustrator SDK linking exception.
-Size:           184 320 bytes
-SHA-256:        C93CEAB49DD553AD3E1BC713BA261DABE5C604F86FB9C349150826DA485F4436
+Size:           193 536 bytes
+SHA-256:        9E960591DF0D5FB97C0F12F2094F2BD6B2759CC12574BBF8CD58D0B1831E9525
 
 [PASS] the binary does not claim Adobe as its publisher
        CompanyName is VulpesNexus
 [PASS] the binary names its own product
        ProductName is Shear for Illustrator
 [PASS] the binary carries a version
-       FileVersion is 0.1.1
+       FileVersion is 0.1.2
 [PASS] Release links the retail C runtime, not the debug one
        links MSVCP140.dll, VCRUNTIME140.dll
 [PASS] no path from the build machine is embedded
@@ -46,7 +46,7 @@ SHA-256:        C93CEAB49DD553AD3E1BC713BA261DABE5C604F86FB9C349150826DA485F4436
 [PASS] no debug trace is on by default
        tracing is behind the LIVESHEAR_LOG environment variable
 [PASS] the source this was built from is identified
-       commit cb010260f2397a2dce67b040555ed1ca49025e61
+       commit a370ca3975bb4245536659448fdeb6cb73d1387c
 [PASS] the working tree was clean when it was built
        0 uncommitted change(s)
 

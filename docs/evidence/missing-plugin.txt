@@ -1,5 +1,5 @@
 Live Shear -- what a machine without the plugin sees
-Run at 2026-09-14 18:30:19
+Run at 2026-09-17 16:01:42
 
 === Phase 1: authored with the plugin installed ===
 TextFrame; name=text; visibleWidth=268.105; geometricWidth=237.981; contents=Handgloves
@@ -34,7 +34,7 @@ Selected objects: 2
       # 1 entries
       shearAngle (Real) = 30.000000
 
-saved to <temp>\liveshear-probe\shear-with-plugin.ai (239 147 bytes)
+saved to <temp>\liveshear-probe\shear-with-plugin.ai (239 435 bytes)
 
 === Phase 2: the same file opened with the plugin removed ===
 plugin reachable: False
@@ -56,18 +56,9 @@ after retyping the text (if the effect were still running, the sheared result wo
 TextFrame; name=text; visibleWidth=268.104; geometricWidth=440.827; contents=Handgloves and more
 PathItem; name=rect; visibleWidth=269.282; geometricWidth=200; anchorsX=100/100/300/300
 
-re-saved without the plugin to <temp>\liveshear-probe\shear-resaved-without-plugin.ai (240 692 bytes)
+re-saved without the plugin to <temp>\liveshear-probe\shear-resaved-without-plugin.ai (240 719 bytes)
 [PASS] the document can be re-saved without the plugin
-       240 692 bytes
-
-=== Crash experiment, arm A: 6 trials of up to 60 document cycles, plugin absent ===
-  A absent          trial 1:  60 of 60 cycles, peak 2571 MB
-  A absent          trial 2:   3 of 60 cycles, peak 3426 MB, 2 Illustrator processes
-  A absent          trial 3:  11 of 60 cycles, peak 3655 MB, 2 Illustrator processes
-  A absent          trial 4:  60 of 60 cycles, peak 2713 MB
-  A absent          trial 5:  16 of 60 cycles, peak 3754 MB, 2 Illustrator processes
-  A absent          trial 6:  13 of 60 cycles, peak 3535 MB, 2 Illustrator processes
-arm A written to <repo>\docs\evidence\crash-arm-a.txt
+       240 719 bytes
 
 === Phase 3: the plugin reinstalled ===
 the original file, reopened with the plugin back:

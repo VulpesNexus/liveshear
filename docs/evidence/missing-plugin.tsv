@@ -4,6 +4,6 @@ without the plugin	without the plugin	the document opens without the plugin	the 
 without the plugin	without the plugin	the artwork still draws sheared	the document opens and nothing is lost	drawn widths with the plugin: text=268.105, rect=269.282; without it: text=268.104, rect=269.282	PASS
 without the plugin	without the plugin	the source geometry is neither expanded nor flattened	the document opens and nothing is lost	geometric widths with the plugin: text=237.981, rect=200; without it: text=237.981, rect=200	PASS
 without the plugin	without the plugin	text is still live text	the document opens and nothing is lost	no TextFrame in the reopened document	PASS
-without the plugin	without the plugin	the document can be re-saved without the plugin	the document opens and nothing is lost	240 692 bytes	PASS
+without the plugin	without the plugin	the document can be re-saved without the plugin	the document opens and nothing is lost	240 719 bytes	PASS
 without the plugin	without the plugin	the original file still holds the effect and its parameters	the document opens and nothing is lost	the effect is in the reopened file, with shearAngle still 30	PASS
 without the plugin	without the plugin	a file re-saved without the plugin loses nothing	the document opens and nothing is lost	the effect survived the round trip through a machine without the plugin, with shearAngle still 30	PASS

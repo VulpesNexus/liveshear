@@ -9,9 +9,9 @@ stability	identity	identity at axis -63, 25 redraws	no change from the untouched
 stability	drift	100 parameter edits then back to 30 degrees	no change from the untouched artwork	deviation 0	PASS
 stability	drift	and back to zero, against artwork never sheared	no change from the untouched artwork	deviation 0	PASS
 stability	source	source anchors identical to a fresh fixture	no change from the untouched artwork	the source moved	PASS
-stability	performance	plainRect: 100 evaluations with the effect	fast enough that dragging the slider does not lag	7016 ms in total, 70,16 ms each; the same loop with nothing to recompute took 3094 ms	MEASURED
-stability	performance	bezier: 100 evaluations with the effect	fast enough that dragging the slider does not lag	6336 ms in total, 63,36 ms each; the same loop with nothing to recompute took 3103 ms	MEASURED
-stability	performance	multilineText: 100 evaluations with the effect	fast enough that dragging the slider does not lag	6466 ms in total, 64,66 ms each; the same loop with nothing to recompute took 3109 ms	MEASURED
-stability	performance	manyChildren: 100 evaluations with the effect	fast enough that dragging the slider does not lag	6118 ms in total, 61,18 ms each; the same loop with nothing to recompute took 3108 ms	MEASURED
-stability	performance	compound: 100 evaluations with the effect	fast enough that dragging the slider does not lag	6138 ms in total, 61,38 ms each; the same loop with nothing to recompute took 3112 ms	MEASURED
+stability	performance	plainRect: 100 evaluations with the effect	fast enough that dragging the slider does not lag	4725 ms in total, 47,25 ms each; the same loop with nothing to recompute took 3138 ms	MEASURED
+stability	performance	bezier: 100 evaluations with the effect	fast enough that dragging the slider does not lag	4859 ms in total, 48,59 ms each; the same loop with nothing to recompute took 3116 ms	MEASURED
+stability	performance	multilineText: 100 evaluations with the effect	fast enough that dragging the slider does not lag	5785 ms in total, 57,85 ms each; the same loop with nothing to recompute took 3125 ms	MEASURED
+stability	performance	manyChildren: 100 evaluations with the effect	fast enough that dragging the slider does not lag	5242 ms in total, 52,42 ms each; the same loop with nothing to recompute took 3126 ms	MEASURED
+stability	performance	compound: 100 evaluations with the effect	fast enough that dragging the slider does not lag	4837 ms in total, 48,37 ms each; the same loop with nothing to recompute took 3125 ms	MEASURED
 stability	performance	all 200 objects survived the round trip	no change from the untouched artwork	found 200	PASS

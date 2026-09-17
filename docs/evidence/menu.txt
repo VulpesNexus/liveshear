@@ -5,10 +5,22 @@ the item is on the Effect menu, not in a submenu         PASS
 no submenu of its own has come back                      PASS
 it is not inside one of Adobe's own submenus             PASS
 the item still reads Shear...                            PASS
-    driver reported: dialogs: 1
+    dialog memory on arrival: nothing remembered; restored at the end
+    menuA: driver reported: dialogs: 1; opened with shear '0.0', axis '0.0', selected Horizontal
 the command string reaches the item                      PASS
 choosing it applies exactly one Shear                    PASS
     Adobe Apply Last Effect returned
 Apply Last Effect reapplies it to another object         PASS
+    menuC: driver reported: dialogs: 1; opened with shear '20.0', axis '0.0', selected Horizontal
+a new Shear opens with the angle committed last          PASS
+    menuD: driver reported: dialogs: 1; opened with shear '0.0', axis '0.0', selected Horizontal
+Illustrator itself hands a new Shear the defaults, which is why the plugin remembers PASS
+    menuE: driver reported: dialogs: 1; opened with shear '0.0', axis '0.0', selected Horizontal
+    menuF: driver reported: dialogs: 1; opened with shear '15.0', axis '90.0', selected Vertical
+and with the axis button used last                       PASS
+    menuG: driver reported: dialogs: 1; opened with shear '15.0', axis '90.0', selected Vertical
+    menuH: driver reported: dialogs: 1; opened with shear '15.0', axis '90.0', selected Vertical
+a canceled dialog is not remembered                      PASS
+    dialog memory restored: nothing remembered
 
-7 passed, 0 failed
+11 passed, 0 failed
