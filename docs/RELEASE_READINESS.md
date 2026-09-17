@@ -160,7 +160,7 @@ That window's placement is now measured too, and it never had been — [evidence
 
 ## N. Performance
 
-About **47 ms per evaluation** including Illustrator's own redraw, against 31 ms for the same loop with nothing to recompute — and nearly flat from one rectangle to a group of two hundred children, 47 to 58 ms across every fixture, which is what one matrix and one `TransformArt` call should look like. These are timings on a shared machine and move between runs: 0.1.1's run measured 61 to 70 ms on the same fixtures and the same code path. A document with two hundred independent Shear effects builds, saves, and reopens with all two hundred objects intact.
+About **47 ms per evaluation** including Illustrator's own redraw, against 31 ms for the same loop with nothing to recompute — and nearly flat from one rectangle to a group of two hundred children, 47 to 58 ms across every fixture, which is what one matrix and one `TransformArt` call should look like. These are timings on a shared machine and move with whatever else it is doing: this run followed a restart, and 0.1.1's, on a busier machine, measured 61 to 70 ms on the same fixtures and the same code path. A document with two hundred independent Shear effects builds, saves, and reopens with all two hundred objects intact.
 
 The earlier figures for this were negative, because the measurement was taken across the COM bridge and the round trip dwarfed the effect. Timing inside a single scripting call fixed it. [evidence/stability.txt](evidence/stability.txt).
 

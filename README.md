@@ -2,7 +2,7 @@
 
 A non-destructive **Shear** effect for Adobe Illustrator, at *Effect > Shear…*.
 
-<p align="center"><img src="docs/shear-in-use.png" alt="A line of live type reading Lorem ipsum, leaning to the right, selected on an Illustrator artboard. The Shear dialog is open below it, drawn in Illustrator's interface colors: a Shear Angle slider reading 10.0 degrees, an Axis Angle slider reading 0.0 degrees, a ticked Preview check box, and Reset, Cancel, and OK buttons. The Appearance panel on the right lists Type, Characters, a Shear entry with an fx badge, and Opacity." width="880"></p>
+<p align="center"><img src="docs/shear-dialog.jpg" alt="The Shear dialog, drawn in Illustrator's dark interface colors: a Shear Angle slider reading 0.0 degrees; an Axis row with Horizontal, Vertical, and Angle buttons, Horizontal selected; an Axis Angle row greyed out at 0.0 degrees; a ticked Preview check box; and Reset, Cancel, and OK buttons." width="432"></p>
 
 ## Why
 
