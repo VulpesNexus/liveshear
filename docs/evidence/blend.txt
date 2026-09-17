@@ -1,6 +1,6 @@
 Live Shear -- blending two objects that carry different Shear effects
-Run at 2026-09-17 15:50:06
-Trace file: <temp>\claude\<workspace>\f5c69828-32cd-4b80-ad62-129046ed0320\scratchpad\shear-trace.log
+Run at 2026-09-17 22:08:23
+Trace file: <temp>\claude\<workspace>\da4933f9-edaf-4c31-a825-bb6fdf2b3f79\scratchpad\ls-013-trace.log
 
 Tracing is live: yes
 

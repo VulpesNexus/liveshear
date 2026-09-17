@@ -1,9 +1,9 @@
 Live Shear -- GPU against CPU preview
-Run at 2026-09-17 15:55:21
+Run at 2026-09-17 22:12:13
 
-window title: Untitled-1* @ 11,33 % (CMYK/Preview) 
+window title: Untitled-1* @ 70,67 % (CMYK/Preview) 
 captured <temp>\liveshear-gpu\preview-a.png
-self-check: moving the artwork changed 0,533 % of sampled pixels
-
-The preview mode could not be switched. The window title stayed Untitled-1* @ 11,33 % (CMYK/Preview) , which names the mode Illustrator is drawing in, and neither the Ctrl+E shortcut nor any candidate menu command changed it.
-GPU preview needs supported hardware and is absent when the machine has none, so on this machine there is only one preview path and the comparison cannot be made. It is recorded as untested rather than as agreement.
+self-check: moving the artwork changed 1,761 % of sampled pixels
+switched with the menu command 'GPU Preview'; title is now Untitled-1* @ 70,67 % (CMYK/CPU Preview) 
+0,615 % of sampled pixels differ between the two modes
+restored; title is Untitled-1* @ 70,67 % (CMYK/CPU Preview) 

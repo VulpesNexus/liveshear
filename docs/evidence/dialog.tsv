@@ -2,8 +2,8 @@ probe	group	case	expected	observed	status
 dialog	dialog	the dialog opened and OK committed the slider value	the dialog behaves like an Adobe dialog	shearAngle in the appearance after OK: 40	PASS
 dialog	dialog	the window title reads Shear	the dialog behaves like an Adobe dialog	the title bar holds 'Shear'	PASS
 dialog	dialog	the degree sign is a degree sign	the dialog behaves like an Adobe dialog	U+00B0 appears 2 time(s) among the dialog's labels	PASS
-dialog	dialog	the dialog opens centered on Illustrator, not in a corner	the dialog behaves like an Adobe dialog	placed at 1056,579; Illustrator's window is -8,-8 to 2568,1400; centers differ by 0,0 pixels; a top-left corner placement would be 0,0	PASS
-dialog	dialog	and entirely inside the monitor work area	the dialog behaves like an Adobe dialog	opened at 1056,579, with no part of it off the desktop or under the taskbar	PASS
+dialog	dialog	the dialog opens centered on Illustrator, not in a corner	the dialog behaves like an Adobe dialog	placed at 1357,1839; Illustrator's window is 613,1432 to 2549,2480; centers differ by 0,0 pixels; a top-left corner placement would be 0,0	PASS
+dialog	dialog	and entirely inside the monitor work area	the dialog behaves like an Adobe dialog	opened at 1357,1839, with no part of it off the desktop or under the taskbar	PASS
 dialog	dialog	dragging through several values does not compound	the dialog behaves like an Adobe dialog	width after dragging through 10, 20, 30, 40 is 300.692 pt; a single 40 degree shear gives 300.692 pt; compounding would give far more	PASS
 dialog	dialog	cancel restores the artwork and the parameter it started with	the dialog behaves like an Adobe dialog	bounds before 94.751, 600, 305.249, 480; after 94.751, 600, 305.249, 480; shearAngle after 5 (it was 5)	PASS
 dialog	dialog	escape restores the artwork and the parameter it started with	the dialog behaves like an Adobe dialog	bounds before 94.751, 600, 305.249, 480; after 94.751, 600, 305.249, 480; shearAngle after 5 (it was 5)	PASS
@@ -29,5 +29,5 @@ dialog	dialog	the arrow keys on Preview, Reset, Cancel, and OK leave the axis al
 dialog	dialog	Reset goes back to Horizontal and no shear	the dialog behaves like an Adobe dialog	clicked Reset; axis field '0.0', enabled False, selected Horizontal, tab stop Horizontal, focus 1006; after OK shearAngle 0, axisAngle 0	PASS
 dialog	dialog	with Preview off the artwork is not redrawn at the new angle	the dialog behaves like an Adobe dialog	the effect was last evaluated at 5 degrees while the dialog was open; it started at 5	PASS
 dialog	dialog	and OK still commits the new angle	the dialog behaves like an Adobe dialog	shearAngle after OK: 44; bounds 42.059, 600, 357.941, 480 (were 94.751, 600, 305.249, 480)	PASS
-dialog	dialog	Preview opens the way it was left	the dialog behaves like an Adobe dialog	the saved preference reads unticked; the next dialog opened with: 20:19:33  EditParameters: new=0 stored shear=5 axis=0; remembered=1; opening shear=5 axis=0 preview=0	PASS
+dialog	dialog	Preview opens the way it was left	the dialog behaves like an Adobe dialog	the saved preference reads unticked; the next dialog opened with: 22:10:39  EditParameters: new=0 stored shear=5 axis=0; remembered=1; opening shear=5 axis=0 preview=0	PASS
 dialog	dialog	the dialog is pushed back on screen when Illustrator sits in the corner	the dialog behaves like an Adobe dialog	centering alone would have put it 46 pixels past the edge; it opened at 19,0, entirely on the desktop	PASS

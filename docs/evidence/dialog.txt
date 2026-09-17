@@ -1,13 +1,13 @@
 Live Shear -- dialog probe
-Run at 2026-09-17 20:18:40
-Trace file: <temp>\claude\<workspace>\da4933f9-edaf-4c31-a825-bb6fdf2b3f79\scratchpad\liveshear-trace.log
+Run at 2026-09-17 22:09:51
+Trace file: <temp>\claude\<workspace>\da4933f9-edaf-4c31-a825-bb6fdf2b3f79\scratchpad\ls-013-trace.log
 Tracing is live: yes
 Dialog memory on arrival: angles none, Preview ticked; restored at the end
 
 driver transcript:
        dialog found, 448 by 233 pixels
-       placed at 1056,579; Illustrator's window is -8,-8 to 2568,1400; centers differ by 0,0 pixels
-       work area is 0,0 to 2560,1392; the dialog is entirely inside it: True
+       placed at 1357,1839; Illustrator's window is 613,1432 to 2549,2480; centers differ by 0,0 pixels
+       work area is 621,1440 to 2541,2472; the dialog is entirely inside it: True
        captured the dialog to <path>, client area 432 by 194
        caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
          label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
@@ -27,7 +27,7 @@ driver transcript:
        slider set to 20; numeric field now reads '20.0'
        slider set to 30; numeric field now reads '30.0'
        slider set to 40; numeric field now reads '40.0'
-       last evaluation during the dialog: 20:18:46  Go: artType=1 shear=40 axis=0
+       last evaluation during the dialog: 22:09:54  Go: artType=1 shear=40 axis=0
        pressing OK
        dialog still open afterwards: False
 [PASS] the dialog opened and OK committed the slider value
@@ -37,15 +37,15 @@ driver transcript:
 [PASS] the degree sign is a degree sign
        U+00B0 appears 2 time(s) among the dialog's labels
 [PASS] the dialog opens centered on Illustrator, not in a corner
-       placed at 1056,579; Illustrator's window is -8,-8 to 2568,1400; centers differ by 0,0 pixels; a top-left corner placement would be 0,0
+       placed at 1357,1839; Illustrator's window is 613,1432 to 2549,2480; centers differ by 0,0 pixels; a top-left corner placement would be 0,0
 [PASS] and entirely inside the monitor work area
-       opened at 1056,579, with no part of it off the desktop or under the taskbar
+       opened at 1357,1839, with no part of it off the desktop or under the taskbar
 [PASS] dragging through several values does not compound
        width after dragging through 10, 20, 30, 40 is 300.692 pt; a single 40 degree shear gives 300.692 pt; compounding would give far more
 driver transcript (cancel):
        dialog found, 448 by 233 pixels
-       placed at 1056,579; Illustrator's window is -8,-8 to 2568,1400; centers differ by 0,0 pixels
-       work area is 0,0 to 2560,1392; the dialog is entirely inside it: True
+       placed at 1357,1839; Illustrator's window is 613,1432 to 2549,2480; centers differ by 0,0 pixels
+       work area is 621,1440 to 2541,2472; the dialog is entirely inside it: True
        caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
          label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
          label: 'ﾂｰ'   U+00B0
@@ -61,15 +61,15 @@ driver transcript (cancel):
          label: 'OK'   U+004F U+004B
        opened with: shear field '5.0'; axis field '0.0', enabled False, selected Horizontal, tab stop Horizontal, focus 1002
        slider set to 35; numeric field now reads '35.0'
-       last evaluation during the dialog: 20:18:48  Go: artType=1 shear=35 axis=0
+       last evaluation during the dialog: 22:09:56  Go: artType=1 shear=35 axis=0
        pressing Cancel
        dialog still open afterwards: False
 [PASS] cancel restores the artwork and the parameter it started with
        bounds before 94.751, 600, 305.249, 480; after 94.751, 600, 305.249, 480; shearAngle after 5 (it was 5)
 driver transcript (escape):
        dialog found, 448 by 233 pixels
-       placed at 1056,579; Illustrator's window is -8,-8 to 2568,1400; centers differ by 0,0 pixels
-       work area is 0,0 to 2560,1392; the dialog is entirely inside it: True
+       placed at 1357,1839; Illustrator's window is 613,1432 to 2549,2480; centers differ by 0,0 pixels
+       work area is 621,1440 to 2541,2472; the dialog is entirely inside it: True
        caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
          label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
          label: 'ﾂｰ'   U+00B0
@@ -85,15 +85,15 @@ driver transcript (escape):
          label: 'OK'   U+004F U+004B
        opened with: shear field '5.0'; axis field '0.0', enabled False, selected Horizontal, tab stop Horizontal, focus 1002
        slider set to 35; numeric field now reads '35.0'
-       last evaluation during the dialog: 20:18:51  Go: artType=1 shear=35 axis=0
+       last evaluation during the dialog: 22:09:58  Go: artType=1 shear=35 axis=0
        pressing Escape
        dialog still open afterwards: False
 [PASS] escape restores the artwork and the parameter it started with
        bounds before 94.751, 600, 305.249, 480; after 94.751, 600, 305.249, 480; shearAngle after 5 (it was 5)
 driver transcript (close):
        dialog found, 448 by 233 pixels
-       placed at 1056,579; Illustrator's window is -8,-8 to 2568,1400; centers differ by 0,0 pixels
-       work area is 0,0 to 2560,1392; the dialog is entirely inside it: True
+       placed at 1357,1839; Illustrator's window is 613,1432 to 2549,2480; centers differ by 0,0 pixels
+       work area is 621,1440 to 2541,2472; the dialog is entirely inside it: True
        caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
          label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
          label: 'ﾂｰ'   U+00B0
@@ -109,15 +109,15 @@ driver transcript (close):
          label: 'OK'   U+004F U+004B
        opened with: shear field '5.0'; axis field '0.0', enabled False, selected Horizontal, tab stop Horizontal, focus 1002
        slider set to 35; numeric field now reads '35.0'
-       last evaluation during the dialog: 20:18:53  Go: artType=1 shear=35 axis=0
+       last evaluation during the dialog: 22:10:00  Go: artType=1 shear=35 axis=0
        pressing the title bar close button
        dialog still open afterwards: False
 [PASS] close restores the artwork and the parameter it started with
        bounds before 94.751, 600, 305.249, 480; after 94.751, 600, 305.249, 480; shearAngle after 5 (it was 5)
 driver transcript (enter):
        dialog found, 448 by 233 pixels
-       placed at 1056,579; Illustrator's window is -8,-8 to 2568,1400; centers differ by 0,0 pixels
-       work area is 0,0 to 2560,1392; the dialog is entirely inside it: True
+       placed at 1357,1839; Illustrator's window is 613,1432 to 2549,2480; centers differ by 0,0 pixels
+       work area is 621,1440 to 2541,2472; the dialog is entirely inside it: True
        caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
          label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
          label: 'ﾂｰ'   U+00B0
@@ -133,15 +133,15 @@ driver transcript (enter):
          label: 'OK'   U+004F U+004B
        opened with: shear field '5.0'; axis field '0.0', enabled False, selected Horizontal, tab stop Horizontal, focus 1002
        slider set to 33; numeric field now reads '33.0'
-       last evaluation during the dialog: 20:18:55  Go: artType=1 shear=33 axis=0
+       last evaluation during the dialog: 22:10:02  Go: artType=1 shear=33 axis=0
        pressing Enter
        dialog still open afterwards: False
 [PASS] Enter commits, like the default button
        shearAngle after Enter: 33
 driver transcript (typed with a decimal comma):
        dialog found, 448 by 233 pixels
-       placed at 1056,579; Illustrator's window is -8,-8 to 2568,1400; centers differ by 0,0 pixels
-       work area is 0,0 to 2560,1392; the dialog is entirely inside it: True
+       placed at 1357,1839; Illustrator's window is 613,1432 to 2549,2480; centers differ by 0,0 pixels
+       work area is 621,1440 to 2541,2472; the dialog is entirely inside it: True
        caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
          label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
          label: 'ﾂｰ'   U+00B0
@@ -157,15 +157,15 @@ driver transcript (typed with a decimal comma):
          label: 'OK'   U+004F U+004B
        opened with: shear field '5.0'; axis field '0.0', enabled False, selected Horizontal, tab stop Horizontal, focus 1002
        typed '22,5' into the numeric field
-       last evaluation during the dialog: 20:18:57  Go: artType=1 shear=22.5 axis=0
+       last evaluation during the dialog: 22:10:04  Go: artType=1 shear=22.5 axis=0
        pressing OK
        dialog still open afterwards: False
 [PASS] a value typed with a decimal comma is committed
        shearAngle after typing 22,5 and pressing OK: 22.5
 driver transcript (typed with trailing text):
        dialog found, 448 by 233 pixels
-       placed at 1056,579; Illustrator's window is -8,-8 to 2568,1400; centers differ by 0,0 pixels
-       work area is 0,0 to 2560,1392; the dialog is entirely inside it: True
+       placed at 1357,1839; Illustrator's window is 613,1432 to 2549,2480; centers differ by 0,0 pixels
+       work area is 621,1440 to 2541,2472; the dialog is entirely inside it: True
        caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
          label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
          label: 'ﾂｰ'   U+00B0
@@ -181,15 +181,15 @@ driver transcript (typed with trailing text):
          label: 'OK'   U+004F U+004B
        opened with: shear field '5.0'; axis field '0.0', enabled False, selected Horizontal, tab stop Horizontal, focus 1002
        typed '18.25 deg' into the numeric field
-       last evaluation during the dialog: 20:18:59  Go: artType=1 shear=18.3 axis=0
+       last evaluation during the dialog: 22:10:06  Go: artType=1 shear=18.3 axis=0
        pressing OK
        dialog still open afterwards: False
 [PASS] a value typed with trailing text reads as a number, at the dialog's resolution
        typing '18.25 deg' committed 18.3 degrees: the trailing text is ignored and the value is rounded once, to the tenth of a degree the sliders and fields work in
 driver transcript (typed past the limit):
        dialog found, 448 by 233 pixels
-       placed at 1056,579; Illustrator's window is -8,-8 to 2568,1400; centers differ by 0,0 pixels
-       work area is 0,0 to 2560,1392; the dialog is entirely inside it: True
+       placed at 1357,1839; Illustrator's window is 613,1432 to 2549,2480; centers differ by 0,0 pixels
+       work area is 621,1440 to 2541,2472; the dialog is entirely inside it: True
        caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
          label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
          label: 'ﾂｰ'   U+00B0
@@ -205,15 +205,15 @@ driver transcript (typed past the limit):
          label: 'OK'   U+004F U+004B
        opened with: shear field '5.0'; axis field '0.0', enabled False, selected Horizontal, tab stop Horizontal, focus 1002
        typed '95' into the numeric field
-       last evaluation during the dialog: 20:19:02  Go: artType=1 shear=89 axis=0
+       last evaluation during the dialog: 22:10:08  Go: artType=1 shear=89 axis=0
        pressing OK
        dialog still open afterwards: False
 [PASS] a value typed past the limit is clamped to 89
        shearAngle after typing 95: 89
 driver transcript (arrow keys):
        dialog found, 448 by 233 pixels
-       placed at 1056,579; Illustrator's window is -8,-8 to 2568,1400; centers differ by 0,0 pixels
-       work area is 0,0 to 2560,1392; the dialog is entirely inside it: True
+       placed at 1357,1839; Illustrator's window is 613,1432 to 2549,2480; centers differ by 0,0 pixels
+       work area is 621,1440 to 2541,2472; the dialog is entirely inside it: True
        caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
          label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
          label: 'ﾂｰ'   U+00B0
@@ -231,15 +231,15 @@ driver transcript (arrow keys):
        brought the dialog to the front: True; Shift cycled down and up; physically held afterwards: False
        3 up arrows; the field read 11.0, 12.0, 13.0 in turn
        3 up arrows; numeric field now reads '13.0'
-       last evaluation during the dialog: 20:19:05  Go: artType=1 shear=13 axis=0
+       last evaluation during the dialog: 22:10:12  Go: artType=1 shear=13 axis=0
        pressing OK
        dialog still open afterwards: False
 [PASS] three up arrows raise the angle by three degrees
        shearAngle after three up arrows from 10: 13; the field read 11.0, 12.0, 13.0 in turn
 driver transcript (opening on an axis of 0):
        dialog found, 448 by 233 pixels
-       placed at 1056,579; Illustrator's window is -8,-8 to 2568,1400; centers differ by 0,0 pixels
-       work area is 0,0 to 2560,1392; the dialog is entirely inside it: True
+       placed at 1357,1839; Illustrator's window is 613,1432 to 2549,2480; centers differ by 0,0 pixels
+       work area is 621,1440 to 2541,2472; the dialog is entirely inside it: True
        caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
          label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
          label: 'ﾂｰ'   U+00B0
@@ -254,15 +254,15 @@ driver transcript (opening on an axis of 0):
          label: 'Cancel'   U+0043 U+0061 U+006E U+0063 U+0065 U+006C
          label: 'OK'   U+004F U+004B
        opened with: shear field '5.0'; axis field '0.0', enabled False, selected Horizontal, tab stop Horizontal, focus 1002
-       last evaluation during the dialog: 20:19:06  Go: artType=1 shear=5 axis=0
+       last evaluation during the dialog: 22:10:13  Go: artType=1 shear=5 axis=0
        pressing Cancel
        dialog still open afterwards: False
 [PASS] an axis of 0 opens with Horizontal selected
        opened with: shear field '5.0'; axis field '0.0', enabled False, selected Horizontal, tab stop Horizontal, focus 1002
 driver transcript (opening on an axis of 90):
        dialog found, 448 by 233 pixels
-       placed at 1056,579; Illustrator's window is -8,-8 to 2568,1400; centers differ by 0,0 pixels
-       work area is 0,0 to 2560,1392; the dialog is entirely inside it: True
+       placed at 1357,1839; Illustrator's window is 613,1432 to 2549,2480; centers differ by 0,0 pixels
+       work area is 621,1440 to 2541,2472; the dialog is entirely inside it: True
        caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
          label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
          label: 'ﾂｰ'   U+00B0
@@ -277,15 +277,15 @@ driver transcript (opening on an axis of 90):
          label: 'Cancel'   U+0043 U+0061 U+006E U+0063 U+0065 U+006C
          label: 'OK'   U+004F U+004B
        opened with: shear field '5.0'; axis field '90.0', enabled False, selected Vertical, tab stop Vertical, focus 1002
-       last evaluation during the dialog: 20:19:08  Go: artType=1 shear=5 axis=90
+       last evaluation during the dialog: 22:10:14  Go: artType=1 shear=5 axis=90
        pressing Cancel
        dialog still open afterwards: False
 [PASS] an axis of 90 opens with Vertical selected
        opened with: shear field '5.0'; axis field '90.0', enabled False, selected Vertical, tab stop Vertical, focus 1002
 driver transcript (opening on an axis of 37):
        dialog found, 448 by 233 pixels
-       placed at 1056,579; Illustrator's window is -8,-8 to 2568,1400; centers differ by 0,0 pixels
-       work area is 0,0 to 2560,1392; the dialog is entirely inside it: True
+       placed at 1357,1839; Illustrator's window is 613,1432 to 2549,2480; centers differ by 0,0 pixels
+       work area is 621,1440 to 2541,2472; the dialog is entirely inside it: True
        caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
          label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
          label: 'ﾂｰ'   U+00B0
@@ -300,7 +300,7 @@ driver transcript (opening on an axis of 37):
          label: 'Cancel'   U+0043 U+0061 U+006E U+0063 U+0065 U+006C
          label: 'OK'   U+004F U+004B
        opened with: shear field '5.0'; axis field '37.0', enabled True, selected Angle, tab stop Angle, focus 1002
-       last evaluation during the dialog: 20:19:09  Go: artType=1 shear=5 axis=37
+       last evaluation during the dialog: 22:10:16  Go: artType=1 shear=5 axis=37
        pressing Cancel
        dialog still open afterwards: False
 [PASS] an axis of 37 opens with Angle selected
@@ -309,8 +309,8 @@ driver transcript (opening on an axis of 37):
        the dialog last committed 13 degrees along 0; the effect holds 5 along 37; the fields opened reading '5.0' and '37.0'
 driver transcript (opening on an axis of -90):
        dialog found, 448 by 233 pixels
-       placed at 1056,579; Illustrator's window is -8,-8 to 2568,1400; centers differ by 0,0 pixels
-       work area is 0,0 to 2560,1392; the dialog is entirely inside it: True
+       placed at 1357,1839; Illustrator's window is 613,1432 to 2549,2480; centers differ by 0,0 pixels
+       work area is 621,1440 to 2541,2472; the dialog is entirely inside it: True
        caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
          label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
          label: 'ﾂｰ'   U+00B0
@@ -325,15 +325,15 @@ driver transcript (opening on an axis of -90):
          label: 'Cancel'   U+0043 U+0061 U+006E U+0063 U+0065 U+006C
          label: 'OK'   U+004F U+004B
        opened with: shear field '5.0'; axis field '-90.0', enabled True, selected Angle, tab stop Angle, focus 1002
-       last evaluation during the dialog: 20:19:11  Go: artType=1 shear=5 axis=-90
+       last evaluation during the dialog: 22:10:18  Go: artType=1 shear=5 axis=-90
        pressing Cancel
        dialog still open afterwards: False
 [PASS] an axis of -90 opens with Angle selected
        opened with: shear field '5.0'; axis field '-90.0', enabled True, selected Angle, tab stop Angle, focus 1002; -90 shears like 90 but is stored as -90, so it opens as the angle it is
 driver transcript (Vertical):
        dialog found, 448 by 233 pixels
-       placed at 1056,579; Illustrator's window is -8,-8 to 2568,1400; centers differ by 0,0 pixels
-       work area is 0,0 to 2560,1392; the dialog is entirely inside it: True
+       placed at 1357,1839; Illustrator's window is 613,1432 to 2549,2480; centers differ by 0,0 pixels
+       work area is 621,1440 to 2541,2472; the dialog is entirely inside it: True
        caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
          label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
          label: 'ﾂｰ'   U+00B0
@@ -349,7 +349,7 @@ driver transcript (Vertical):
          label: 'OK'   U+004F U+004B
        opened with: shear field '5.0'; axis field '0.0', enabled False, selected Horizontal, tab stop Horizontal, focus 1002
        clicked Vertical; axis field '90.0', enabled False, selected Vertical, tab stop Vertical, focus 1008
-       last evaluation during the dialog: 20:19:14  Go: artType=1 shear=5 axis=90
+       last evaluation during the dialog: 22:10:20  Go: artType=1 shear=5 axis=90
        pressing OK
        dialog still open afterwards: False
 [PASS] Vertical sets the axis to 90 degrees and leaves the angle row locked
@@ -358,8 +358,8 @@ driver transcript (Vertical):
        axisAngle 90, shearAngle 5; 200 x 137.498 pt, was 210.499 x 120; a vertical 5 degree shear of this box is 200 x 137.498
 driver transcript (Horizontal):
        dialog found, 448 by 233 pixels
-       placed at 1056,579; Illustrator's window is -8,-8 to 2568,1400; centers differ by 0,0 pixels
-       work area is 0,0 to 2560,1392; the dialog is entirely inside it: True
+       placed at 1357,1839; Illustrator's window is 613,1432 to 2549,2480; centers differ by 0,0 pixels
+       work area is 621,1440 to 2541,2472; the dialog is entirely inside it: True
        caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
          label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
          label: 'ﾂｰ'   U+00B0
@@ -375,15 +375,15 @@ driver transcript (Horizontal):
          label: 'OK'   U+004F U+004B
        opened with: shear field '5.0'; axis field '90.0', enabled False, selected Vertical, tab stop Vertical, focus 1002
        clicked Horizontal; axis field '0.0', enabled False, selected Horizontal, tab stop Horizontal, focus 1007
-       last evaluation during the dialog: 20:19:16  Go: artType=1 shear=5 axis=0
+       last evaluation during the dialog: 22:10:22  Go: artType=1 shear=5 axis=0
        pressing OK
        dialog still open afterwards: False
 [PASS] Horizontal sets the axis back to 0 degrees and shears the artwork horizontally
        axisAngle 0; 210.499 x 120 pt; a horizontal 5 degree shear of this box is 210.499 x 120
 driver transcript (Angle keeps its angle):
        dialog found, 448 by 233 pixels
-       placed at 1056,579; Illustrator's window is -8,-8 to 2568,1400; centers differ by 0,0 pixels
-       work area is 0,0 to 2560,1392; the dialog is entirely inside it: True
+       placed at 1357,1839; Illustrator's window is 613,1432 to 2549,2480; centers differ by 0,0 pixels
+       work area is 621,1440 to 2541,2472; the dialog is entirely inside it: True
        caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
          label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
          label: 'ﾂｰ'   U+00B0
@@ -401,7 +401,7 @@ driver transcript (Angle keeps its angle):
        clicked Horizontal; axis field '0.0', enabled False, selected Horizontal, tab stop Horizontal, focus 1007
        clicked Angle; axis field '37.0', enabled True, selected Angle, tab stop Angle, focus 1009
        clicked Vertical; axis field '90.0', enabled False, selected Vertical, tab stop Vertical, focus 1008
-       last evaluation during the dialog: 20:19:19  Go: artType=1 shear=5 axis=90
+       last evaluation during the dialog: 22:10:25  Go: artType=1 shear=5 axis=90
        pressing Cancel
        dialog still open afterwards: False
 [PASS] Angle gives back the angle it held after a look at Horizontal
@@ -410,8 +410,8 @@ driver transcript (Angle keeps its angle):
        axisAngle after Cancel: 37 (it was 37)
 driver transcript (arrow keys between the axis buttons):
        dialog found, 448 by 233 pixels
-       placed at 1056,579; Illustrator's window is -8,-8 to 2568,1400; centers differ by 0,0 pixels
-       work area is 0,0 to 2560,1392; the dialog is entirely inside it: True
+       placed at 1357,1839; Illustrator's window is 613,1432 to 2549,2480; centers differ by 0,0 pixels
+       work area is 621,1440 to 2541,2472; the dialog is entirely inside it: True
        caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
          label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
          label: 'ﾂｰ'   U+00B0
@@ -431,7 +431,7 @@ driver transcript (arrow keys between the axis buttons):
        pressed down on the selected axis button; axis field '0.0', enabled False, selected Horizontal, tab stop Horizontal, focus 1007
        pressed up on the selected axis button; axis field '0.0', enabled True, selected Angle, tab stop Angle, focus 1009
        pressed up on the selected axis button; axis field '90.0', enabled False, selected Vertical, tab stop Vertical, focus 1008
-       last evaluation during the dialog: 20:19:22  Go: artType=1 shear=5 axis=90
+       last evaluation during the dialog: 22:10:29  Go: artType=1 shear=5 axis=90
        pressing OK
        dialog still open afterwards: False
 [PASS] the arrow keys move between the axis buttons, wrapping at both ends
@@ -440,8 +440,8 @@ driver transcript (arrow keys between the axis buttons):
        axisAngle after OK: 90
 driver transcript (arrow keys on the controls below the buttons):
        dialog found, 448 by 233 pixels
-       placed at 1056,579; Illustrator's window is -8,-8 to 2568,1400; centers differ by 0,0 pixels
-       work area is 0,0 to 2560,1392; the dialog is entirely inside it: True
+       placed at 1357,1839; Illustrator's window is 613,1432 to 2549,2480; centers differ by 0,0 pixels
+       work area is 621,1440 to 2541,2472; the dialog is entirely inside it: True
        caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
          label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
          label: 'ﾂｰ'   U+00B0
@@ -462,15 +462,15 @@ driver transcript (arrow keys on the controls below the buttons):
        pressed left on OK; axis field '0.0', enabled False, selected Horizontal, tab stop Horizontal, focus 2
        pressed left on Cancel; axis field '0.0', enabled False, selected Horizontal, tab stop Horizontal, focus 1006
        pressed up on Reset; axis field '0.0', enabled False, selected Horizontal, tab stop Horizontal, focus 1005
-       last evaluation during the dialog: 20:19:25  Go: artType=1 shear=5 axis=0
+       last evaluation during the dialog: 22:10:31  Go: artType=1 shear=5 axis=0
        pressing OK
        dialog still open afterwards: False
 [PASS] the arrow keys on Preview, Reset, Cancel, and OK leave the axis alone
        after clicking Horizontal on an axis of 37: pressed up on Preview -> Horizontal '0.0'; pressed left on Preview -> Horizontal '0.0'; pressed left on OK -> Horizontal '0.0'; pressed left on Cancel -> Horizontal '0.0'; pressed up on Reset -> Horizontal '0.0'; axisAngle after OK: 0
 driver transcript (Reset):
        dialog found, 448 by 233 pixels
-       placed at 1056,579; Illustrator's window is -8,-8 to 2568,1400; centers differ by 0,0 pixels
-       work area is 0,0 to 2560,1392; the dialog is entirely inside it: True
+       placed at 1357,1839; Illustrator's window is 613,1432 to 2549,2480; centers differ by 0,0 pixels
+       work area is 621,1440 to 2541,2472; the dialog is entirely inside it: True
        caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
          label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
          label: 'ﾂｰ'   U+00B0
@@ -486,15 +486,15 @@ driver transcript (Reset):
          label: 'OK'   U+004F U+004B
        opened with: shear field '5.0'; axis field '37.0', enabled True, selected Angle, tab stop Angle, focus 1002
        clicked Reset; axis field '0.0', enabled False, selected Horizontal, tab stop Horizontal, focus 1006
-       last evaluation during the dialog: 20:19:29  Go: artType=1 shear=0 axis=0
+       last evaluation during the dialog: 22:10:35  Go: artType=1 shear=0 axis=0
        pressing OK
        dialog still open afterwards: False
 [PASS] Reset goes back to Horizontal and no shear
        clicked Reset; axis field '0.0', enabled False, selected Horizontal, tab stop Horizontal, focus 1006; after OK shearAngle 0, axisAngle 0
 driver transcript (preview off):
        dialog found, 448 by 233 pixels
-       placed at 1056,579; Illustrator's window is -8,-8 to 2568,1400; centers differ by 0,0 pixels
-       work area is 0,0 to 2560,1392; the dialog is entirely inside it: True
+       placed at 1357,1839; Illustrator's window is 613,1432 to 2549,2480; centers differ by 0,0 pixels
+       work area is 621,1440 to 2541,2472; the dialog is entirely inside it: True
        caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
          label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
          label: 'ﾂｰ'   U+00B0
@@ -511,7 +511,7 @@ driver transcript (preview off):
        opened with: shear field '5.0'; axis field '0.0', enabled False, selected Horizontal, tab stop Horizontal, focus 1002
        clicked the Preview box
        slider set to 44; numeric field now reads '44.0'
-       last evaluation during the dialog: 20:19:30  Go: artType=1 shear=5 axis=0
+       last evaluation during the dialog: 22:10:36  Go: artType=1 shear=5 axis=0
        pressing OK
        dialog still open afterwards: False
 [PASS] with Preview off the artwork is not redrawn at the new angle
@@ -520,8 +520,8 @@ driver transcript (preview off):
        shearAngle after OK: 44; bounds 42.059, 600, 357.941, 480 (were 94.751, 600, 305.249, 480)
 driver transcript (the dialog after Preview was turned off):
        dialog found, 448 by 233 pixels
-       placed at 1056,579; Illustrator's window is -8,-8 to 2568,1400; centers differ by 0,0 pixels
-       work area is 0,0 to 2560,1392; the dialog is entirely inside it: True
+       placed at 1357,1839; Illustrator's window is 613,1432 to 2549,2480; centers differ by 0,0 pixels
+       work area is 621,1440 to 2541,2472; the dialog is entirely inside it: True
        caption: 'Shear'   U+0053 U+0068 U+0065 U+0061 U+0072
          label: 'Shear Angle'   U+0053 U+0068 U+0065 U+0061 U+0072 U+0020 U+0041 U+006E U+0067 U+006C U+0065
          label: 'ﾂｰ'   U+00B0
@@ -536,11 +536,11 @@ driver transcript (the dialog after Preview was turned off):
          label: 'Cancel'   U+0043 U+0061 U+006E U+0063 U+0065 U+006C
          label: 'OK'   U+004F U+004B
        opened with: shear field '5.0'; axis field '0.0', enabled False, selected Horizontal, tab stop Horizontal, focus 1002
-       last evaluation during the dialog: 20:19:33  Go: artType=1 shear=5 axis=0
+       last evaluation during the dialog: 22:10:39  Go: artType=1 shear=5 axis=0
        pressing Cancel
        dialog still open afterwards: False
 [PASS] Preview opens the way it was left
-       the saved preference reads unticked; the next dialog opened with: 20:19:33  EditParameters: new=0 stored shear=5 axis=0; remembered=1; opening shear=5 axis=0 preview=0
+       the saved preference reads unticked; the next dialog opened with: 22:10:39  EditParameters: new=0 stored shear=5 axis=0; remembered=1; opening shear=5 axis=0 preview=0
 Illustrator is at 0,0 to 487,140; its middle is 244,70
 driver transcript (Illustrator in the corner):
        dialog found, 448 by 233 pixels
@@ -561,13 +561,13 @@ driver transcript (Illustrator in the corner):
          label: 'OK'   U+004F U+004B
        opened with: shear field '5.0'; axis field '0.0', enabled False, selected Horizontal, tab stop Horizontal, focus 1002
        slider set to 12; numeric field now reads '12.0'
-       last evaluation during the dialog: 20:19:37  Go: artType=1 shear=12 axis=0
+       last evaluation during the dialog: 22:10:43  Go: artType=1 shear=12 axis=0
        pressing Cancel
        dialog still open afterwards: False
 [PASS] the dialog is pushed back on screen when Illustrator sits in the corner
        centering alone would have put it 46 pixels past the edge; it opened at 19,0, entirely on the desktop
 Illustrator put back where it was
-last dialog trace line: 20:19:37  dialog: closed, committed=0 shear=12 axis=0 dpi=96
+last dialog trace line: 22:10:43  dialog: closed, committed=0 shear=12 axis=0 dpi=96
 Dialog memory restored: angles none, Preview ticked
 
 32 passed, 0 failed

@@ -1,10 +1,10 @@
 Live Shear -- the built artifact
-Run at 2026-09-17 15:21:19
+Run at 2026-09-17 21:49:17
 Windows 10.0.26200.0
 
 Toolchain: MSVC 14.44.35207
 SDK:       Adobe Illustrator 2026 SDK
-Commit:    a370ca3975bb4245536659448fdeb6cb73d1387c
+Commit:    404e16a86740249f607cc7dc2cbcdddb3b772a1f
 
 [PASS] Release builds with no warnings and no errors
        0 warnings, 0 errors
@@ -13,20 +13,20 @@ Commit:    a370ca3975bb4245536659448fdeb6cb73d1387c
 [PASS] the Release build produced a plugin
        build\Release\LiveShear.aip
 
-File version:   0.1.2
+File version:   0.1.3
 Company:        VulpesNexus
 Product:        Shear for Illustrator
 Description:    Non-destructive Shear effect for Adobe Illustrator
 Copyright:      Copyright (C) 2026 Vixen420. GPL-3.0-or-later, with an Adobe Illustrator SDK linking exception.
-Size:           193 536 bytes
-SHA-256:        9E960591DF0D5FB97C0F12F2094F2BD6B2759CC12574BBF8CD58D0B1831E9525
+Size:           209 408 bytes
+SHA-256:        951317E4C0D391FF305A6EA72B03A5C7825F48F605CD0B45F354F2A7547A5BB5
 
 [PASS] the binary does not claim Adobe as its publisher
        CompanyName is VulpesNexus
 [PASS] the binary names its own product
        ProductName is Shear for Illustrator
 [PASS] the binary carries a version
-       FileVersion is 0.1.2
+       FileVersion is 0.1.3
 [PASS] Release links the retail C runtime, not the debug one
        links MSVCP140.dll, VCRUNTIME140.dll
 [PASS] no path from the build machine is embedded
@@ -46,11 +46,11 @@ SHA-256:        9E960591DF0D5FB97C0F12F2094F2BD6B2759CC12574BBF8CD58D0B1831E9525
 [PASS] no debug trace is on by default
        tracing is behind the LIVESHEAR_LOG environment variable
 [PASS] the source this was built from is identified
-       commit a370ca3975bb4245536659448fdeb6cb73d1387c
+       commit 404e16a86740249f607cc7dc2cbcdddb3b772a1f
 [PASS] the working tree was clean when it was built
        0 uncommitted change(s)
 
-Depends on: COMCTL32.dll, USER32.dll, GDI32.dll, KERNEL32.dll, SHELL32.dll, MSVCP140.dll, VCRUNTIME140.dll, VCRUNTIME140_1.dll, api-ms-win-crt-runtime-l1-1-0.dll, api-ms-win-crt-string-l1-1-0.dll, api-ms-win-crt-convert-l1-1-0.dll, api-ms-win-crt-heap-l1-1-0.dll, api-ms-win-crt-math-l1-1-0.dll, api-ms-win-crt-locale-l1-1-0.dll, api-ms-win-crt-stdio-l1-1-0.dll, api-ms-win-crt-filesystem-l1-1-0.dll, api-ms-win-crt-environment-l1-1-0.dll, api-ms-win-crt-time-l1-1-0.dll
+Depends on: COMCTL32.dll, USER32.dll, GDI32.dll, KERNEL32.dll, SHELL32.dll, MSVCP140.dll, SHLWAPI.dll, VCRUNTIME140.dll, VCRUNTIME140_1.dll, api-ms-win-crt-runtime-l1-1-0.dll, api-ms-win-crt-string-l1-1-0.dll, api-ms-win-crt-convert-l1-1-0.dll, api-ms-win-crt-heap-l1-1-0.dll, api-ms-win-crt-math-l1-1-0.dll, api-ms-win-crt-locale-l1-1-0.dll, api-ms-win-crt-stdio-l1-1-0.dll, api-ms-win-crt-filesystem-l1-1-0.dll, api-ms-win-crt-environment-l1-1-0.dll, api-ms-win-crt-time-l1-1-0.dll
 [PASS] nothing is linked but Windows and the C runtime
        no SDK, developer, or test-harness DLL is named
 [PASS] the C runtime it needs is one Illustrator already needs

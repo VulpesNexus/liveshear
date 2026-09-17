@@ -1,18 +1,18 @@
 probe	group	case	expected	observed	status
-limits	stored parameter	shearAngle written as 0	clamped to 0 degrees, no hang	100.000000,600.000000,300.000000,480.000000 in 1,41 s	PASS
-limits	stored parameter	shearAngle written as 30	clamped to 30 degrees, no hang	65.358984,600.000000,334.641016,480.000000 in 4,24 s	PASS
-limits	stored parameter	shearAngle written as 89	clamped to 89 degrees, no hang	-3337.397698,600.000000,3737.397698,480.000000 in 1,51 s	PASS
-limits	stored parameter	shearAngle written as -89	clamped to -89 degrees, no hang	-3337.397698,600.000000,3737.397698,480.000000 in 3,59 s	PASS
-limits	stored parameter	shearAngle written as 89.000001	clamped to 89 degrees, no hang	-3337.397698,600.000000,3737.397698,480.000000 in 3,79 s	PASS
-limits	stored parameter	shearAngle written as 89.9	clamped to 89 degrees, no hang	-3337.397698,600.000000,3737.397698,480.000000 in 3,56 s	PASS
-limits	stored parameter	shearAngle written as 90	clamped to 89 degrees, no hang	-3337.397698,600.000000,3737.397698,480.000000 in 3,67 s	PASS
-limits	stored parameter	shearAngle written as -90	clamped to -89 degrees, no hang	-3337.397698,600.000000,3737.397698,480.000000 in 3,66 s	PASS
-limits	stored parameter	shearAngle written as 180	clamped to 89 degrees, no hang	-3337.397698,600.000000,3737.397698,480.000000 in 3,50 s	PASS
-limits	stored parameter	shearAngle written as -180	clamped to -89 degrees, no hang	-3337.397698,600.000000,3737.397698,480.000000 in 3,59 s	PASS
-limits	stored parameter	shearAngle written as 1e9	clamped to 89 degrees, no hang	-3337.397698,600.000000,3737.397698,480.000000 in 3,33 s	PASS
-limits	stored parameter	shearAngle written as nan	clamped to 0 degrees, no hang	100.000000,600.000000,300.000000,480.000000 in 4,12 s	PASS
-limits	stored parameter	shearAngle written as inf	clamped to 89 degrees, no hang	-3337.397698,600.000000,3737.397698,480.000000 in 3,97 s	PASS
-limits	stored parameter	shearAngle written as -inf	clamped to -89 degrees, no hang	-3337.397698,600.000000,3737.397698,480.000000 in 3,69 s	PASS
-limits	stored parameter	shearAngle written as 0.000001	clamped to 0 degrees, no hang	99.999999,600.000000,300.000001,480.000000 in 3,61 s	PASS
-limits	stored parameter	shearAngle written as 0.001	clamped to 0,001 degrees, no hang	99.998953,600.000000,300.001047,480.000000 in 3,68 s	PASS
-limits	stored parameter	a document storing 90 degrees opens and renders the same	opens promptly, clamped, unchanged bounds	opened in 0,52 s, dictionary holds 90.000000, bounds -3337.397697846,600.000000000,3737.397697846,480.000000000	PASS
+limits	stored parameter	shearAngle written as 0	clamped to 0 degrees, no hang	100.000000,600.000000,300.000000,480.000000 in 2,39 s	PASS
+limits	stored parameter	shearAngle written as 30	clamped to 30 degrees, no hang	65.358984,600.000000,334.641016,480.000000 in 3,34 s	PASS
+limits	stored parameter	shearAngle written as 89	clamped to 89 degrees, no hang	-3337.397698,600.000000,3737.397698,480.000000 in 3,45 s	PASS
+limits	stored parameter	shearAngle written as -89	clamped to -89 degrees, no hang	-3337.397698,600.000000,3737.397698,480.000000 in 3,49 s	PASS
+limits	stored parameter	shearAngle written as 89.000001	clamped to 89 degrees, no hang	-3337.397698,600.000000,3737.397698,480.000000 in 1,99 s	PASS
+limits	stored parameter	shearAngle written as 89.9	clamped to 89 degrees, no hang	-3337.397698,600.000000,3737.397698,480.000000 in 2,41 s	PASS
+limits	stored parameter	shearAngle written as 90	clamped to 89 degrees, no hang	-3337.397698,600.000000,3737.397698,480.000000 in 2,16 s	PASS
+limits	stored parameter	shearAngle written as -90	clamped to -89 degrees, no hang	-3337.397698,600.000000,3737.397698,480.000000 in 1,68 s	PASS
+limits	stored parameter	shearAngle written as 180	clamped to 89 degrees, no hang	-3337.397698,600.000000,3737.397698,480.000000 in 3,63 s	PASS
+limits	stored parameter	shearAngle written as -180	clamped to -89 degrees, no hang	-3337.397698,600.000000,3737.397698,480.000000 in 3,63 s	PASS
+limits	stored parameter	shearAngle written as 1e9	clamped to 89 degrees, no hang	-3337.397698,600.000000,3737.397698,480.000000 in 3,42 s	PASS
+limits	stored parameter	shearAngle written as nan	clamped to 0 degrees, no hang	100.000000,600.000000,300.000000,480.000000 in 2,34 s	PASS
+limits	stored parameter	shearAngle written as inf	clamped to 89 degrees, no hang	-3337.397698,600.000000,3737.397698,480.000000 in 3,25 s	PASS
+limits	stored parameter	shearAngle written as -inf	clamped to -89 degrees, no hang	-3337.397698,600.000000,3737.397698,480.000000 in 1,65 s	PASS
+limits	stored parameter	shearAngle written as 0.000001	clamped to 0 degrees, no hang	99.999999,600.000000,300.000001,480.000000 in 3,25 s	PASS
+limits	stored parameter	shearAngle written as 0.001	clamped to 0,001 degrees, no hang	99.998953,600.000000,300.001047,480.000000 in 1,50 s	PASS
+limits	stored parameter	a document storing 90 degrees opens and renders the same	opens promptly, clamped, unchanged bounds	opened in 0,42 s, dictionary holds 90.000000, bounds -3337.397697846,600.000000000,3737.397697846,480.000000000	PASS
