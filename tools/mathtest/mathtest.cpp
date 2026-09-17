@@ -20,6 +20,7 @@
 #include "ShearMath.h"
 #include "ShearCurve.h"
 #include "ShearLayout.h"
+#include "ShearDialogModel.h"
 
 #include <cmath>
 #include <cstdio>
@@ -331,6 +332,65 @@ int main()
         Check(!shear::IsIdentity(-1e-5), "and neither is its negative");
     }
 
+    // ---- the axis buttons ------------------------------------------------
+    //
+    // Horizontal and Vertical are names for two axis angles and nothing more,
+    // so the checks are that each button stands for its angle, that an angle
+    // opens under the button that names it, and that no other angle does --
+    // including the ones that shear identically but are stored differently.
+    {
+        using shear::AxisMode;
+        Check(shear::AxisModeOf(0.0) == shear::kAxisHorizontal, "an axis of 0 opens under Horizontal");
+        Check(shear::AxisModeOf(-0.0) == shear::kAxisHorizontal, "and so does -0");
+        Check(shear::AxisModeOf(90.0) == shear::kAxisVertical, "an axis of 90 opens under Vertical");
+        Check(shear::AxisModeOf(-90.0) == shear::kAxisAngle,
+              "-90 opens under Angle, so OK does not rewrite it as 90");
+        Check(shear::AxisModeOf(180.0) == shear::kAxisAngle,
+              "180 opens under Angle, so OK does not rewrite it as 0");
+        Check(shear::AxisModeOf(37.0) == shear::kAxisAngle, "37 opens under Angle");
+        Check(shear::AxisModeOf(0.1) == shear::kAxisAngle, "a tenth of a degree opens under Angle");
+        Check(shear::AxisModeOf(89.9) == shear::kAxisAngle, "89.9 opens under Angle");
+
+        Near(shear::AxisOfMode(shear::kAxisHorizontal, 37.0), 0.0, 0.0, "Horizontal stands for 0");
+        Near(shear::AxisOfMode(shear::kAxisVertical, 37.0), 90.0, 0.0, "Vertical stands for 90");
+        Near(shear::AxisOfMode(shear::kAxisAngle, 37.0), 37.0, 0.0, "Angle gives back the angle it held");
+
+        // Each button, taken back through AxisModeOf, is itself again: what
+        // the dialog shows after OK is what it will show on reopening.
+        const AxisMode modes[] = { shear::kAxisHorizontal, shear::kAxisVertical };
+        for (int i = 0; i < 2; ++i)
+            Check(shear::AxisModeOf(shear::AxisOfMode(modes[i], 37.0)) == modes[i],
+                  "a fixed button reopens as itself");
+
+        // The fixed angles are what the effect is sheared along, so they must
+        // survive the sanitizing every stored angle goes through.
+        Near(shear::SanitizeAxisAngle(shear::kHorizontalAxis), 0.0, 0.0, "Horizontal survives sanitizing");
+        Near(shear::SanitizeAxisAngle(shear::kVerticalAxis), 90.0, 0.0, "Vertical survives sanitizing");
+    }
+
+    // ---- what the dialog opens with ----------------------------------------
+    {
+        shear::LastUsed none;
+        shear::LastUsed last;
+        last.known = true;
+        last.shearAngle = 12.5;
+        last.axisAngle = 90.0;
+
+        double s = -1, a = -1;
+        shear::OpeningValues(true, none, 0.0, 0.0, &s, &a);
+        Check(s == 0.0 && a == 0.0, "a new effect with nothing remembered opens on its defaults");
+
+        shear::OpeningValues(true, last, 0.0, 0.0, &s, &a);
+        Check(s == 12.5 && a == 90.0, "a new effect opens on the values used last");
+
+        shear::OpeningValues(false, last, 5.0, 37.0, &s, &a);
+        Check(s == 5.0 && a == 37.0,
+              "an effect being edited opens on its own values, not the ones used last");
+
+        shear::OpeningValues(false, none, 5.0, 37.0, &s, &a);
+        Check(s == 5.0 && a == 37.0, "and so it does with nothing remembered");
+    }
+
     // ---- the dialog layout at display scales there is no monitor for -----
     //
     // The dialog is measured on a 96-dpi display, which is the only kind
@@ -399,6 +459,26 @@ int main()
             previous = rank;
         }
         Check(ordered, "tab order runs left to right and top to bottom");
+
+        // The dialog creates the three buttons from these rows in AxisMode's
+        // order and numbers them by it, and the arrow keys walk them in that
+        // order, so the rows have to be in AxisMode's order and sit left to
+        // right in one row. The numbering itself lives in ShearDialog.cpp,
+        // which this test cannot reach; the host probe checks it by clicking
+        // each button and reading back the axis it selected.
+        const Rect& h = kItems[kHorizontalRadio].rect;
+        const Rect& v = kItems[kVerticalRadio].rect;
+        const Rect& g = kItems[kAngleRadio].rect;
+        Check(static_cast<int>(kVerticalRadio) ==
+                  static_cast<int>(kHorizontalRadio) + static_cast<int>(shear::kAxisVertical) &&
+              static_cast<int>(kAngleRadio) ==
+                  static_cast<int>(kHorizontalRadio) + static_cast<int>(shear::kAxisAngle),
+              "the axis buttons are in the order of AxisMode");
+        Check(h.y == v.y && v.y == g.y && h.x < v.x && v.x < g.x,
+              "the axis buttons sit in one row, left to right");
+        Check(kItems[kHorizontalRadio].kind == kRadio && kItems[kVerticalRadio].kind == kRadio &&
+              kItems[kAngleRadio].kind == kRadio,
+              "the axis buttons are radio buttons");
     }
 
     std::printf("\n%d checks, %d failed\n", gChecks, gFailures);

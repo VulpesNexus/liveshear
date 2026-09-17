@@ -49,7 +49,7 @@ This is not particular to this effect. Adobe's own *Transform* effect does not m
 
 ## The dialog has not been seen on a display above 100%
 
-**Untested.** It is measured at 96 dots per inch, where it is 448 by 199 pixels with nothing clipped and every control reachable, and a picture of it is in [docs/evidence/dialog.png](docs/evidence/dialog.png). No display that would scale it was available, and *the release notes do not claim scaling works*.
+**Untested.** It is measured at 96 dots per inch, where it is 448 by 233 pixels with nothing clipped and every control reachable, and a picture of it is in [docs/evidence/dialog.png](docs/evidence/dialog.png). No display that would scale it was available, and *the release notes do not claim scaling works*.
 
 What can be said without a monitor is arithmetic, and it is checked rather than asserted: every control's box comes from one table, multiplied through one function, and the test walks that table at 100%, 125%, 150%, 200%, and 250% checking that nothing leaves the window, nothing lands on top of anything else, every control a person can tab to stays at least sixteen pixels across, and the tab order still reads left to right and top to bottom. That covers the layout. It does not cover font substitution or the trackbar's own idea of its minimum height, which is why this says untested rather than verified. **Affected:** anyone running Windows above 100% scaling. **Workaround:** none needed if it works; the failure mode would be cosmetic rather than a control you cannot reach.
 

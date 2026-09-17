@@ -58,13 +58,13 @@ namespace layout
 
     /** The client area. The window is sized to this and then adjusted outward
         for its frame. */
-    const Rect kClient = { 0, 0, 432, 160 };
+    const Rect kClient = { 0, 0, 432, 194 };
 
     /** The point size of the dialog font, scaled against 72 rather than 96
         because that is what a point is. */
     const int kFontPointSize = 9;
 
-    enum Kind { kStatic, kSlider, kEdit, kCheckBox, kButton };
+    enum Kind { kStatic, kSlider, kEdit, kCheckBox, kRadio, kButton };
 
     struct Item
     {
@@ -79,23 +79,28 @@ namespace layout
     enum Index
     {
         kShearLabel = 0, kShearSlider, kShearEdit, kShearDegree,
+        kAxisModeLabel, kHorizontalRadio, kVerticalRadio, kAngleRadio,
         kAxisLabel, kAxisSlider, kAxisEdit, kAxisDegree,
         kPreview, kReset, kCancel, kOk
     };
 
     const Item kItems[] = {
-        { "shear label",   {  16, 18,  90, 18 }, kStatic,   false },
-        { "shear slider",  { 110, 14, 220, 26 }, kSlider,   true  },
-        { "shear edit",    { 340, 16,  60, 22 }, kEdit,     true  },
-        { "shear degree",  { 404, 18,  14, 18 }, kStatic,   false },
-        { "axis label",    {  16, 54,  90, 18 }, kStatic,   false },
-        { "axis slider",   { 110, 50, 220, 26 }, kSlider,   true  },
-        { "axis edit",     { 340, 52,  60, 22 }, kEdit,     true  },
-        { "axis degree",   { 404, 54,  14, 18 }, kStatic,   false },
-        { "preview",       {  16, 92,  90, 22 }, kCheckBox, true  },
-        { "reset",         { 120, 92,  70, 24 }, kButton,   true  },
-        { "cancel",        { 250, 92,  78, 24 }, kButton,   true  },
-        { "ok",            { 338, 92,  78, 24 }, kButton,   true  }
+        { "shear label",     {  16,  18,  90, 18 }, kStatic,   false },
+        { "shear slider",    { 110,  14, 220, 26 }, kSlider,   true  },
+        { "shear edit",      { 340,  16,  60, 22 }, kEdit,     true  },
+        { "shear degree",    { 404,  18,  14, 18 }, kStatic,   false },
+        { "axis mode label", {  16,  52,  90, 18 }, kStatic,   false },
+        { "horizontal",      { 110,  50,  92, 22 }, kRadio,    true  },
+        { "vertical",        { 208,  50,  80, 22 }, kRadio,    true  },
+        { "angle",           { 294,  50,  72, 22 }, kRadio,    true  },
+        { "axis label",      {  16,  88,  90, 18 }, kStatic,   false },
+        { "axis slider",     { 110,  84, 220, 26 }, kSlider,   true  },
+        { "axis edit",       { 340,  86,  60, 22 }, kEdit,     true  },
+        { "axis degree",     { 404,  88,  14, 18 }, kStatic,   false },
+        { "preview",         {  16, 126,  90, 22 }, kCheckBox, true  },
+        { "reset",           { 120, 126,  70, 24 }, kButton,   true  },
+        { "cancel",          { 250, 126,  78, 24 }, kButton,   true  },
+        { "ok",              { 338, 126,  78, 24 }, kButton,   true  }
     };
 
     const int kItemCount = static_cast<int>(sizeof(kItems) / sizeof(kItems[0]));

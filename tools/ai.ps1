@@ -454,3 +454,55 @@ public static class ShearDlg {
     Remove-Job $driver -Force
     [pscustomobject]@{ Driver = $said; Host = ($result -replace "`r?`n", ' ').Trim() }
 }
+
+function Get-ShearDialogMemory {
+    <#
+    .SYNOPSIS
+        What a newly applied Shear opens its dialog with, and whether Preview
+        opens ticked.
+    .DESCRIPTION
+        Using the dialog changes both: OK remembers the angles for the rest of
+        the Illustrator session, and the Preview box is kept in Illustrator's
+        preferences file. A probe that uses the dialog on the Illustrator a
+        person works in would leave its own test angles and its own Preview
+        setting behind, so it reads this first and hands it to
+        Restore-ShearDialogMemory in a finally block.
+    #>
+    [CmdletBinding()]
+    param([string] $Command = '')
+
+    $text = Send-AiMessage 'dialog memory' $Command
+    $fields = @{}
+    foreach ($line in ($text -split "`r?`n")) {
+        $f = $line -split "`t", 2
+        if ($f.Count -eq 2) { $fields[$f[0].Trim()] = $f[1].Trim() }
+    }
+    if (-not $fields.ContainsKey('remembered')) {
+        throw "The plugin did not answer 'dialog memory' (is this an older build?): $text"
+    }
+    $invariant = [Globalization.CultureInfo]::InvariantCulture
+    [pscustomobject]@{
+        Remembered = $fields['remembered'] -eq '1'
+        Shear      = [double]::Parse($fields['shear'], $invariant)
+        Axis       = [double]::Parse($fields['axis'], $invariant)
+        Preview    = $fields['preview'] -ne '0'
+    }
+}
+
+function Restore-ShearDialogMemory {
+    <#
+    .SYNOPSIS
+        Puts back what Get-ShearDialogMemory read, and returns the state that
+        results, so the caller can check it took.
+    #>
+    [CmdletBinding()]
+    param([Parameter(Mandatory, Position = 0)] $Saved)
+
+    if ($Saved.Remembered) {
+        Get-ShearDialogMemory ('angles {0}|{1}' -f (Format-AiNumber $Saved.Shear), (Format-AiNumber $Saved.Axis)) | Out-Null
+    }
+    else {
+        Get-ShearDialogMemory 'forget' | Out-Null
+    }
+    Get-ShearDialogMemory ('preview {0}' -f $(if ($Saved.Preview) { 1 } else { 0 }))
+}

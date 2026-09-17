@@ -1,5 +1,15 @@
 # Release notes
 
+## Unreleased
+
+**The axis is chosen the way Illustrator chooses it.** The dialog has *Horizontal*, *Vertical*, and *Angle* buttons, as *Object > Transform > Shear* does. *Horizontal* and *Vertical* set the axis to 0° and 90° and lock the *Axis Angle* slider; *Angle* unlocks it. Like Illustrator's, the buttons are only names for those two angles: nothing new is stored, so documents stay readable by 0.1.1. An axis of −90° shears exactly like one of 90°, but it opens under *Angle*, as stored, so pressing *OK* on it does not quietly rewrite the number.
+
+The buttons matter most for rotated artwork. The effect is applied after the object's own rotation, so a slant stays lined up with the page when its text is turned. To keep the slant, set the axis to the rotation angle and leave the shear angle as it is. For a quarter turn, that is one click on *Vertical*.
+
+**A new Shear opens with the values used last.** Choosing *Effect > Shear…* used to open at 0° every time. It now opens with the angles and axis last committed with *OK*, until Illustrator quits. Editing an existing Shear from the *Appearance* panel still opens with that effect's own values, and *Cancel* is not remembered. The *Preview* box also stays the way it was left, and is kept in Illustrator's preferences file across restarts. Illustrator's preferences file holds exactly that for its own transform dialogs (a Preview setting each, and no angles), which is why the angles last only for the session.
+
+Nothing about the geometry changed.
+
 ## 0.1.1
 
 **The About window stays on the desktop.** It centered on Illustrator's window and stopped there, so an Illustrator sitting against a screen edge could open it partly off the desktop or under the taskbar. The prose in that window does not scroll, so a clipped one cannot be read, only dragged back. It is now pushed inside the work area of whatever monitor it lands on — which is what the Shear dialog has done since rc.6.

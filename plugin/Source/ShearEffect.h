@@ -18,6 +18,7 @@
 
 #include "IllustratorSDK.h"
 #include "AILiveEffect.h"
+#include "ShearDialogModel.h"
 
 class ShearEffect
 {
@@ -48,6 +49,20 @@ public:
     /** Refreshes the Appearance panel's one-line description of the effect. */
     static void UpdateDisplayString(AILiveEffectParameters params,
                                     AIReal shearAngle, AIReal axisAngle);
+
+    /** The values the dialog last committed, which a newly applied effect
+        opens with. Exposed so the script bridge can read, set, and forget
+        them, and a probe can put back whatever it found. */
+    const shear::LastUsed& GetLastUsed() const { return fLastUsed; }
+    void SetLastUsed(const shear::LastUsed& lastUsed) { fLastUsed = lastUsed; }
+
+    /** Whether the dialog's Preview box opens ticked, from Illustrator's
+        preferences. Ticked when nothing has been saved. */
+    static bool ReadPreviewPreference();
+    static void WritePreviewPreference(bool enabled);
+
+private:
+    shear::LastUsed fLastUsed;
 };
 
 #endif // __SHEAREFFECT_H__

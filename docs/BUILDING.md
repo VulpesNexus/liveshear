@@ -162,13 +162,13 @@ The second one matters here more than in most repositories: the probes write pat
 
 ## The scripting bridge
 
-The plugin answers `app.sendScriptMessage("LiveShear", selector, arguments)` with a set of selectors used by the probes: `version`, `log`, `registry`, `appearance`, `selection`, `geometry`, `matrix`, `apply effect`, `set param`, `delete param`, `move effect`, `remove effect`, `count effects`, `bounds`, `bounds flags`, `edit effect`, and `native shear`.
+The plugin answers `app.sendScriptMessage("LiveShear", selector, arguments)` with a set of selectors used by the probes: `version`, `log`, `registry`, `appearance`, `selection`, `geometry`, `matrix`, `apply effect`, `set param`, `delete param`, `move effect`, `remove effect`, `count effects`, `bounds`, `bounds flags`, `edit effect`, `dialog memory`, `menu groups`, `effect menu`, `about`, and `native shear`.
 
 **Status: a test interface, not a public API.** It is unsupported, undocumented beyond this paragraph, and carries no stability guarantee whatsoever: selectors may change meaning, change arguments, or disappear between any two versions without a note. Do not build anything on it.
 
 It is in the shipped binary on purpose, so that the binary which passes the tests is the binary that ships — a test suite that runs against a different build than the one users get is testing the wrong thing. Two questions follow from shipping it, and both have been answered rather than assumed:
 
-**Does it grant anything?** No. Everything it reaches is reachable through Illustrator's own scripting and action interfaces, which any script already has. `native shear` plays Illustrator's own shear action; `apply effect` applies an effect by name; the rest read state or edit this plugin's own parameters. There is no file, network, or process access in any of it.
+**Does it grant anything?** No. Everything it reaches is reachable through Illustrator's own scripting and action interfaces, which any script already has. `native shear` plays Illustrator's own shear action; `apply effect` applies an effect by name; `dialog memory` reads or resets what this plugin's dialog remembers, one entry of which is its own line in Illustrator's preferences file; the rest read state or edit this plugin's own parameters. There is no file, network, or process access in any of it.
 
 **One trap, if you use it for testing.** `set param` writes the effect's parameter dictionary in place. An object and its duplicate *share* an art style until something forks it, so editing either one through the bridge moves both. Editing through the dialog does not: that goes through `EditEffectParameters` and `UpdateParameters`, which forks the style properly. A test that used the bridge to check two duplicates were independent reported a defect that does not exist for anyone using Illustrator — which is why *tools/ai.ps1* has `Invoke-ShearDialog`, and why the case is driven that way instead.
 

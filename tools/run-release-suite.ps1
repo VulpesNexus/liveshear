@@ -221,6 +221,18 @@ Invoke-AiScript 'app.userInteractionLevel = UserInteractionLevel.DONTDISPLAYALER
 
 Write-Output ('Plugin: ' + ((Send-AiMessage version) -replace "`r?`n", ' | '))
 
+# The dialog's Preview box is kept in Illustrator's preferences file, so it
+# outlasts the restarts between probes, and the probes that open the dialog
+# without saying so assume it starts ticked -- the undo probe's drag counts
+# preview steps. Tick it for the run, and put back the person's own setting,
+# and whatever angles the dialog remembered, once the host probes are done.
+$savedDialogMemory = $null
+try {
+    $savedDialogMemory = Get-ShearDialogMemory
+    Get-ShearDialogMemory 'preview 1' | Out-Null
+}
+catch { Write-Output ('could not read what the dialog remembers, so it will not be put back: ' + $_.Exception.Message) }
+
 Run 'solvers'     { python (Join-Path $PSScriptRoot 'test-solvers.py') (Join-Path $evidence 'solvers.tsv') }
 if (-not $SkipBuildProbe) { Run 'built artifact' { & (Join-Path $PSScriptRoot 'probe-build.ps1') } }
 elseif (-not $script:skipping) { Write-Output ''; Write-Output '=== built artifact ==='; Write-Output 'skipped, so the binary under test stays the one that was installed' }
@@ -256,6 +268,15 @@ if (-not $SkipSlow) {
     # quick pass has no patience for.
     Run 'shutdown' { & (Join-Path $PSScriptRoot 'probe-shutdown.ps1') }
 }
+if ($null -ne $savedDialogMemory) {
+    try {
+        if (-not (Get-Process Illustrator -ErrorAction SilentlyContinue)) { Start-Ai | Out-Null }
+        $restored = Restore-ShearDialogMemory $savedDialogMemory
+        Write-Output ('Dialog memory put back: Preview {0}' -f $(if ($restored.Preview) { 'ticked' } else { 'unticked' }))
+    }
+    catch { Write-Output ('could NOT put back the dialog''s Preview setting; it may be left ticked: ' + $_.Exception.Message) }
+}
+
 Run 'test matrix' { python (Join-Path $PSScriptRoot 'make-test-matrix.py') $evidence (Join-Path $repo 'docs\RELEASE_TEST_MATRIX.md') }
 Run 'support matrix' { python (Join-Path $PSScriptRoot 'make-support-matrix.py') $evidence (Join-Path $repo 'docs\SUPPORT_MATRIX.md') }
 Run 'registry'    {

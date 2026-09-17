@@ -17,6 +17,7 @@
 #include "LiveShearPlugin.h"
 #include "LiveShearSuites.h"
 #include "ShearMath.h"
+#include "ShearDialogModel.h"
 #include "Introspect.h"
 #include "ShearLog.h"
 #include "ShearDialog.h"
@@ -31,6 +32,7 @@
 #include <vector>
 #include <cstdlib>
 #include <cstring>
+#include <locale>
 
 namespace
 {
@@ -62,6 +64,17 @@ namespace
     double Field(const std::vector<std::string>& f, size_t i, double dflt = 0.0)
     {
         return i < f.size() && !f[i].empty() ? std::atof(f[i].c_str()) : dflt;
+    }
+
+    /** A number read in the C locale, whatever locale the host has set, so a
+        value a probe saved as 12.5 comes back as 12.5 and not as 12. */
+    double InvariantNumber(const std::string& text, double dflt = 0.0)
+    {
+        std::istringstream in(text);
+        in.imbue(std::locale::classic());
+        double value = dflt;
+        in >> value;
+        return in.fail() ? dflt : value;
     }
 
     bool BoolField(const std::vector<std::string>& f, size_t i, bool dflt)
@@ -446,6 +459,49 @@ ASErr LiveShearPlugin::HandleScriptMessage(const char* selector, AIScriptMessage
     else if (sel == "edit effect")
     {
         result = introspect::EditEffect(std::atoi(in.c_str()));
+    }
+    else if (sel == "dialog memory")
+    {
+        /* What the dialog opens a new effect with, and the means to change it.
+           The dialog probes change it just by using the dialog, and a person's
+           own Illustrator session should get back what it had, so a probe reads
+           this first and puts it back afterwards.
+
+               (empty)             reads
+               forget              forgets the remembered angles
+               angles <s>|<a>      remembers these angles
+               preview 0|1         sets the Preview preference
+
+           Every form answers with the state it leaves. */
+        std::ostringstream o;
+        o.imbue(std::locale::classic());
+        if (in == "forget")
+        {
+            fShear.SetLastUsed(shear::LastUsed());
+        }
+        else if (in.compare(0, 7, "angles ") == 0)
+        {
+            const std::vector<std::string> f = Split(in.substr(7), '|');
+            shear::LastUsed last;
+            last.known = true;
+            last.shearAngle = shear::SanitizeShearAngle(InvariantNumber(f.size() > 0 ? f[0] : std::string()));
+            last.axisAngle = shear::SanitizeAxisAngle(InvariantNumber(f.size() > 1 ? f[1] : std::string()));
+            fShear.SetLastUsed(last);
+        }
+        else if (in.compare(0, 8, "preview ") == 0)
+        {
+            ShearEffect::WritePreviewPreference(in.substr(8) != "0");
+        }
+        else if (!in.empty())
+        {
+            o << "Expected nothing, forget, angles <shear>|<axis>, or preview 0|1\n";
+        }
+        const shear::LastUsed& last = fShear.GetLastUsed();
+        o << "remembered\t" << (last.known ? 1 : 0) << "\n"
+          << "shear\t" << last.shearAngle << "\n"
+          << "axis\t" << last.axisAngle << "\n"
+          << "preview\t" << (ShearEffect::ReadPreviewPreference() ? 1 : 0) << "\n";
+        result = o.str();
     }
     else if (sel == "set param")
     {

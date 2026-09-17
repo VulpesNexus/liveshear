@@ -192,21 +192,66 @@ ASErr ShearEffect::Go(AILiveEffectGoMessage* message)
     return err;
 }
 
+bool ShearEffect::ReadPreviewPreference()
+{
+    // The suite leaves the value alone when nothing has been saved, so the
+    // default goes in first.
+    AIBoolean enabled = true;
+    if (sAIPreference != nullptr)
+        sAIPreference->GetBooleanPreference(kShearPreferencePrefix, kShearPreviewPreference, &enabled);
+    return enabled != 0;
+}
+
+void ShearEffect::WritePreviewPreference(bool enabled)
+{
+    if (sAIPreference != nullptr)
+        sAIPreference->PutBooleanPreference(kShearPreferencePrefix, kShearPreviewPreference, enabled);
+}
+
 ASErr ShearEffect::EditParameters(AILiveEffectEditParamMessage* message)
 {
     if (message == nullptr) return kNoErr;
 
-    AIReal shearAngle = 0, axisAngle = 0;
-    ReadParameters(message->parameters, &shearAngle, &axisAngle);
+    AIReal storedShear = 0, storedAxis = 0;
+    ReadParameters(message->parameters, &storedShear, &storedAxis);
 
+    const bool isNew = message->isNewInstance != 0;
     ShearDialogState state;
-    state.shearAngle = static_cast<double>(shearAngle);
-    state.axisAngle  = static_cast<double>(axisAngle);
+    state.storedShearAngle = static_cast<double>(storedShear);
+    state.storedAxisAngle  = static_cast<double>(storedAxis);
+    shear::OpeningValues(isNew, fLastUsed, state.storedShearAngle, state.storedAxisAngle,
+                         &state.shearAngle, &state.axisAngle);
     state.allowPreview = message->allowPreview != 0;
+    state.previewEnabled = ReadPreviewPreference();
     state.context = message->context;
     state.parameters = message->parameters;
 
-    if (!RunShearDialog(state)) return kCanceledErr;
+    // Traced because nothing documents what Illustrator hands a new effect:
+    // whether its dictionary arrives empty or already holding the values
+    // applied last decides whether remembering them here is needed at all.
+    if (shearlog::Enabled())
+    {
+        std::ostringstream o;
+        o.imbue(std::locale::classic());
+        o << "EditParameters: new=" << (isNew ? 1 : 0)
+          << " stored shear=" << static_cast<double>(storedShear)
+          << " axis=" << static_cast<double>(storedAxis)
+          << "; remembered=" << (fLastUsed.known ? 1 : 0)
+          << "; opening shear=" << state.shearAngle << " axis=" << state.axisAngle
+          << " preview=" << (state.previewEnabled ? 1 : 0);
+        shearlog::Write(o.str());
+    }
+
+    const bool committed = RunShearDialog(state);
+
+    // The box is a way of looking rather than a value, so it is kept however
+    // the dialog closed.
+    WritePreviewPreference(state.previewEnabled);
+    if (!committed) return kCanceledErr;
+
+    fLastUsed.known = true;
+    fLastUsed.shearAngle = state.shearAngle;
+    fLastUsed.axisAngle = state.axisAngle;
 
     WriteParameters(message->parameters,
                     static_cast<AIReal>(state.shearAngle),

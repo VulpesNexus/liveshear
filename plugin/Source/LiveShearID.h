@@ -135,4 +135,12 @@ static_assert(liveshearid::StartsWith(kShearVersionString, kShearDisplayVersion)
 #define kShearDefaultAngle          0.0
 #define kShearDefaultAxis           0.0
 
+/** PERSISTENT, in Illustrator's preferences file rather than in documents:
+    whether the dialog's Preview box is ticked. Illustrator keeps the same
+    setting for each of its own transform dialogs, under PreviewPref. Renaming
+    either string only forgets one tick, so this is a lesser promise than the
+    parameter keys above. */
+#define kShearPreferencePrefix      "LiveShear"
+#define kShearPreviewPreference     "previewEnabled"
+
 #endif // __LIVESHEARID_H__

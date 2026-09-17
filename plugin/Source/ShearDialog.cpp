@@ -14,11 +14,15 @@
 //  ShearDialog.cpp -- a plain Win32 modal dialog, built at run time so the
 //  plugin carries no dialog resource template.
 //
-//  Two rows, each a slider paired with an editable numeric field, plus a
-//  Preview check box. Moving a slider writes the new values into the effect's
-//  parameter dictionary and asks Illustrator to re-run the effect, so the
-//  artwork updates under the dialog. Cancel puts the dictionary back the way it
-//  was and re-runs once more, so nothing is left behind.
+//  Two rows, each a slider paired with an editable numeric field; between
+//  them the Horizontal, Vertical, and Angle buttons of Illustrator's own Shear
+//  dialog; and a Preview check box. Moving a slider writes the new values into
+//  the effect's parameter dictionary and asks Illustrator to re-run the effect,
+//  so the artwork updates under the dialog. Cancel puts the dictionary back the
+//  way it was and re-runs once more, so nothing is left behind.
+//
+//  An effect being edited opens with its own values. A new one opens with the
+//  values committed last, and the Preview box opens the way it was left.
 //
 //  Every preview is computed from the parameters as they stand now, against art
 //  the appearance pipeline rebuilds from the untouched source. Nothing here
@@ -32,6 +36,7 @@
 
 #include "IllustratorSDK.h"
 #include "ShearDialog.h"
+#include "ShearDialogModel.h"
 #include "ShearEffect.h"
 #include "ShearMath.h"
 #include "ShearLayout.h"
@@ -63,6 +68,10 @@ namespace
     const int kIdAxisEdit    = 1004;
     const int kIdPreview     = 1005;
     const int kIdReset       = 1006;
+    /** In the order of shear::AxisMode, so each is the first plus the mode. */
+    const int kIdHorizontal  = 1007;
+    const int kIdVertical    = 1008;
+    const int kIdAngle       = 1009;
 
     /** Sliders are integral, so both angles are carried in tenths of a degree. */
     const int kScale = 10;
@@ -101,9 +110,18 @@ namespace
         HFONT font = nullptr;
         HWND shearSlider = nullptr;
         HWND shearEdit = nullptr;
+        HWND axisLabel = nullptr;
         HWND axisSlider = nullptr;
         HWND axisEdit = nullptr;
+        HWND axisDegree = nullptr;
+        HWND axisButtons[3] = { nullptr, nullptr, nullptr };
         HWND preview = nullptr;
+
+        /** The selected axis button, and the angle Angle stands for: what it
+            held when it was last left, so that a typed angle survives a look
+            at Horizontal. */
+        shear::AxisMode axisMode = shear::kAxisHorizontal;
+        double angleModeAxis = 0.0;
 
         /** Illustrator's own dialog colors, read once when the window is
             created. The dialog is modal, so the host's brightness cannot
@@ -274,6 +292,90 @@ namespace
         Republish(dd);
     }
 
+    bool IsAxisButton(int id)
+    {
+        return id >= kIdHorizontal && id <= kIdAngle;
+    }
+
+    shear::AxisMode ModeOfButton(int id)
+    {
+        return static_cast<shear::AxisMode>(id - kIdHorizontal);
+    }
+
+    /** Makes the controls agree with the selected axis button. The angle row
+        takes input under Angle only, the way Illustrator greys its own angle
+        field. And only the selected button is a Tab stop, which is how a radio
+        group works from the keyboard: Tab lands on the choice in effect, and
+        the arrow keys move between the choices. */
+    void ShowAxisMode(DialogData* dd)
+    {
+        const BOOL editable = dd->axisMode == shear::kAxisAngle ? TRUE : FALSE;
+        if (dd->axisSlider != nullptr) EnableWindow(dd->axisSlider, editable);
+        if (dd->axisEdit != nullptr) EnableWindow(dd->axisEdit, editable);
+
+        // The row's two labels are greyed by color, in WM_CTLCOLORSTATIC,
+        // rather than disabled. A disabled static control draws its text
+        // etched, with a white copy offset under it, and ignores the text
+        // color it is given -- a smear on Illustrator's dark gray.
+        if (dd->axisLabel != nullptr) InvalidateRect(dd->axisLabel, nullptr, TRUE);
+        if (dd->axisDegree != nullptr) InvalidateRect(dd->axisDegree, nullptr, TRUE);
+
+        for (int i = 0; i < 3; ++i)
+        {
+            const HWND button = dd->axisButtons[i];
+            if (button == nullptr) continue;
+            LONG_PTR style = GetWindowLongPtrW(button, GWL_STYLE);
+            if (i == static_cast<int>(dd->axisMode)) style |= WS_TABSTOP;
+            else style &= ~static_cast<LONG_PTR>(WS_TABSTOP);
+            SetWindowLongPtrW(button, GWL_STYLE, style);
+            InvalidateRect(button, nullptr, TRUE);
+        }
+    }
+
+    /** Selects an axis button: keeps the angle Angle held if Angle is being
+        left, then puts the angle the new button stands for into the slider,
+        the field, and the preview. */
+    void SelectAxisMode(DialogData* dd, shear::AxisMode mode)
+    {
+        if (mode == dd->axisMode) return;
+        if (dd->axisMode == shear::kAxisAngle) dd->angleModeAxis = dd->state->axisAngle;
+        dd->axisMode = mode;
+        ShowAxisMode(dd);
+        ApplyValue(dd, false, shear::AxisOfMode(mode, dd->angleModeAxis));
+    }
+
+    /** An owner-drawn button does not know it is meant to be a radio button,
+        so this answers BM_GETCHECK for it: which choice is selected is then
+        something anyone can ask, a probe included.
+
+        Taking the focus deliberately does not select a button, though an
+        earlier build did. The focus can reach a button without a click -- a
+        press dragged off the button before release, or any keyboard route
+        that skips the locked angle row and stops at Angle -- and selecting
+        then would quietly change the axis. Arrow keys posted to Preview,
+        Reset, Cancel, and OK did not in fact move the focus into the buttons,
+        even in that build, when the dialog probe tried it, so this closes a
+        route rather than fixing a measured defect. A button is selected when it is
+        clicked, and when the arrow keys move between the buttons, and at no
+        other time. */
+    LRESULT CALLBACK AxisButtonSubclassProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp,
+                                            UINT_PTR id, DWORD_PTR ref)
+    {
+        DialogData* dd = reinterpret_cast<DialogData*>(ref);
+        switch (msg)
+        {
+            case BM_GETCHECK:
+                return (dd != nullptr && ModeOfButton(static_cast<int>(id)) == dd->axisMode)
+                           ? BST_CHECKED : BST_UNCHECKED;
+            case WM_NCDESTROY:
+                RemoveWindowSubclass(hwnd, AxisButtonSubclassProc, id);
+                break;
+            default:
+                break;
+        }
+        return DefSubclassProc(hwnd, msg, wp, lp);
+    }
+
     void SyncFromEdit(DialogData* dd, bool isShear)
     {
         if (dd->updating) return;
@@ -314,9 +416,9 @@ namespace
     }
 
     HWND MakeLabel(HWND parent, HINSTANCE inst, const wchar_t* text,
-                   int x, int y, int w, int h)
+                   int x, int y, int w, int h, DWORD extraStyle = 0)
     {
-        return CreateWindowExW(0, L"STATIC", text, WS_CHILD | WS_VISIBLE | SS_LEFT,
+        return CreateWindowExW(0, L"STATIC", text, WS_CHILD | WS_VISIBLE | SS_LEFT | extraStyle,
                                x, y, w, h, parent, nullptr, inst, nullptr);
     }
 
@@ -466,6 +568,36 @@ namespace
                        disabled ? t.disabledText : t.text, dd->font);
     }
 
+    /** The text beside a check box or an axis button, and the focus ring round
+        the whole control. mark is the box or circle the text sits to the right
+        of. */
+    void DrawMarkLabel(DialogData* dd, const DRAWITEMSTRUCT* di, const RECT& mark)
+    {
+        const sheartheme::Theme& t = dd->theme;
+        const bool disabled = (di->itemState & ODS_DISABLED) != 0;
+        const bool focused = (di->itemState & ODS_FOCUS) != 0;
+        const int line = Hairline(dd->dpi);
+
+        wchar_t text[64];
+        text[0] = L'\0';
+        GetWindowTextW(di->hwndItem, text, static_cast<int>(std::size(text)));
+        RECT label = di->rcItem;
+        label.left = mark.right + MulDiv(6, dd->dpi, 96);
+
+        const HGDIOBJ oldFont = dd->font != nullptr ? SelectObject(di->hDC, dd->font) : nullptr;
+        SetBkMode(di->hDC, TRANSPARENT);
+        SetTextColor(di->hDC, disabled ? t.disabledText : t.text);
+        DrawTextW(di->hDC, text, -1, &label, DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+        if (oldFont != nullptr) SelectObject(di->hDC, oldFont);
+
+        if (focused && !disabled)
+        {
+            RECT ring = di->rcItem;
+            InsetBy(ring, line);
+            FrameThick(di->hDC, ring, t.focusRing, line);
+        }
+    }
+
     /** The Preview check box. Owner-drawn like the buttons, because a stock
         check box paints its own white square and there is no message that
         recolours it. The tick is two strokes rather than a font glyph, so it
@@ -475,7 +607,6 @@ namespace
     {
         const sheartheme::Theme& t = dd->theme;
         const bool disabled = (di->itemState & ODS_DISABLED) != 0;
-        const bool focused = (di->itemState & ODS_FOCUS) != 0;
         const bool hot = dd->hot == static_cast<int>(di->CtlID);
         const bool checked = dd->state != nullptr && dd->state->previewEnabled;
 
@@ -512,24 +643,63 @@ namespace
             }
         }
 
-        wchar_t text[64];
-        text[0] = L'\0';
-        GetWindowTextW(di->hwndItem, text, static_cast<int>(std::size(text)));
-        RECT label = rc;
-        label.left = box.right + MulDiv(6, dd->dpi, 96);
+        DrawMarkLabel(dd, di, box);
+    }
 
-        const HGDIOBJ oldFont = dd->font != nullptr ? SelectObject(di->hDC, dd->font) : nullptr;
-        SetBkMode(di->hDC, TRANSPARENT);
-        SetTextColor(di->hDC, disabled ? t.disabledText : t.text);
-        DrawTextW(di->hDC, text, -1, &label, DT_LEFT | DT_VCENTER | DT_SINGLELINE);
-        if (oldFont != nullptr) SelectObject(di->hDC, oldFont);
+    /** An axis button, drawn for the check box's reason: a stock radio button
+        paints its own white circle. */
+    void DrawAxisButton(DialogData* dd, const DRAWITEMSTRUCT* di)
+    {
+        const sheartheme::Theme& t = dd->theme;
+        const bool disabled = (di->itemState & ODS_DISABLED) != 0;
+        const bool hot = dd->hot == static_cast<int>(di->CtlID);
+        const bool selected = ModeOfButton(static_cast<int>(di->CtlID)) == dd->axisMode;
 
-        if (focused && !disabled)
+        RECT rc = di->rcItem;
+        FillSolid(di->hDC, rc, t.background);
+
+        const int line = Hairline(dd->dpi);
+        const int side = MulDiv(13, dd->dpi, 96);
+        RECT circle;
+        circle.left = rc.left;
+        circle.top = rc.top + (rc.bottom - rc.top - side) / 2;
+        circle.right = circle.left + side;
+        circle.bottom = circle.top + side;
+
+        // PS_INSIDEFRAME keeps a thick outline inside the circle's box rather
+        // than centered on its edge, the way FrameThick keeps the check box's.
+        const HPEN pen = CreatePen(PS_INSIDEFRAME, line, (hot && !disabled) ? t.focusRing : t.border);
+        const HBRUSH face = CreateSolidBrush(disabled ? t.background : t.editBackground);
+        if (pen != nullptr && face != nullptr)
         {
-            RECT ring = rc;
-            InsetBy(ring, line);
-            FrameThick(di->hDC, ring, t.focusRing, line);
+            const HGDIOBJ oldPen = SelectObject(di->hDC, pen);
+            const HGDIOBJ oldBrush = SelectObject(di->hDC, face);
+            Ellipse(di->hDC, circle.left, circle.top, circle.right, circle.bottom);
+            SelectObject(di->hDC, oldBrush);
+            SelectObject(di->hDC, oldPen);
         }
+        if (pen != nullptr) DeleteObject(pen);
+        if (face != nullptr) DeleteObject(face);
+
+        if (selected)
+        {
+            RECT dot = circle;
+            InsetBy(dot, MulDiv(3, dd->dpi, 96));
+            const HBRUSH ink = CreateSolidBrush(disabled ? t.disabledText : t.editText);
+            if (ink != nullptr)
+            {
+                const HGDIOBJ oldPen = SelectObject(di->hDC, GetStockObject(NULL_PEN));
+                const HGDIOBJ oldBrush = SelectObject(di->hDC, ink);
+                // A null pen leaves the right and bottom edge undrawn, so the
+                // box grows by one to keep the dot the size asked for.
+                Ellipse(di->hDC, dot.left, dot.top, dot.right + 1, dot.bottom + 1);
+                SelectObject(di->hDC, oldBrush);
+                SelectObject(di->hDC, oldPen);
+                DeleteObject(ink);
+            }
+        }
+
+        DrawMarkLabel(dd, di, circle);
     }
 
     /** The trackbars. A stock trackbar paints a light channel and a chrome
@@ -664,8 +834,36 @@ namespace
                 { R(kShearDegree);
                   MakeLabel(hwnd, inst, kDegreeLabel, box.x, box.y, box.w, box.h); }
 
+                // Illustrator's own labels, in its own order. The Tab stop goes
+                // to whichever button is selected, in ShowAxisMode, and the
+                // arrow keys between them are handled in the message loop.
+                // WS_GROUP on the first button and on the label after the last
+                // makes the three a group of their own, as in a stock radio
+                // group, so the arrow keys on any other control move only
+                // among that control's neighbors and never into the buttons.
+                dd->axisMode = shear::AxisModeOf(dd->state->axisAngle);
+                dd->angleModeAxis = dd->state->axisAngle;
+                { R(kAxisModeLabel);
+                  MakeLabel(hwnd, inst, L"Axis", box.x, box.y, box.w, box.h); }
+                {
+                    const int rows[3] = { shear::layout::kHorizontalRadio,
+                                          shear::layout::kVerticalRadio,
+                                          shear::layout::kAngleRadio };
+                    const wchar_t* const labels[3] = { L"Horizontal", L"Vertical", L"Angle" };
+                    for (int i = 0; i < 3; ++i)
+                    {
+                        const shear::layout::Rect box =
+                            shear::layout::Scale(shear::layout::kItems[rows[i]].rect, dpi);
+                        dd->axisButtons[i] = CreateWindowExW(0, L"BUTTON", labels[i],
+                            WS_CHILD | WS_VISIBLE | BS_OWNERDRAW | (i == 0 ? WS_GROUP : 0),
+                            box.x, box.y, box.w, box.h, hwnd,
+                            ControlId(kIdHorizontal + i), inst, nullptr);
+                    }
+                }
+
                 { R(kAxisLabel);
-                  MakeLabel(hwnd, inst, L"Axis Angle", box.x, box.y, box.w, box.h); }
+                  dd->axisLabel = MakeLabel(hwnd, inst, L"Axis Angle",
+                                            box.x, box.y, box.w, box.h, WS_GROUP); }
                 { R(kAxisSlider);
                 dd->axisSlider = CreateWindowExW(0, TRACKBAR_CLASSW, L"",
                     WS_CHILD | WS_VISIBLE | WS_TABSTOP | TBS_HORZ | TBS_NOTICKS,
@@ -683,7 +881,7 @@ namespace
                     ControlId(kIdAxisEdit), inst, nullptr); }
                 SetEditValue(dd->axisEdit, dd->state->axisAngle);
                 { R(kAxisDegree);
-                  MakeLabel(hwnd, inst, kDegreeLabel, box.x, box.y, box.w, box.h); }
+                  dd->axisDegree = MakeLabel(hwnd, inst, kDegreeLabel, box.x, box.y, box.w, box.h); }
 
                 { R(kPreview);
                 dd->preview = CreateWindowExW(0, L"BUTTON", L"Preview",
@@ -724,11 +922,20 @@ namespace
                                   reinterpret_cast<DWORD_PTR>(dd));
                 SetWindowSubclass(dd->axisEdit, EditSubclassProc, kIdAxisEdit,
                                   reinterpret_cast<DWORD_PTR>(dd));
+                for (int i = 0; i < 3; ++i)
+                {
+                    if (dd->axisButtons[i] != nullptr)
+                        SetWindowSubclass(dd->axisButtons[i], AxisButtonSubclassProc,
+                                          static_cast<UINT_PTR>(kIdHorizontal + i),
+                                          reinterpret_cast<DWORD_PTR>(dd));
+                }
+                ShowAxisMode(dd);
 
                 // Everything that lights up under the pointer.
                 {
                     const int hoverIds[] = { kIdPreview, kIdReset, IDCANCEL, IDOK,
-                                             kIdShearSlider, kIdAxisSlider };
+                                             kIdShearSlider, kIdAxisSlider,
+                                             kIdHorizontal, kIdVertical, kIdAngle };
                     for (size_t i = 0; i < std::size(hoverIds); ++i)
                     {
                         const HWND control = GetDlgItem(hwnd, hoverIds[i]);
@@ -739,7 +946,8 @@ namespace
                     }
                 }
 
-                Republish(dd);
+                // No preview here: see RunShearDialog, which pushes the first
+                // one once Illustrator's own window is disabled.
                 return 0;
             }
 
@@ -780,12 +988,16 @@ namespace
                 break;
 
             case WM_CTLCOLORSTATIC:
-                // Labels and both trackbars come through here.
+                // Labels and both trackbars come through here, and so does a
+                // disabled edit field.
                 if (dd != nullptr && dd->backBrush != nullptr)
                 {
+                    const HWND control = reinterpret_cast<HWND>(lp);
+                    const bool lockedLabel = (control == dd->axisLabel || control == dd->axisDegree) &&
+                                             dd->axisMode != shear::kAxisAngle;
                     SetBkMode(reinterpret_cast<HDC>(wp), TRANSPARENT);
                     SetTextColor(reinterpret_cast<HDC>(wp),
-                                 IsWindowEnabled(reinterpret_cast<HWND>(lp))
+                                 (IsWindowEnabled(control) && !lockedLabel)
                                      ? dd->theme.text : dd->theme.disabledText);
                     SetBkColor(reinterpret_cast<HDC>(wp), dd->theme.background);
                     return reinterpret_cast<LRESULT>(dd->backBrush);
@@ -808,6 +1020,7 @@ namespace
                     if (di->CtlType == ODT_BUTTON)
                     {
                         if (di->CtlID == kIdPreview) DrawCheckBox(dd, di);
+                        else if (IsAxisButton(static_cast<int>(di->CtlID))) DrawAxisButton(dd, di);
                         else DrawPushButton(dd, di);
                         return TRUE;
                     }
@@ -850,16 +1063,26 @@ namespace
                         InvalidateRect(dd->preview, nullptr, TRUE);
                         Republish(dd);
                         return 0;
+                    case kIdHorizontal:
+                    case kIdVertical:
+                    case kIdAngle:
+                        if (HIWORD(wp) == BN_CLICKED)
+                            SelectAxisMode(dd, ModeOfButton(LOWORD(wp)));
+                        return 0;
                     case kIdReset:
                         dd->updating = true;
                         dd->state->shearAngle = 0.0;
-                        dd->state->axisAngle = 0.0;
                         SendMessageW(dd->shearSlider, TBM_SETPOS, TRUE, 0);
-                        SendMessageW(dd->axisSlider, TBM_SETPOS, TRUE, 0);
                         SetEditValue(dd->shearEdit, 0.0);
-                        SetEditValue(dd->axisEdit, 0.0);
                         dd->updating = false;
-                        Republish(dd);
+                        // Back to the defaults, which is Horizontal, and an
+                        // Angle that stands for nothing typed yet. The axis
+                        // goes through ApplyValue, which publishes both angles
+                        // at once.
+                        dd->axisMode = shear::kAxisHorizontal;
+                        dd->angleModeAxis = 0.0;
+                        ShowAxisMode(dd);
+                        ApplyValue(dd, false, 0.0);
                         return 0;
                     case IDOK:
                         SyncFromEdit(dd, true);
@@ -945,12 +1168,14 @@ bool RunShearDialog(ShearDialogState& state)
 
     DialogData dd;
     dd.state = &state;
-    dd.entryShear = state.shearAngle;
-    dd.entryAxis = state.axisAngle;
-    // The dictionary already holds these, so the first preview has nothing to
-    // do and the artwork is not re-rendered just because the dialog opened.
-    dd.pushedShear = state.shearAngle;
-    dd.pushedAxis = state.axisAngle;
+    dd.entryShear = state.storedShearAngle;
+    dd.entryAxis = state.storedAxisAngle;
+    // What the dictionary holds. Editing an effect opens on exactly these, so
+    // the first preview has nothing to do and the artwork is not re-rendered
+    // just because the dialog opened; a new effect opening on the values used
+    // last differs from them, and its first preview puts those on the artwork.
+    dd.pushedShear = state.storedShearAngle;
+    dd.pushedAxis = state.storedAxisAngle;
 
     const int dpi = DpiOf(parent);
     const shear::layout::Rect client = shear::layout::Scale(shear::layout::kClient, dpi);
@@ -986,6 +1211,13 @@ bool RunShearDialog(ShearDialogState& state)
 
     if (parent) EnableWindow(parent, FALSE);
     SetFocus(dd.shearEdit);
+
+    // The first preview. Editing an effect opens on the values the artwork
+    // already shows, so this does nothing; a new effect opening on the values
+    // used last re-renders the artwork, and does so only now that Illustrator's
+    // window is disabled, not from inside CreateWindowEx while it still takes
+    // input.
+    Republish(&dd);
 
     MSG msg;
     while (!dd.finished)
@@ -1024,6 +1256,29 @@ bool RunShearDialog(ShearDialogState& state)
                          MAKEWPARAM(send, BN_CLICKED),
                          reinterpret_cast<LPARAM>(onButton ? focus : nullptr));
             continue;
+        }
+
+        // The arrow keys move between the axis buttons and select as they go,
+        // as in a stock radio group, wrapping at both ends. Handled here
+        // rather than left to IsDialogMessage, so that it does not depend on
+        // what that function makes of owner-drawn buttons in a window that is
+        // not a dialog.
+        if (msg.message == WM_KEYDOWN &&
+            (msg.wParam == VK_LEFT || msg.wParam == VK_RIGHT ||
+             msg.wParam == VK_UP || msg.wParam == VK_DOWN))
+        {
+            // The parent is checked as well as the identifier: this loop also
+            // pumps messages for Illustrator's own windows, whose controls can
+            // carry the same numbers.
+            const int id = msg.hwnd != nullptr ? GetDlgCtrlID(msg.hwnd) : 0;
+            if (IsAxisButton(id) && GetParent(msg.hwnd) == hwnd)
+            {
+                const bool back = msg.wParam == VK_LEFT || msg.wParam == VK_UP;
+                const int next = (static_cast<int>(ModeOfButton(id)) + (back ? 2 : 1)) % 3;
+                if (dd.axisButtons[next] != nullptr) SetFocus(dd.axisButtons[next]);
+                SelectAxisMode(&dd, static_cast<shear::AxisMode>(next));
+                continue;
+            }
         }
 
         if (nudge || !IsDialogMessageW(hwnd, &msg))
